@@ -1,0 +1,81 @@
+import '../models/instrument.dart';
+
+/// Starting catalogue of sandbox instruments. Prices are illustrative
+/// LKR mock values — replace with live/cached rates from your data layer
+/// (e.g. CBSL, CSE feeds) when moving past the sandbox.
+final List<Instrument> mockInstruments = [
+  const Instrument(
+    id: 'fd_nsb_12m',
+    name: 'Fixed Deposit (12mo)',
+    issuer: 'NSB · Low risk',
+    category: InstrumentCategory.term,
+    risk: RiskLevel.low,
+    unitLabel: 'LKR principal',
+    description:
+        'Lock a sum for 12 months and earn a fixed annual rate. Early withdrawal forfeits accrued interest, same as a real fixed deposit.',
+    basePrice: 1,
+    volatility: 0,
+    termDays: 365,
+    annualRatePct: 6.8,
+  ),
+  const Instrument(
+    id: 'gold_sovereign',
+    name: 'Gold (Sovereign)',
+    issuer: '1g unit',
+    category: InstrumentCategory.tradable,
+    risk: RiskLevel.medium,
+    unitLabel: 'per gram',
+    description: 'Simulated gram-gold price with realistic daily drift, for practicing precious-metal allocation.',
+    basePrice: 33500,
+    volatility: 0.012,
+  ),
+  const Instrument(
+    id: 'forex_usd',
+    name: 'Forex (USD)',
+    issuer: 'Sandbox demo',
+    category: InstrumentCategory.tradable,
+    risk: RiskLevel.medium,
+    unitLabel: 'per USD',
+    description: 'Practice currency exposure against a simulated LKR/USD rate.',
+    basePrice: 302.5,
+    volatility: 0.006,
+  ),
+  const Instrument(
+    id: 'cse_jkh',
+    name: 'CSE Stock — JKH',
+    issuer: 'Blue chip',
+    category: InstrumentCategory.tradable,
+    risk: RiskLevel.high,
+    unitLabel: 'per share',
+    description: 'A simulated blue-chip Colombo Stock Exchange listing with higher daily volatility.',
+    basePrice: 148.75,
+    volatility: 0.025,
+  ),
+  const Instrument(
+    id: 'tbond_91d',
+    name: 'Treasury Bond',
+    issuer: 'CBSL · 91-day',
+    category: InstrumentCategory.term,
+    risk: RiskLevel.low,
+    unitLabel: 'LKR principal',
+    description: 'Government-backed short-term instrument. Fixed yield, held to a fixed maturity date.',
+    basePrice: 1,
+    volatility: 0,
+    termDays: 91,
+    annualRatePct: 10.8,
+  ),
+  const Instrument(
+    id: 'community_fund',
+    name: 'Community fund',
+    issuer: 'Trader circle (seettu)',
+    category: InstrumentCategory.community,
+    risk: RiskLevel.medium,
+    unitLabel: 'per round',
+    description:
+        'Rotating pooled-savings simulation: contribute each round; one member receives the full pot per round, in turn.',
+    basePrice: 1,
+    volatility: 0,
+    totalRounds: 10,
+    roundContribution: 5000,
+  ),
+];
