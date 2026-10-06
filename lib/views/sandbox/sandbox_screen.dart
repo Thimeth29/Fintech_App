@@ -6,6 +6,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/widgets/gradient_scaffold.dart';
+import '../../core/widgets/glass_card.dart';
 import '../../models/instrument_model.dart';
 import '../../viewmodels/sandbox_viewmodel.dart';
 
@@ -69,21 +70,32 @@ class SandboxScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Virtual Balance', style: TextStyle(fontSize: 14)),
-                  Text(
-                    'LKR ${vm.virtualBalance.toStringAsFixed(2)}',
-                    style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Portfolio value: LKR ${vm.portfolioValue.toStringAsFixed(2)}  '
-                    '(${vm.totalReturnPercent >= 0 ? "+" : ""}${vm.totalReturnPercent.toStringAsFixed(2)}%)',
-                    style: TextStyle(
-                      color: vm.totalReturnPercent >= 0 ? Colors.green.shade800 : Colors.red.shade800,
+                  GlassCard(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('Virtual Balance', style: TextStyle(fontSize: 14, color: Colors.black54)),
+                        Text(
+                          'LKR ${vm.virtualBalance.toStringAsFixed(2)}',
+                          style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Portfolio value: LKR ${vm.portfolioValue.toStringAsFixed(2)}  '
+                          '(${vm.totalReturnPercent >= 0 ? "+" : ""}${vm.totalReturnPercent.toStringAsFixed(2)}%)',
+                          style: TextStyle(
+                            color: vm.totalReturnPercent >= 0 ? Colors.green.shade700 : Colors.red.shade700,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(height: 20),
-                  const Text('Instruments', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  const Text(
+                    'Instruments',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                  ),
                   Expanded(
                     child: ListView.builder(
                       itemCount: vm.instruments.length,

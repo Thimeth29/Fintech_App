@@ -1,12 +1,14 @@
 // lib/views/investments/asset_analytics_screen.dart
+//
+// Pure UI for now — static sample gainers/losers and insights. Real
+// CSE/Supabase wiring (AssetAnalyticsViewModel) comes back in during the
+// backend phase.
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../core/widgets/gradient_scaffold.dart';
 import '../../core/widgets/suggested_action_card.dart';
+import '../../core/widgets/glass_card.dart';
 import '../../models/market_data_model.dart';
-import '../../services/auth_service.dart';
-import '../../viewmodels/asset_analytics_viewmodel.dart';
 
 const Map<String, String> _titles = {
   'CSE': 'CSE Analytics',
@@ -36,108 +38,112 @@ const Map<String, String> _topicBlurbs = {
       'short-term price moves — higher potential reward, but higher risk too.',
 };
 
+final _sampleGainers = [
+  StockQuote(symbol: 'JKH.N', name: 'John Keells Holdings', price: 145.50, changePercentage: 2.3, volume: 182000),
+  StockQuote(symbol: 'COMB.N', name: 'Commercial Bank', price: 98.20, changePercentage: 1.1, volume: 94000),
+];
+final _sampleLosers = [
+  StockQuote(symbol: 'DIAL.N', name: 'Dialog Axiata', price: 12.40, changePercentage: -1.8, volume: 210000),
+  StockQuote(symbol: 'HNB.N', name: 'HNB', price: 210.75, changePercentage: -0.6, volume: 40000),
+];
+
+const _sampleInsights = [
+  'Banking-sector counters led gains today on improved liquidity.',
+  'Telecom names softened slightly amid broader sector rotation.',
+];
+
+const _sampleSuggestedAction = 'Diversify across at least 2-3 sectors before increasing position size.';
+
 class AssetAnalyticsScreen extends StatelessWidget {
   final String assetType;
   const AssetAnalyticsScreen({super.key, required this.assetType});
 
   @override
   Widget build(BuildContext context) {
-    final userId = AuthService().currentUser?.id;
-    return ChangeNotifierProvider(
-      create: (_) => AssetAnalyticsViewModel(assetType)..load(userId: userId),
-      child: GradientScaffold(
-        appBar: AppBar(
-          leading: const BackButton(),
-          title: Text(_titles[assetType] ?? '$assetType Analytics'),
-        ),
-        body: Consumer<AssetAnalyticsViewModel>(
-          builder: (context, vm, _) {
-            if (vm.isLoading) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            return ListView(
-              padding: const EdgeInsets.all(20),
-              children: [
-                if (!vm.isLiveData)
-                  Container(
-                    margin: const EdgeInsets.only(bottom: 16),
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: Colors.amber.shade100,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: const Text(
-                      'Showing reference figures — connect a live rate source to replace these.',
-                      style: TextStyle(fontSize: 12),
-                    ),
-                  ),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: _topics
-                      .map(
-                        (t) => ActionChip(
-                          label: Text(t, style: const TextStyle(fontSize: 12)),
-                          onPressed: () => showDialog(
-                            context: context,
-                            builder: (_) => AlertDialog(
-                              title: Text(t),
-                              content: Text(_topicBlurbs[t] ?? ''),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context),
-                                  child: const Text('Got it'),
-                                ),
-                              ],
-                            ),
+    return GradientScaffold(
+      maxContentWidth: 820,
+      appBar: AppBar(
+        leading: const BackButton(),
+        title: Text(_titles[assetType] ?? '$assetType Analytics'),
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(20),
+        children: [
+          Container(
+            margin: const EdgeInsets.only(bottom: 16),
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: Colors.amber.shade100,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: const Text(
+              'Showing sample figures — connect a live rate source to replace these.',
+              style: TextStyle(fontSize: 12),
+            ),
+          ),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: _topics
+                .map(
+                  (t) => ActionChip(
+                    label: Text(t, style: const TextStyle(fontSize: 12)),
+                    onPressed: () => showDialog(
+                      context: context,
+                      builder: (_) => AlertDialog(
+                        title: Text(t),
+                        content: Text(_topicBlurbs[t] ?? ''),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text('Got it'),
                           ),
-                        ),
-                      )
-                      .toList(),
-                ),
-                const SizedBox(height: 20),
-                const Text('% Change Snapshot', style: TextStyle(fontWeight: FontWeight.bold)),
-                const SizedBox(height: 8),
-                _ChangeChart(gainers: vm.gainers, losers: vm.losers),
-                const SizedBox(height: 20),
-                const Text('Insights', style: TextStyle(fontWeight: FontWeight.bold)),
-                const SizedBox(height: 8),
-                ...vm.insights.map(
-                  (tip) => Card(
-                    margin: const EdgeInsets.only(bottom: 8),
-                    child: Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Text(tip, style: const TextStyle(fontSize: 13)),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 12),
-                if (userId != null)
-                  OutlinedButton.icon(
-                    icon: const Icon(Icons.add),
-                    label: const Text('Log an investment action'),
-                    onPressed: () => _showLogActionDialog(context, vm, userId),
-                  ),
-                const SizedBox(height: 20),
-                SuggestedActionCard(action: vm.suggestedAction),
-                const SizedBox(height: 16),
-                AskBotButton(
-                  seedContext: "You're looking at $assetType analytics. "
-                      '${vm.insights.isNotEmpty ? vm.insights.first : ""}',
-                ),
-              ],
-            );
-          },
-        ),
+                )
+                .toList(),
+          ),
+          const SizedBox(height: 20),
+          const Text(
+            '% Change Snapshot',
+            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+          ),
+          const SizedBox(height: 8),
+          GlassCard(child: _ChangeChart(gainers: _sampleGainers, losers: _sampleLosers)),
+          const SizedBox(height: 20),
+          const Text('Insights', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+          const SizedBox(height: 8),
+          ..._sampleInsights.map(
+            (tip) => Card(
+              margin: const EdgeInsets.only(bottom: 8),
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Text(tip, style: const TextStyle(fontSize: 13)),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          OutlinedButton.icon(
+            style: OutlinedButton.styleFrom(
+              foregroundColor: Colors.white,
+              side: const BorderSide(color: Colors.white70),
+            ),
+            icon: const Icon(Icons.add),
+            label: const Text('Log an investment action'),
+            onPressed: () => _showLogActionDialog(context),
+          ),
+          const SizedBox(height: 20),
+          const SuggestedActionCard(action: _sampleSuggestedAction),
+          const SizedBox(height: 16),
+          AskBotButton(seedContext: "You're looking at $assetType analytics."),
+        ],
       ),
     );
   }
 
-  void _showLogActionDialog(
-    BuildContext context,
-    AssetAnalyticsViewModel vm,
-    String userId,
-  ) {
+  void _showLogActionDialog(BuildContext context) {
     final symbolController = TextEditingController();
     final amountController = TextEditingController();
     String action = 'considered';
@@ -178,16 +184,9 @@ class AssetAnalyticsScreen extends StatelessWidget {
               child: const Text('Cancel'),
             ),
             ElevatedButton(
-              onPressed: () async {
-                final amount = double.tryParse(amountController.text) ?? 0;
-                Navigator.pop(dialogContext);
-                await vm.logAction(
-                  userId: userId,
-                  symbol: symbolController.text.trim(),
-                  action: action,
-                  amount: amount,
-                );
-              },
+              // Pure UI for now — just closes. Persisting via Supabase
+              // comes back in during the backend phase.
+              onPressed: () => Navigator.pop(dialogContext),
               child: const Text('Save'),
             ),
           ],

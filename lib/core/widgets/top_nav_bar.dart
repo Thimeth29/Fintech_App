@@ -3,8 +3,9 @@ import '../../views/home/home_screen.dart';
 import '../../views/investments/investments_screen.dart';
 import '../../views/expenditure/expenditure_screen.dart';
 import '../../views/bot/chat_screen.dart';
+import '../../views/profile/profile_screen.dart';
 
-enum AppSection { home, investments, expenses, bot }
+enum AppSection { home, investments, expenses, bot, profile }
 
 /// The "Home | My Investments | My Expenses | Ask Bot" bar shown at the
 /// top of every logged-in-area screen. Tapping a section replaces the
@@ -42,6 +43,9 @@ class TopNavBar extends StatelessWidget implements PreferredSizeWidget {
       case AppSection.bot:
         page = const ChatScreen();
         break;
+      case AppSection.profile:
+        page = const ProfileScreen();
+        break;
     }
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => page),
@@ -51,20 +55,30 @@ class TopNavBar extends StatelessWidget implements PreferredSizeWidget {
 
   Widget _tab(BuildContext context, String label, AppSection section) {
     final isActive = section == current;
+    final primary = Theme.of(context).colorScheme.primary;
     return GestureDetector(
       onTap: () => _go(context, section),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
         decoration: BoxDecoration(
-          color: isActive ? Colors.white.withOpacity(0.35) : Colors.transparent,
+          color: isActive ? Colors.white : Colors.white.withValues(alpha: 0.18),
           borderRadius: BorderRadius.circular(16),
+          boxShadow: isActive
+              ? [
+                  BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.1),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2))
+                ]
+              : null,
         ),
         child: Text(
           label,
           style: TextStyle(
             fontSize: 12.5,
-            fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
-            color: Colors.black87,
+            fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+            color: isActive ? primary : Colors.white,
           ),
         ),
       ),
@@ -82,7 +96,7 @@ class TopNavBar extends StatelessWidget implements PreferredSizeWidget {
               children: [
                 if (showBackButton)
                   IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Colors.black87),
+                    icon: const Icon(Icons.arrow_back, color: Colors.white),
                     onPressed: () => Navigator.of(context).maybePop(),
                   )
                 else
@@ -93,7 +107,7 @@ class TopNavBar extends StatelessWidget implements PreferredSizeWidget {
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+                      color: Colors.white,
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -113,6 +127,8 @@ class TopNavBar extends StatelessWidget implements PreferredSizeWidget {
                 _tab(context, 'My Expenses', AppSection.expenses),
                 const SizedBox(width: 6),
                 _tab(context, 'Ask Bot', AppSection.bot),
+                const SizedBox(width: 6),
+                _tab(context, 'Profile', AppSection.profile),
               ],
             ),
           ),

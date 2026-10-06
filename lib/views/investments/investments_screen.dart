@@ -1,133 +1,120 @@
 // lib/views/investments/investments_screen.dart
+//
+// Pure UI for now — static sample market pulse, categories, and recent
+// actions. Real CSE/Supabase/AI wiring (InvestmentViewModel) comes back
+// in during the backend phase.
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import '../../core/widgets/gradient_scaffold.dart';
 import '../../core/widgets/top_nav_bar.dart';
 import '../../core/widgets/block_button.dart';
-import '../../core/widgets/suggested_action_card.dart';
+import '../../core/widgets/glass_card.dart';
 import '../../models/market_data_model.dart';
-import '../../services/auth_service.dart';
-import '../../viewmodels/investment_viewmodel.dart';
 import 'asset_analytics_screen.dart';
 
-class InvestmentsScreen extends StatelessWidget {
+class _AssetCategory {
+  final String code;
+  final String label;
+  final IconData icon;
+  const _AssetCategory(this.code, this.label, this.icon);
+}
+
+const _categories = [
+  _AssetCategory('CSE', 'CSE', Icons.show_chart),
+  _AssetCategory('SEC', 'SEC', Icons.account_balance_outlined),
+  _AssetCategory('FD', 'FD', Icons.savings_outlined),
+  _AssetCategory('GOLD', 'GOLD', Icons.monetization_on_outlined),
+];
+
+final _sampleIndices = [
+  MarketIndex(name: 'ASPI', value: 12480.32, change: 54.1, changePercentage: 0.44),
+  MarketIndex(name: 'S&P SL20', value: 3710.88, change: -12.4, changePercentage: -0.33),
+];
+
+const _sampleRecentActions = [
+  ('BUY', 'JKH.N', 'CSE', 25000.0, '2026-09-18'),
+  ('CONSIDERED', 'GOLD', 'GOLD', 10000.0, '2026-09-12'),
+  ('SELL', 'COMB.N', 'CSE', 8000.0, '2026-09-02'),
+];
+
+const _sampleInsight = "ASPI is up slightly today on steady banking-sector volume. "
+    "Based on your recent activity, you've leaned toward CSE equities — "
+    "consider balancing with a fixed-income allocation.";
+
+class InvestmentsScreen extends StatefulWidget {
   const InvestmentsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final userId = AuthService().currentUser?.id;
-    return ChangeNotifierProvider(
-      create: (_) => InvestmentViewModel()
-        ..loadHistory(userId)
-        ..loadMarketPulse(),
-      child: GradientScaffold(
-        appBar: const TopNavBar(
-          current: AppSection.investments,
-          title: 'My Investments',
-          showBackButton: true,
-        ),
-        body: Consumer<InvestmentViewModel>(
-          builder: (context, vm, _) {
-            return ListView(
-              padding: const EdgeInsets.all(20),
-              children: [
-                _MarketPulseStrip(vm: vm),
-                const SizedBox(height: 20),
-                Wrap(
-                  spacing: 16,
-                  runSpacing: 16,
-                  children: [
-                    for (int i = 0; i < InvestmentViewModel.categories.length; i++)
-                      SizedBox(
-                        width: 160,
-                        child: BlockButton(
-                          label: InvestmentViewModel.categories[i].label,
-                          entranceDelay: Duration(milliseconds: i * 80),
-                          onTap: () => Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => AssetAnalyticsScreen(
-                                assetType: InvestmentViewModel.categories[i].code,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 28),
-                _AiInsightCard(vm: vm, userId: userId),
-                const SizedBox(height: 20),
-                if (userId == null)
-                  const SuggestedActionCard(
-                    action: 'Log in to track and save a history of your investment decisions.',
-                  )
-                else ...[
-                  const Text('Recent Actions', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                  const SizedBox(height: 8),
-                  if (vm.isLoading)
-                    const Center(child: CircularProgressIndicator())
-                  else if (vm.recentActions.isEmpty)
-                    const Text('No investment actions logged yet.', style: TextStyle(fontSize: 13))
-                  else
-                    ...vm.recentActions.take(5).map(
-                      (a) => Card(
-                        margin: const EdgeInsets.only(bottom: 8),
-                        child: ListTile(
-                          dense: true,
-                          title: Text('${a.action.toUpperCase()} · ${a.symbol}'),
-                          subtitle: Text('${a.assetType} · LKR ${a.amount.toStringAsFixed(2)}'),
-                          trailing: Text(
-                            '${a.createdAt.year}-${a.createdAt.month.toString().padLeft(2, '0')}-${a.createdAt.day.toString().padLeft(2, '0')}',
-                            style: const TextStyle(fontSize: 11),
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-              ],
-            );
-          },
-        ),
-      ),
-    );
-  }
+  State<InvestmentsScreen> createState() => _InvestmentsScreenState();
 }
 
-/// Live ASPI / S&P SL20 index strip — the "live data analytics" surfaced
-/// right on the hub page, fetched straight from the CSE via CseService.
-class _MarketPulseStrip extends StatelessWidget {
-  final InvestmentViewModel vm;
-  const _MarketPulseStrip({required this.vm});
+class _InvestmentsScreenState extends State<InvestmentsScreen> {
+  String? _insight;
 
   @override
   Widget build(BuildContext context) {
-    if (vm.isLoadingIndices) {
-      return const SizedBox(
-        height: 64,
-        child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
-      );
-    }
-    if (vm.indices.isEmpty) {
-      return Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.5),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.white.withOpacity(0.6)),
-        ),
-        child: const Text(
-          'Market Pulse is offline right now — showing category data below instead.',
-          style: TextStyle(fontSize: 12),
-        ),
-      );
-    }
-    return Row(
-      children: [
-        for (final idx in vm.indices) ...[
-          Expanded(child: _IndexTile(index: idx)),
-          if (idx != vm.indices.last) const SizedBox(width: 12),
+    return GradientScaffold(
+      maxContentWidth: 820,
+      appBar: const TopNavBar(
+        current: AppSection.investments,
+        title: 'My Investments',
+        showBackButton: true,
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(20),
+        children: [
+          Row(
+            children: [
+              for (final idx in _sampleIndices) ...[
+                Expanded(child: _IndexTile(index: idx)),
+                if (idx != _sampleIndices.last) const SizedBox(width: 12),
+              ],
+            ],
+          ),
+          const SizedBox(height: 20),
+          Wrap(
+            spacing: 16,
+            runSpacing: 16,
+            children: [
+              for (int i = 0; i < _categories.length; i++)
+                SizedBox(
+                  width: 160,
+                  child: BlockButton(
+                    label: _categories[i].label,
+                    icon: _categories[i].icon,
+                    entranceDelay: Duration(milliseconds: i * 80),
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => AssetAnalyticsScreen(assetType: _categories[i].code),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 28),
+          _AiInsightCard(
+            insight: _insight,
+            onGetInsight: () => setState(() => _insight = _sampleInsight),
+          ),
+          const SizedBox(height: 20),
+          const Text(
+            'Recent Actions',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white),
+          ),
+          const SizedBox(height: 8),
+          ..._sampleRecentActions.map(
+            (a) => Card(
+              margin: const EdgeInsets.only(bottom: 8),
+              child: ListTile(
+                dense: true,
+                title: Text('${a.$1} · ${a.$2}'),
+                subtitle: Text('${a.$3} · LKR ${a.$4.toStringAsFixed(2)}'),
+                trailing: Text(a.$5, style: const TextStyle(fontSize: 11)),
+              ),
+            ),
+          ),
         ],
-      ],
+      ),
     );
   }
 }
@@ -139,13 +126,8 @@ class _IndexTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = index.isUp ? Colors.green.shade700 : Colors.red.shade700;
-    return Container(
+    return GlassCard(
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.55),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.6)),
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -162,30 +144,20 @@ class _IndexTile extends StatelessWidget {
   }
 }
 
-/// FinBot-generated "what to know today" card — the AI agent's live-data
-/// insight, requested on demand so it doesn't burn API calls on every
-/// page load.
 class _AiInsightCard extends StatelessWidget {
-  final InvestmentViewModel vm;
-  final String? userId;
-  const _AiInsightCard({required this.vm, required this.userId});
+  final String? insight;
+  final VoidCallback onGetInsight;
+  const _AiInsightCard({required this.insight, required this.onGetInsight});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.55),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: Colors.white.withOpacity(0.6)),
-      ),
+    return GlassCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(Icons.auto_awesome, color: Colors.black87, size: 18),
+              Icon(Icons.auto_awesome, color: Theme.of(context).colorScheme.primary, size: 18),
               const SizedBox(width: 8),
               const Expanded(
                 child: Text(
@@ -194,20 +166,15 @@ class _AiInsightCard extends StatelessWidget {
                 ),
               ),
               TextButton(
-                onPressed: vm.isLoadingInsight ? null : () => vm.loadAiInsight(userId),
-                child: Text(vm.aiInsight == null ? 'Get insights' : 'Refresh'),
+                onPressed: onGetInsight,
+                child: Text(insight == null ? 'Get insights' : 'Refresh'),
               ),
             ],
           ),
-          if (vm.isLoadingInsight)
-            const Padding(
-              padding: EdgeInsets.only(top: 8),
-              child: LinearProgressIndicator(minHeight: 2),
-            )
-          else if (vm.aiInsight != null)
+          if (insight != null)
             Padding(
               padding: const EdgeInsets.only(top: 4),
-              child: Text(vm.aiInsight!, style: const TextStyle(fontSize: 13)),
+              child: Text(insight!, style: const TextStyle(fontSize: 13)),
             )
           else
             const Padding(

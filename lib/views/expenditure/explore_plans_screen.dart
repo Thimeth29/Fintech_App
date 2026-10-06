@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../core/widgets/gradient_scaffold.dart';
 import '../../core/widgets/suggested_action_card.dart';
+import '../../core/widgets/glass_card.dart';
 
 class ExploreExpenditurePlansScreen extends StatelessWidget {
   const ExploreExpenditurePlansScreen({super.key});
@@ -15,30 +16,32 @@ class ExploreExpenditurePlansScreen extends StatelessWidget {
         children: [
           const Text(
             'The 50/30/20 Rule',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
           ),
           const SizedBox(height: 4),
-          const Text(
+          Text(
             'A simple starting budget: needs, wants, and savings/debt payoff.',
-            style: TextStyle(fontSize: 13),
+            style: TextStyle(fontSize: 13, color: Colors.white.withValues(alpha: 0.85)),
           ),
           const SizedBox(height: 16),
-          SizedBox(
-            height: 180,
-            child: PieChart(
-              PieChartData(
-                sectionsSpace: 2,
-                centerSpaceRadius: 30,
-                sections: [
-                  PieChartSectionData(value: 50, color: Colors.blue, title: '50%\nNeeds', radius: 60, titleStyle: const TextStyle(fontSize: 11, color: Colors.white)),
-                  PieChartSectionData(value: 30, color: Colors.teal, title: '30%\nWants', radius: 60, titleStyle: const TextStyle(fontSize: 11, color: Colors.white)),
-                  PieChartSectionData(value: 20, color: Colors.deepPurple, title: '20%\nSavings', radius: 60, titleStyle: const TextStyle(fontSize: 11, color: Colors.white)),
-                ],
+          GlassCard(
+            child: SizedBox(
+              height: 180,
+              child: PieChart(
+                PieChartData(
+                  sectionsSpace: 2,
+                  centerSpaceRadius: 30,
+                  sections: [
+                    PieChartSectionData(value: 50, color: Colors.blue, title: '50%\nNeeds', radius: 60, titleStyle: const TextStyle(fontSize: 11, color: Colors.white)),
+                    PieChartSectionData(value: 30, color: Colors.teal, title: '30%\nWants', radius: 60, titleStyle: const TextStyle(fontSize: 11, color: Colors.white)),
+                    PieChartSectionData(value: 20, color: Colors.deepPurple, title: '20%\nSavings', radius: 60, titleStyle: const TextStyle(fontSize: 11, color: Colors.white)),
+                  ],
+                ),
               ),
             ),
           ),
           const SizedBox(height: 24),
-          const Text('Other approaches', style: TextStyle(fontWeight: FontWeight.bold)),
+          const Text('Other approaches', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
           const SizedBox(height: 8),
           _planCard(
             'Zero-based budgeting',

@@ -1,10 +1,15 @@
+// lib/views/bot/chat_screen.dart
+//
+// Pure UI for now — sending a message appends a canned local reply. Real
+// AI/Supabase wiring (ChatViewModel) comes back in during the backend
+// phase.
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import '../../core/widgets/gradient_scaffold.dart';
 import '../../core/widgets/top_nav_bar.dart';
 import '../../models/chat_message_model.dart';
-import '../../services/auth_service.dart';
-import '../../viewmodels/chat_viewmodel.dart';
+
+const _cannedReply = "I'm just a placeholder for now — once FinBot is wired up "
+    "to live data, I'll give you a real answer here.";
 
 class ChatScreen extends StatefulWidget {
   final String title;
@@ -19,6 +24,20 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final _controller = TextEditingController();
   final _scrollController = ScrollController();
+  late final List<ChatMessageModel> _messages;
+
+  @override
+  void initState() {
+    super.initState();
+    _messages = [
+      ChatMessageModel(
+        role: ChatRole.bot,
+        content: widget.seedContext == null || widget.seedContext!.isEmpty
+            ? "Hi! I'm FinBot. Ask me anything about your finances."
+            : "Hi! I see you're looking at: ${widget.seedContext}. What would you like to know?",
+      ),
+    ];
+  }
 
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -32,61 +51,58 @@ class _ChatScreenState extends State<ChatScreen> {
     });
   }
 
+  void _send(String text) {
+    if (text.trim().isEmpty) return;
+    setState(() {
+      _messages.add(ChatMessageModel(role: ChatRole.user, content: text.trim()));
+      _messages.add(ChatMessageModel(role: ChatRole.bot, content: _cannedReply));
+    });
+    _controller.clear();
+    _scrollToBottom();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => ChatViewModel()
-        ..seed(widget.seedContext ?? '')
-        ..loadFinancialContext(userId: AuthService().currentUser?.id),
-      child: GradientScaffold(
-        appBar: TopNavBar(current: AppSection.bot, title: widget.title, showBackButton: true),
-        body: Consumer<ChatViewModel>(
-          builder: (context, vm, _) {
-            _scrollToBottom();
-            return Column(
+    _scrollToBottom();
+    return GradientScaffold(
+      maxContentWidth: 720,
+      appBar: TopNavBar(current: AppSection.bot, title: widget.title, showBackButton: true),
+      body: Column(
+        children: [
+          Expanded(
+            child: ListView.builder(
+              controller: _scrollController,
+              padding: const EdgeInsets.all(16),
+              itemCount: _messages.length,
+              itemBuilder: (context, i) => _Bubble(message: _messages[i]),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+            child: Row(
               children: [
                 Expanded(
-                  child: ListView.builder(
-                    controller: _scrollController,
-                    padding: const EdgeInsets.all(16),
-                    itemCount: vm.messages.length,
-                    itemBuilder: (context, i) => _Bubble(message: vm.messages[i]),
+                  child: TextField(
+                    controller: _controller,
+                    decoration: const InputDecoration(hintText: 'Ask FinBot something...'),
+                    onSubmitted: _send,
                   ),
                 ),
-                if (vm.isSending)
-                  const Padding(
-                    padding: EdgeInsets.only(bottom: 8),
-                    child: Text('FinBot is typing…', style: TextStyle(fontSize: 12)),
+                const SizedBox(width: 8),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primary,
+                    shape: BoxShape.circle,
                   ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: _controller,
-                          decoration: const InputDecoration(hintText: 'Ask FinBot something...'),
-                          onSubmitted: (text) {
-                            vm.send(text);
-                            _controller.clear();
-                          },
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      IconButton(
-                        icon: const Icon(Icons.send),
-                        onPressed: () {
-                          vm.send(_controller.text);
-                          _controller.clear();
-                        },
-                      ),
-                    ],
+                  child: IconButton(
+                    icon: const Icon(Icons.send, color: Colors.white, size: 20),
+                    onPressed: () => _send(_controller.text),
                   ),
                 ),
               ],
-            );
-          },
-        ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -99,18 +115,30 @@ class _Bubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isUser = message.role == ChatRole.user;
+    final primary = Theme.of(context).colorScheme.primary;
     return Align(
       alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         margin: const EdgeInsets.symmetric(vertical: 6),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-        constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
+        constraints: BoxConstraints(maxWidth: MediaQuery.sizeOf(context).width * 0.75),
         decoration: BoxDecoration(
-          color: isUser ? Colors.white.withOpacity(0.7) : Colors.black.withOpacity(0.06),
-          borderRadius: BorderRadius.circular(16),
+          color: isUser ? primary : Colors.white.withValues(alpha: 0.92),
+          borderRadius: BorderRadius.only(
+            topLeft: const Radius.circular(16),
+            topRight: const Radius.circular(16),
+            bottomLeft: Radius.circular(isUser ? 16 : 4),
+            bottomRight: Radius.circular(isUser ? 4 : 16),
+          ),
+          boxShadow: [
+            BoxShadow(color: Colors.black.withValues(alpha: 0.08), blurRadius: 6, offset: const Offset(0, 2)),
+          ],
         ),
-        child: Text(message.content, style: const TextStyle(fontSize: 13.5)),
+        child: Text(
+          message.content,
+          style: TextStyle(fontSize: 13.5, color: isUser ? Colors.white : Colors.black87),
+        ),
       ),
     );
   }

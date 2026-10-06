@@ -19,7 +19,10 @@ class WelcomeScreen extends StatelessWidget {
             const Text(
               'Welcome To The Personal Finance Management',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white),
             ),
             const SizedBox(height: 56),
             BlockButton(

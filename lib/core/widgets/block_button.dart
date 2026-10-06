@@ -59,12 +59,12 @@ class _BlockButtonState extends State<BlockButton>
               padding: const EdgeInsets.symmetric(horizontal: 20),
               decoration: BoxDecoration(
                 gradient: widget.gradient ?? AppGradients.block,
-                borderRadius: BorderRadius.circular(32),
+                borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.08),
-                    blurRadius: 8,
-                    offset: const Offset(0, 4),
+                    color: Colors.black.withValues(alpha: 0.18),
+                    blurRadius: 14,
+                    offset: const Offset(0, 6),
                   ),
                 ],
               ),
@@ -72,7 +72,7 @@ class _BlockButtonState extends State<BlockButton>
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   if (widget.icon != null) ...[
-                    Icon(widget.icon, color: Colors.black87),
+                    Icon(widget.icon, color: Colors.white),
                     const SizedBox(width: 10),
                   ],
                   Flexible(
@@ -82,7 +82,8 @@ class _BlockButtonState extends State<BlockButton>
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: Colors.black87,
+                        color: Colors.white,
+                        height: 1.2,
                       ),
                     ),
                   ),

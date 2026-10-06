@@ -26,6 +26,7 @@ class ExpenditureScreen extends StatelessWidget {
               width: 200,
               child: BlockButton(
                 label: 'Plan My Expenses',
+                icon: Icons.edit_note,
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const PlanExpensesScreen()),
                 ),
@@ -35,6 +36,7 @@ class ExpenditureScreen extends StatelessWidget {
               width: 200,
               child: BlockButton(
                 label: 'Explore Expenditure Plans',
+                icon: Icons.lightbulb_outline,
                 entranceDelay: const Duration(milliseconds: 100),
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const ExploreExpenditurePlansScreen()),

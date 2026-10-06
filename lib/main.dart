@@ -3,7 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'core/config/supabase_config.dart';
 import 'core/theme/app_theme.dart';
-import 'views/auth/welcome_screen.dart';
+import 'views/auth/login_screen.dart';
 import 'views/home/home_screen.dart';
 
 final supabase = Supabase.instance.client;
@@ -35,8 +35,7 @@ class MyApp extends StatelessWidget {
 }
 
 /// Decides where the app opens: straight to the dashboard for a returning
-/// logged-in user, otherwise the welcome screen (Sign Up / Login / Try
-/// Sandbox) — sandbox mode never requires a session either way.
+/// logged-in user, otherwise the Login screen.
 class AuthGate extends StatefulWidget {
   const AuthGate({super.key});
 
@@ -48,6 +47,6 @@ class _AuthGateState extends State<AuthGate> {
   @override
   Widget build(BuildContext context) {
     final session = supabase.auth.currentSession;
-    return session == null ? const WelcomeScreen() : const HomeScreen();
+    return session == null ? const LoginScreen() : const HomeScreen();
   }
 }
