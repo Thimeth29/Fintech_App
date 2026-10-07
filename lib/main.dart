@@ -3,7 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'core/config/supabase_config.dart';
 import 'core/theme/app_theme.dart';
-import 'views/auth/login_screen.dart';
+import 'views/auth/welcome_screen.dart';
 import 'views/home/home_screen.dart';
 
 final supabase = Supabase.instance.client;
@@ -11,10 +11,7 @@ final supabase = Supabase.instance.client;
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Supabase.initialize(
-    url: SupabaseConfig.supabaseUrl,
-    publishableKey: SupabaseConfig.supabaseAnonKey,
-  );
+  await SupabaseConfig.initialize();
 
   runApp(const MyApp());
 }
@@ -35,7 +32,7 @@ class MyApp extends StatelessWidget {
 }
 
 /// Decides where the app opens: straight to the dashboard for a returning
-/// logged-in user, otherwise the Login screen.
+/// logged-in user, otherwise the Welcome screen.
 class AuthGate extends StatefulWidget {
   const AuthGate({super.key});
 
@@ -46,7 +43,15 @@ class AuthGate extends StatefulWidget {
 class _AuthGateState extends State<AuthGate> {
   @override
   Widget build(BuildContext context) {
-    final session = supabase.auth.currentSession;
-    return session == null ? const LoginScreen() : const HomeScreen();
+    if (!SupabaseConfig.isConfigured) {
+      return const WelcomeScreen();
+    }
+    try {
+      final session = SupabaseConfig.client.auth.currentSession;
+      return session == null ? const WelcomeScreen() : const HomeScreen();
+    } catch (_) {
+      return const WelcomeScreen();
+    }
   }
 }
+

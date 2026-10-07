@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../core/theme/app_theme.dart';
 
-/// The floating-label bordered field from the Figma "Login and Forget
-/// screen" file — an uppercase label that overlaps the top border line.
 class LabeledTextField extends StatefulWidget {
   final String label;
   final TextEditingController controller;
   final TextInputType? keyboardType;
   final bool isPassword;
-  final Color borderColor;
+  final IconData? prefixIcon;
+  final String? hintText;
+  final Color? borderColor;
 
   const LabeledTextField({
     super.key,
@@ -16,7 +17,9 @@ class LabeledTextField extends StatefulWidget {
     required this.controller,
     this.keyboardType,
     this.isPassword = false,
-    this.borderColor = const Color(0xFFD1D1D1),
+    this.prefixIcon,
+    this.hintText,
+    this.borderColor,
   });
 
   @override
@@ -28,50 +31,73 @@ class _LabeledTextFieldState extends State<LabeledTextField> {
 
   @override
   Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
-    final enabledBorder = OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
-      borderSide: BorderSide(color: widget.borderColor),
-    );
-    final focusedBorder = OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
-      borderSide: BorderSide(color: primary, width: 1.5),
-    );
-
-    return TextField(
-      controller: widget.controller,
-      keyboardType: widget.keyboardType,
-      obscureText: widget.isPassword && _obscure,
-      style: GoogleFonts.rubik(fontSize: 16, color: Colors.black),
-      decoration: InputDecoration(
-        isDense: true,
-        filled: true,
-        fillColor: Colors.white.withValues(alpha: 0.92),
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
-        labelText: widget.label,
-        floatingLabelBehavior: FloatingLabelBehavior.always,
-        labelStyle: GoogleFonts.rubik(
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
-          color: const Color(0xFF757575),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          widget.label,
+          style: GoogleFonts.outfit(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textDark,
+            letterSpacing: 0.3,
+          ),
         ),
-        border: enabledBorder,
-        enabledBorder: enabledBorder,
-        focusedBorder: focusedBorder,
-        suffixIcon: widget.isPassword
-            ? IconButton(
-                icon: Icon(
-                  _obscure
-                      ? Icons.visibility_off_outlined
-                      : Icons.visibility_outlined,
-                  color: const Color(0xFF757575),
-                  size: 20,
-                ),
-                onPressed: () => setState(() => _obscure = !_obscure),
-              )
-            : null,
-      ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: widget.controller,
+          keyboardType: widget.keyboardType,
+          obscureText: widget.isPassword && _obscure,
+          style: GoogleFonts.outfit(fontSize: 15, color: AppColors.textDark),
+          cursorColor: AppColors.primary,
+          decoration: InputDecoration(
+            isDense: true,
+            filled: true,
+            fillColor: Colors.white,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            hintText: widget.hintText ?? 'Enter your ${widget.label.toLowerCase()}...',
+            hintStyle: GoogleFonts.outfit(fontSize: 14, color: AppColors.textMuted),
+            prefixIcon: Icon(
+              widget.prefixIcon ??
+                  (widget.isPassword
+                      ? Icons.lock_outline_rounded
+                      : (widget.keyboardType == TextInputType.emailAddress ||
+                              widget.label.toLowerCase().contains('email')
+                          ? Icons.email_outlined
+                          : Icons.edit_note_rounded)),
+              color: AppColors.textMuted,
+              size: 20,
+            ),
+            suffixIcon: widget.isPassword
+                ? IconButton(
+                    icon: Icon(
+                      _obscure ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                      color: AppColors.textMuted,
+                      size: 20,
+                    ),
+                    onPressed: () => setState(() => _obscure = !_obscure),
+                  )
+                : null,
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide(
+                color: widget.borderColor ?? AppColors.borderLight,
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide(
+                color: widget.borderColor ?? AppColors.borderLight,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
+

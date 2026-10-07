@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../core/widgets/gradient_scaffold.dart';
 import '../../core/widgets/suggested_action_card.dart';
 import '../../core/widgets/glass_card.dart';
+import '../../core/theme/app_theme.dart';
 
 class ExploreExpenditurePlansScreen extends StatelessWidget {
   const ExploreExpenditurePlansScreen({super.key});
@@ -10,77 +12,148 @@ class ExploreExpenditurePlansScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GradientScaffold(
-      appBar: AppBar(leading: const BackButton(), title: const Text('Explore Expenditure Plans')),
-      body: ListView(
+      maxContentWidth: 860,
+      appBar: AppBar(
+        leading: Container(
+          margin: const EdgeInsets.only(left: 12, top: 8, bottom: 8),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+            border: Border.all(color: AppColors.borderLight),
+          ),
+          child: const BackButton(color: AppColors.textDark),
+        ),
+        title: Text(
+          'Explore Budgeting Models',
+          style: GoogleFonts.outfit(fontWeight: FontWeight.w700, color: AppColors.textDark),
+        ),
+      ),
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
-        children: [
-          const Text(
-            'The 50/30/20 Rule',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'A simple starting budget: needs, wants, and savings/debt payoff.',
-            style: TextStyle(fontSize: 13, color: Colors.white.withValues(alpha: 0.85)),
-          ),
-          const SizedBox(height: 16),
-          GlassCard(
-            child: SizedBox(
-              height: 180,
-              child: PieChart(
-                PieChartData(
-                  sectionsSpace: 2,
-                  centerSpaceRadius: 30,
-                  sections: [
-                    PieChartSectionData(value: 50, color: Colors.blue, title: '50%\nNeeds', radius: 60, titleStyle: const TextStyle(fontSize: 11, color: Colors.white)),
-                    PieChartSectionData(value: 30, color: Colors.teal, title: '30%\nWants', radius: 60, titleStyle: const TextStyle(fontSize: 11, color: Colors.white)),
-                    PieChartSectionData(value: 20, color: Colors.deepPurple, title: '20%\nSavings', radius: 60, titleStyle: const TextStyle(fontSize: 11, color: Colors.white)),
-                  ],
+        physics: const BouncingScrollPhysics(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'The 50 / 30 / 20 Rule',
+              style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.textDark),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'A standard framework: 50% Needs, 30% Wants, 20% Investments & Savings.',
+              style: GoogleFonts.outfit(fontSize: 13, color: AppColors.textMuted),
+            ),
+            const SizedBox(height: 16),
+            GlassCard(
+              padding: const EdgeInsets.all(20),
+              backgroundColor: Colors.white,
+              child: SizedBox(
+                height: 190,
+                child: PieChart(
+                  PieChartData(
+                    sectionsSpace: 3,
+                    centerSpaceRadius: 36,
+                    sections: [
+                      PieChartSectionData(
+                        value: 50,
+                        color: AppColors.primary,
+                        title: '50%\nNeeds',
+                        radius: 56,
+                        titleStyle: GoogleFonts.outfit(fontSize: 11, color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
+                      PieChartSectionData(
+                        value: 30,
+                        color: const Color(0xFF16A34A),
+                        title: '30%\nWants',
+                        radius: 56,
+                        titleStyle: GoogleFonts.outfit(fontSize: 11, color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
+                      PieChartSectionData(
+                        value: 20,
+                        color: const Color(0xFFF3C06B),
+                        title: '20%\nSavings',
+                        radius: 56,
+                        titleStyle: GoogleFonts.outfit(fontSize: 11, color: AppColors.textDark, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-          const SizedBox(height: 24),
-          const Text('Other approaches', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
-          const SizedBox(height: 8),
-          _planCard(
-            'Zero-based budgeting',
-            'Every rupee of income is assigned a job (spend, save, or invest) before the month starts — nothing is left unplanned.',
-          ),
-          _planCard(
-            'Pay-yourself-first',
-            'Move a fixed percentage to savings/investments the moment income arrives, then budget the rest.',
-          ),
-          _planCard(
-            'Envelope method',
-            'Split cash (or virtual "envelopes") per category so overspending in one area is visible immediately.',
-          ),
-          const SizedBox(height: 12),
-          const SuggestedActionCard(
-            action: 'Pick one budgeting method and try it for a full month before switching — '
-                'consistency matters more than finding the "perfect" system.',
-          ),
-          const SizedBox(height: 16),
-          const AskBotButton(seedContext: "You're exploring budgeting plans."),
-        ],
+            const SizedBox(height: 24),
+            Text(
+              'Alternative Budgeting Strategies',
+              style: GoogleFonts.outfit(fontWeight: FontWeight.w700, fontSize: 16, color: AppColors.textDark),
+            ),
+            const SizedBox(height: 12),
+            _planCard(
+              'Zero-Based Budgeting',
+              'Every rupee of monthly income is assigned a specific job (spend, save, or invest) before the month begins — leaving zero unallocated funds.',
+              Icons.balance_rounded,
+            ),
+            _planCard(
+              'Pay-Yourself-First Method',
+              'Automatically divert 20%+ of your paycheck to investments (CSE / Fixed Deposits) the day your salary lands, then live on the rest.',
+              Icons.savings_rounded,
+            ),
+            _planCard(
+              'Envelope Budgeting',
+              'Allocate fixed digital spending caps per category so overspending in entertainment or dining out is immediately restricted.',
+              Icons.mark_email_read_rounded,
+            ),
+            const SizedBox(height: 20),
+            const SuggestedActionCard(
+              action: 'Pick one budgeting method and stick with it for at least 3 months in Sri Lanka before adjusting — '
+                  'consistency builds long-term wealth.',
+            ),
+            const SizedBox(height: 16),
+            const AskBotButton(seedContext: "You're exploring budgeting plans."),
+            const SizedBox(height: 30),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _planCard(String title, String desc) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 8),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
+  Widget _planCard(String title, String desc, IconData icon) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: GlassCard(
+        padding: const EdgeInsets.all(16),
+        backgroundColor: Colors.white,
+        child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-            const SizedBox(height: 4),
-            Text(desc, style: const TextStyle(fontSize: 12.5)),
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: const BoxDecoration(
+                color: AppColors.mintBg,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: AppColors.primary, size: 22),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: GoogleFonts.outfit(fontWeight: FontWeight.w700, fontSize: 15, color: AppColors.textDark),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    desc,
+                    style: GoogleFonts.outfit(fontSize: 13, color: AppColors.textMuted, height: 1.35),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 }
+
+

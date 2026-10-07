@@ -2,14 +2,13 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/widgets/gradient_scaffold.dart';
+import '../../core/widgets/glass_card.dart';
+import '../../core/theme/app_theme.dart';
 import 'verification_code_screen.dart';
 import 'widgets/auth_back_button.dart';
 import 'widgets/labeled_text_field.dart';
 import 'widgets/primary_action_button.dart';
 
-/// The Figma frame for this step ("Email for forget password") only
-/// contains a back arrow — its content is built here to match the same
-/// field/button language used on the Login screen for consistency.
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
 
@@ -37,53 +36,79 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return GradientScaffold(
-      maxContentWidth: 420,
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const AuthBackButton(),
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 32),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const SizedBox(height: 16),
-                  Text(
-                    'Forget Password',
-                    style: GoogleFonts.rubik(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
+      maxContentWidth: 440,
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const AuthBackButton(),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                physics: const BouncingScrollPhysics(),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const SizedBox(height: 12),
+                    Center(
+                      child: Container(
+                        padding: const EdgeInsets.all(18),
+                        decoration: const BoxDecoration(
+                          color: AppColors.mintBg,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.lock_reset_rounded, size: 36, color: AppColors.primary),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    "Enter the email address associated with your account and we'll send you a code to reset your password.",
-                    style: GoogleFonts.rubik(
-                      fontSize: 12,
-                      color: Colors.white.withValues(alpha: 0.85),
-                      height: 1.5,
+                    const SizedBox(height: 20),
+                    Text(
+                      'Forgot Password?',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.outfit(
+                        fontSize: 28,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.textDark,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 32),
-                  LabeledTextField(
-                    label: 'Email Id',
-                    controller: _emailController,
-                    keyboardType: TextInputType.emailAddress,
-                  ),
-                  const SizedBox(height: 32),
-                  PrimaryActionButton(
-                    label: 'Send Code',
-                    isLoading: _isSending,
-                    onPressed: _sendCode,
-                  ),
-                ],
+                    const SizedBox(height: 8),
+                    Text(
+                      "Enter the email address associated with your account and we'll send you a verification code to reset your password.",
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.outfit(
+                        fontSize: 13,
+                        color: AppColors.textMuted,
+                        height: 1.5,
+                      ),
+                    ),
+                    const SizedBox(height: 28),
+                    GlassCard(
+                      padding: const EdgeInsets.all(22),
+                      backgroundColor: Colors.white,
+                      child: Column(
+                        children: [
+                          LabeledTextField(
+                            label: 'Email Address',
+                            controller: _emailController,
+                            keyboardType: TextInputType.emailAddress,
+                            hintText: 'name@example.com',
+                          ),
+                          const SizedBox(height: 24),
+                          PrimaryActionButton(
+                            label: 'Send Code',
+                            isLoading: _isSending,
+                            onPressed: _sendCode,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 }
+

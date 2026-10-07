@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import '../theme/app_theme.dart';
 import '../../views/home/home_screen.dart';
 import '../../views/investments/investments_screen.dart';
 import '../../views/expenditure/expenditure_screen.dart';
@@ -7,11 +9,6 @@ import '../../views/profile/profile_screen.dart';
 
 enum AppSection { home, investments, expenses, bot, profile }
 
-/// The "Home | My Investments | My Expenses | Ask Bot" bar shown at the
-/// top of every logged-in-area screen. Tapping a section replaces the
-/// current screen so the nav bar always represents where you are, while
-/// screens pushed *within* a section (e.g. CSE Analytics) still get a
-/// normal back arrow from the AppBar.
 class TopNavBar extends StatelessWidget implements PreferredSizeWidget {
   final AppSection current;
   final String title;
@@ -25,7 +22,7 @@ class TopNavBar extends StatelessWidget implements PreferredSizeWidget {
   });
 
   @override
-  Size get preferredSize => const Size.fromHeight(96);
+  Size get preferredSize => const Size.fromHeight(110);
 
   void _go(BuildContext context, AppSection section) {
     if (section == current) return;
@@ -48,38 +45,66 @@ class TopNavBar extends StatelessWidget implements PreferredSizeWidget {
         break;
     }
     Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => page),
+      PageRouteBuilder(
+        pageBuilder: (_, animation, secondaryAnimation) => page,
+        transitionsBuilder: (_, animation, secondaryAnimation, child) {
+          return FadeTransition(opacity: animation, child: child);
+        },
+        transitionDuration: const Duration(milliseconds: 200),
+      ),
       (route) => false,
     );
   }
 
-  Widget _tab(BuildContext context, String label, AppSection section) {
+  Widget _tab(BuildContext context, String label, IconData icon, AppSection section) {
     final isActive = section == current;
-    final primary = Theme.of(context).colorScheme.primary;
     return GestureDetector(
       onTap: () => _go(context, section),
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+        duration: const Duration(milliseconds: 220),
+        curve: Curves.easeOutCubic,
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
-          color: isActive ? Colors.white : Colors.white.withValues(alpha: 0.18),
-          borderRadius: BorderRadius.circular(16),
+          color: isActive ? AppColors.primary : Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isActive ? AppColors.primary : AppColors.borderLight,
+            width: 1.2,
+          ),
           boxShadow: isActive
               ? [
                   BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.1),
-                      blurRadius: 6,
-                      offset: const Offset(0, 2))
+                    color: AppColors.primary.withValues(alpha: 0.2),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                  ),
                 ]
-              : null,
+              : [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.02),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
         ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 12.5,
-            fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-            color: isActive ? primary : Colors.white,
-          ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 15,
+              color: isActive ? Colors.white : AppColors.textMuted,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: GoogleFonts.outfit(
+                fontSize: 13,
+                fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+                color: isActive ? Colors.white : AppColors.textDark,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -89,25 +114,41 @@ class TopNavBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          SizedBox(
-            height: 48,
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 6),
             child: Row(
               children: [
                 if (showBackButton)
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Colors.white),
-                    onPressed: () => Navigator.of(context).maybePop(),
-                  )
-                else
-                  const SizedBox(width: 12),
+                  Container(
+                    margin: const EdgeInsets.only(right: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: AppColors.borderLight),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.03),
+                          blurRadius: 4,
+                        ),
+                      ],
+                    ),
+                    child: IconButton(
+                      icon: const Icon(Icons.arrow_back, color: AppColors.textDark, size: 18),
+                      onPressed: () => Navigator.of(context).maybePop(),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                    ),
+                  ),
                 Expanded(
                   child: Text(
                     title,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                    style: GoogleFonts.outfit(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textDark,
+                      letterSpacing: -0.3,
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -117,18 +158,19 @@ class TopNavBar extends StatelessWidget implements PreferredSizeWidget {
           ),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            physics: const BouncingScrollPhysics(),
             child: Row(
               children: [
-                _tab(context, 'Home', AppSection.home),
-                const SizedBox(width: 6),
-                _tab(context, 'My Investments', AppSection.investments),
-                const SizedBox(width: 6),
-                _tab(context, 'My Expenses', AppSection.expenses),
-                const SizedBox(width: 6),
-                _tab(context, 'Ask Bot', AppSection.bot),
-                const SizedBox(width: 6),
-                _tab(context, 'Profile', AppSection.profile),
+                _tab(context, 'Home', Icons.grid_view_rounded, AppSection.home),
+                const SizedBox(width: 8),
+                _tab(context, 'Investments', Icons.trending_up_rounded, AppSection.investments),
+                const SizedBox(width: 8),
+                _tab(context, 'Expenses', Icons.account_balance_wallet_rounded, AppSection.expenses),
+                const SizedBox(width: 8),
+                _tab(context, 'Ask Bot', Icons.smart_toy_rounded, AppSection.bot),
+                const SizedBox(width: 8),
+                _tab(context, 'Profile', Icons.person_rounded, AppSection.profile),
               ],
             ),
           ),
@@ -137,3 +179,5 @@ class TopNavBar extends StatelessWidget implements PreferredSizeWidget {
     );
   }
 }
+
+

@@ -1,62 +1,70 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../core/config/supabase_config.dart';
 
 class AuthService {
-  final SupabaseClient _client = Supabase.instance.client;
+  SupabaseClient? get _client => SupabaseConfig.isConfigured ? SupabaseConfig.client : null;
 
-  User? get currentUser => _client.auth.currentUser;
+  User? get currentUser => _client?.auth.currentUser;
 
-  Stream<AuthState> get authStateChanges => _client.auth.onAuthStateChange;
+  Stream<AuthState>? get authStateChanges => _client?.auth.onAuthStateChange;
 
-  Future<AuthResponse> signUp({
+  Future<AuthResponse?> signUp({
     required String name,
     required String email,
     required String password,
     required String mobile,
   }) async {
-    final response = await _client.auth.signUp(
+    final client = _client;
+    if (client == null) return null;
+
+    final response = await client.auth.signUp(
       email: email,
       password: password,
-      data: {'name': name, 'mobile': mobile},
+      data: {'full_name': name, 'mobile_number': mobile},
     );
 
-    // In case the DB trigger (see supabase_schema.sql) isn't set up yet,
-    // upsert the profile row directly so the app still works end to end.
     final user = response.user;
     if (user != null) {
-      await _client.from('profiles').upsert({
+      await client.from('profiles').upsert({
         'id': user.id,
-        'name': name,
+        'full_name': name,
         'email': email,
-        'mobile': mobile,
+        'mobile_number': mobile,
       });
     }
     return response;
   }
 
-  Future<AuthResponse> signIn({
+  Future<AuthResponse?> signIn({
     required String email,
     required String password,
-  }) {
-    return _client.auth.signInWithPassword(email: email, password: password);
+  }) async {
+    final client = _client;
+    if (client == null) return null;
+    return client.auth.signInWithPassword(email: email, password: password);
   }
 
-  Future<void> signOut() => _client.auth.signOut();
+  Future<void> signOut() async {
+    await _client?.auth.signOut();
+  }
 
   Future<String> fetchDisplayName() async {
     final user = currentUser;
-    if (user == null) return 'Guest';
+    final client = _client;
+    if (user == null || client == null) return 'Nimali';
     try {
-      final row = await _client
+      final row = await client
           .from('profiles')
-          .select('name')
+          .select('full_name')
           .eq('id', user.id)
           .maybeSingle();
-      final name = row?['name'] as String?;
+      final name = row?['full_name'] as String?;
       if (name != null && name.isNotEmpty) return name;
     } catch (_) {
-      // fall through to metadata / email fallback
+      // fall through
     }
-    final metaName = user.userMetadata?['name'] as String?;
-    return metaName ?? user.email ?? 'User';
+    final metaName = user.userMetadata?['full_name'] as String?;
+    return metaName ?? user.email?.split('@').first ?? 'User';
   }
 }
+

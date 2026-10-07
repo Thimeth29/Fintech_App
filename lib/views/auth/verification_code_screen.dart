@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/widgets/gradient_scaffold.dart';
+import '../../core/widgets/glass_card.dart';
+import '../../core/theme/app_theme.dart';
 import 'reset_password_screen.dart';
 import 'widgets/auth_back_button.dart';
 import 'widgets/primary_action_button.dart';
@@ -80,151 +82,170 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
     return GradientScaffold(
-      maxContentWidth: 420,
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const AuthBackButton(),
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 32),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const SizedBox(height: 8),
-                  Center(
-                    child: Column(
-                      children: [
-                        Text(
-                          'F',
-                          style: GoogleFonts.rubik(
-                            fontSize: 40,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
-                          ),
+      maxContentWidth: 440,
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const AuthBackButton(),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                physics: const BouncingScrollPhysics(),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const SizedBox(height: 12),
+                    Center(
+                      child: Container(
+                        padding: const EdgeInsets.all(18),
+                        decoration: const BoxDecoration(
+                          color: AppColors.mintBg,
+                          shape: BoxShape.circle,
                         ),
-                        Text(
-                          'FinSmart',
-                          style: GoogleFonts.rubik(
-                            fontSize: 32,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  Center(
-                    child: Text(
-                      _timerLabel,
-                      style: GoogleFonts.rubik(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
+                        child: const Icon(Icons.mark_email_read_rounded, size: 36, color: AppColors.primary),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 24),
-                  Text(
-                    'Verification Code',
-                    style: GoogleFonts.rubik(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
+                    const SizedBox(height: 20),
+                    Text(
+                      'Verification Code',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.outfit(
+                        fontSize: 28,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.textDark,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Please confirm the security code sent to ${widget.email.isEmpty ? "your registered email" : widget.email}.',
-                    style: GoogleFonts.rubik(
-                        fontSize: 12,
-                        color: Colors.white.withValues(alpha: 0.85)),
-                  ),
-                  const SizedBox(height: 24),
-                  Row(
-                    children: List.generate(_codeLength, (i) {
-                      return Expanded(
-                        child: Padding(
-                          padding: EdgeInsets.only(
-                              right: i == _codeLength - 1 ? 0 : 8),
-                          child: SizedBox(
-                            height: 54,
-                            child: TextField(
-                              controller: _controllers[i],
-                              focusNode: _focusNodes[i],
-                              textAlign: TextAlign.center,
-                              keyboardType: TextInputType.number,
-                              maxLength: 1,
-                              style: GoogleFonts.rubik(
-                                  fontSize: 16, color: Colors.black),
-                              inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly
-                              ],
-                              decoration: InputDecoration(
-                                counterText: '',
-                                filled: true,
-                                fillColor: Colors.white.withValues(alpha: 0.92),
-                                contentPadding: EdgeInsets.zero,
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                  borderSide: BorderSide.none,
+                    const SizedBox(height: 8),
+                    Text(
+                      'Please enter the 6-digit security code sent to ${widget.email.isEmpty ? "your registered email" : widget.email}.',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.outfit(
+                        fontSize: 13,
+                        color: AppColors.textMuted,
+                        height: 1.5,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Center(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: AppColors.mintBg,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: AppColors.primary.withValues(alpha: 0.25)),
+                        ),
+                        child: Text(
+                          'Expires in: $_timerLabel',
+                          style: GoogleFonts.outfit(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 28),
+                    GlassCard(
+                      padding: const EdgeInsets.all(22),
+                      backgroundColor: Colors.white,
+                      child: Column(
+                        children: [
+                          Row(
+                            children: List.generate(_codeLength, (i) {
+                              return Expanded(
+                                child: Padding(
+                                  padding: EdgeInsets.only(
+                                      right: i == _codeLength - 1 ? 0 : 6),
+                                  child: SizedBox(
+                                    height: 54,
+                                    child: TextField(
+                                      controller: _controllers[i],
+                                      focusNode: _focusNodes[i],
+                                      textAlign: TextAlign.center,
+                                      keyboardType: TextInputType.number,
+                                      maxLength: 1,
+                                      style: GoogleFonts.outfit(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.w700,
+                                        color: AppColors.textDark,
+                                      ),
+                                      cursorColor: AppColors.primary,
+                                      inputFormatters: [
+                                        FilteringTextInputFormatter.digitsOnly
+                                      ],
+                                      decoration: InputDecoration(
+                                        counterText: '',
+                                        filled: true,
+                                        fillColor: Colors.white,
+                                        contentPadding: EdgeInsets.zero,
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(14),
+                                          borderSide: const BorderSide(
+                                            color: AppColors.borderLight,
+                                          ),
+                                        ),
+                                        enabledBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(14),
+                                          borderSide: const BorderSide(
+                                            color: AppColors.borderLight,
+                                          ),
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(14),
+                                          borderSide: const BorderSide(
+                                            color: AppColors.primary,
+                                            width: 1.8,
+                                          ),
+                                        ),
+                                      ),
+                                      onChanged: (value) => _onDigitChanged(i, value),
+                                    ),
+                                  ),
                                 ),
-                                enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                  borderSide: BorderSide.none,
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                  borderSide:
-                                      BorderSide(color: primary, width: 1.5),
+                              );
+                            }),
+                          ),
+                          const SizedBox(height: 24),
+                          PrimaryActionButton(label: 'Verify & Proceed', onPressed: _confirm),
+                          const SizedBox(height: 16),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                "Didn't receive the code? ",
+                                style: GoogleFonts.outfit(
+                                  fontSize: 13,
+                                  color: AppColors.textMuted,
                                 ),
                               ),
-                              onChanged: (value) => _onDigitChanged(i, value),
-                            ),
+                              GestureDetector(
+                                onTap: _secondsLeft == 0 ? _startTimer : null,
+                                child: Text(
+                                  'Resend Code',
+                                  style: GoogleFonts.outfit(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                    color: _secondsLeft == 0
+                                        ? AppColors.primary
+                                        : AppColors.textMuted,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                      );
-                    }),
-                  ),
-                  const SizedBox(height: 32),
-                  PrimaryActionButton(label: 'Confirm', onPressed: _confirm),
-                  const SizedBox(height: 16),
-                  Center(
-                    child: Column(
-                      children: [
-                        Text(
-                          'Did not receive the code?',
-                          style: GoogleFonts.rubik(
-                              fontSize: 14,
-                              color: Colors.white.withValues(alpha: 0.85)),
-                        ),
-                        const SizedBox(height: 4),
-                        GestureDetector(
-                          onTap: _secondsLeft == 0 ? _startTimer : null,
-                          child: Text(
-                            'Send again',
-                            style: GoogleFonts.rubik(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700,
-                              color: _secondsLeft == 0
-                                  ? Colors.white
-                                  : Colors.white.withValues(alpha: 0.4),
-                            ),
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 24),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 }
+

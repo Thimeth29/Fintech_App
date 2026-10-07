@@ -25,7 +25,7 @@ class StockQuote {
   // endpoints (e.g. "changePercentage" vs "percentageChange"), so we
   // read defensively with fallbacks instead of assuming one shape.
   factory StockQuote.fromJson(Map<String, dynamic> json) {
-    double _asDouble(dynamic value) {
+    double asDouble(dynamic value) {
       if (value == null) return 0.0;
       if (value is num) return value.toDouble();
       return double.tryParse(value.toString()) ?? 0.0;
@@ -34,11 +34,11 @@ class StockQuote {
     return StockQuote(
       symbol: (json['symbol'] ?? json['securityId'] ?? '').toString(),
       name: (json['name'] ?? json['securityName'] ?? '').toString(),
-      price: _asDouble(json['price'] ?? json['lastTradedPrice']),
-      changePercentage: _asDouble(
+      price: asDouble(json['price'] ?? json['lastTradedPrice']),
+      changePercentage: asDouble(
         json['changePercentage'] ?? json['percentageChange'],
       ),
-      volume: _asDouble(json['tradeVolume'] ?? json['volume']),
+      volume: asDouble(json['tradeVolume'] ?? json['volume']),
     );
   }
 }

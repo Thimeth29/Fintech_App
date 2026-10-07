@@ -2,6 +2,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/widgets/gradient_scaffold.dart';
+import '../../core/widgets/glass_card.dart';
+import '../../core/theme/app_theme.dart';
 import 'login_screen.dart';
 import 'widgets/auth_back_button.dart';
 import 'widgets/labeled_text_field.dart';
@@ -42,65 +44,96 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return GradientScaffold(
-      maxContentWidth: 420,
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const AuthBackButton(),
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 32),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const SizedBox(height: 32),
-                  Text(
-                    'Reset Password',
-                    style: GoogleFonts.rubik(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Choose a new password for your account.',
-                    style: GoogleFonts.rubik(
-                        fontSize: 13,
-                        color: Colors.white.withValues(alpha: 0.85)),
-                  ),
-                  const SizedBox(height: 24),
-                  LabeledTextField(
-                    label: 'Password',
-                    controller: _passwordController,
-                    isPassword: true,
-                  ),
-                  const SizedBox(height: 20),
-                  LabeledTextField(
-                    label: 'Confirm Password',
-                    controller: _confirmController,
-                    isPassword: true,
-                  ),
-                  if (_errorMessage != null) ...[
+      maxContentWidth: 440,
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const AuthBackButton(),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                physics: const BouncingScrollPhysics(),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
                     const SizedBox(height: 12),
+                    Center(
+                      child: Container(
+                        padding: const EdgeInsets.all(18),
+                        decoration: const BoxDecoration(
+                          color: AppColors.mintBg,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.key_rounded, size: 36, color: AppColors.primary),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
                     Text(
-                      _errorMessage!,
-                      style: GoogleFonts.rubik(
-                          color: Colors.yellowAccent, fontSize: 13),
+                      'Reset Password',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.outfit(
+                        fontSize: 28,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.textDark,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Choose a strong new password for your account.',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.outfit(
+                        fontSize: 13,
+                        color: AppColors.textMuted,
+                      ),
+                    ),
+                    const SizedBox(height: 28),
+                    GlassCard(
+                      padding: const EdgeInsets.all(22),
+                      backgroundColor: Colors.white,
+                      child: Column(
+                        children: [
+                          LabeledTextField(
+                            label: 'New Password',
+                            controller: _passwordController,
+                            isPassword: true,
+                            hintText: 'Minimum 8 characters',
+                          ),
+                          const SizedBox(height: 16),
+                          LabeledTextField(
+                            label: 'Confirm New Password',
+                            controller: _confirmController,
+                            isPassword: true,
+                            hintText: 'Re-enter new password',
+                          ),
+                          if (_errorMessage != null) ...[
+                            const SizedBox(height: 12),
+                            Text(
+                              _errorMessage!,
+                              style: GoogleFonts.outfit(
+                                color: AppColors.rose,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                          const SizedBox(height: 24),
+                          PrimaryActionButton(
+                            label: 'Set New Password',
+                            isLoading: _isSubmitting,
+                            onPressed: _confirm,
+                          ),
+                        ],
+                      ),
                     ),
                   ],
-                  const SizedBox(height: 32),
-                  PrimaryActionButton(
-                    label: 'Confirm',
-                    isLoading: _isSubmitting,
-                    onPressed: _confirm,
-                  ),
-                ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 }
+
