@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../services/auth_service.dart';
 import '../home/home_screen.dart';
 import 'forgot_password_screen.dart';
@@ -182,7 +183,7 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       final authService = AuthService();
       await authService.signIn(
-        email: emailOrPhone,
+        emailOrPhone: emailOrPhone,
         password: password,
       );
 
@@ -194,13 +195,22 @@ class _LoginScreenState extends State<LoginScreen> {
         // Navigate to dashboard on successful Supabase authentication
         _navigateToHome();
       }
+    } on AuthException catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _errorMessage = e.message;
+          _emailHasError = true;
+          _passwordHasError = true;
+        });
+        _showSnackBar(e.message);
+      }
     } catch (e) {
       if (mounted) {
         setState(() {
           _isLoading = false;
+          _errorMessage = e.toString();
         });
-
-        // Prompt user with Demo fallback or Sign up choice when credentials don't match
         _showDemoOrSignupDialog(emailOrPhone);
       }
     }

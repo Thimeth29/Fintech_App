@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:provider/provider.dart';
 
 import 'core/config/supabase_config.dart';
 import 'core/theme/app_theme.dart';
+import 'viewmodels/auth_viewmodel.dart';
 import 'views/auth/welcome_screen.dart';
 import 'views/home/home_screen.dart';
-
-final supabase = Supabase.instance.client;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,12 +20,15 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'FinSmart — Personal Finance Management',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      home: const AuthGate(),
+    return ChangeNotifierProvider(
+      create: (_) => AuthViewModel(),
+      child: MaterialApp(
+        title: 'FinSmart — Personal Finance Management',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
+        home: const AuthGate(),
+      ),
     );
   }
 }

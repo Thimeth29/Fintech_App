@@ -13,6 +13,9 @@ class ExpenseViewModel extends ChangeNotifier {
   String? errorMessage;
   List<ExpenseModel> expenses = [];
 
+  // Monthly category budget limits
+  List<Map<String, dynamic>> budgets = [];
+
   bool isLoadingPrediction = false;
   double? predictedNextMonthTotal;
   String? predictionMessage;
@@ -39,8 +42,7 @@ class ExpenseViewModel extends ChangeNotifier {
         'total spend — consider setting a monthly cap for it.';
   }
 
-  /// Total spend per calendar month, oldest first — the LSTM's expected
-  /// input series (it was trained on a 3-month sliding window).
+  /// Total spend per calendar month, oldest first
   List<MapEntry<DateTime, double>> get monthlyTotals {
     final map = <DateTime, double>{};
     for (final e in expenses) {
@@ -58,20 +60,18 @@ class ExpenseViewModel extends ChangeNotifier {
     notifyListeners();
     try {
       expenses = await _service.fetchExpenses(userId);
+      final now = DateTime.now();
+      final monthYear = "${now.year}-${now.month.toString().padLeft(2, '0')}";
+      budgets = await _service.fetchBudgets(userId, monthYear);
     } catch (e) {
       errorMessage = 'Could not load expenses.';
     } finally {
       isLoading = false;
       notifyListeners();
     }
-    // Fire-and-forget: doesn't block the expense list from rendering.
     unawaited(loadPrediction());
   }
 
-  /// Runs the on-device LSTM (see ExpenditurePredictionService) on the
-  /// last 3 calendar months of spending to forecast next month's total.
-  /// Needs at least 3 months of history and the .tflite asset bundled
-  /// (see ml/README.md); otherwise sets an explanatory message instead.
   Future<void> loadPrediction() async {
     final months = monthlyTotals;
     if (months.length < 3) {
@@ -128,6 +128,41 @@ class ExpenseViewModel extends ChangeNotifier {
       return true;
     } catch (e) {
       errorMessage = 'Could not save expense.';
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> deleteExpense({required String userId, required String id}) async {
+    try {
+      await _service.deleteExpense(id);
+      await load(userId);
+      return true;
+    } catch (e) {
+      errorMessage = 'Could not delete expense.';
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> upsertBudget({
+    required String userId,
+    required String category,
+    required double limitAmount,
+    required String monthYear,
+  }) async {
+    try {
+      await _service.upsertBudget(
+        userId: userId,
+        category: category,
+        limitAmount: limitAmount,
+        monthYear: monthYear,
+      );
+      budgets = await _service.fetchBudgets(userId, monthYear);
+      notifyListeners();
+      return true;
+    } catch (e) {
+      errorMessage = 'Could not save budget.';
       notifyListeners();
       return false;
     }

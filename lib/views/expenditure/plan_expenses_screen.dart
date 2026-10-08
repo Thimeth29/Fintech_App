@@ -1,199 +1,200 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import '../../core/widgets/gradient_scaffold.dart';
 import '../../core/widgets/suggested_action_card.dart';
 import '../../core/widgets/glass_card.dart';
 import '../../core/theme/app_theme.dart';
-import '../../models/expense_model.dart';
+import '../../services/auth_service.dart';
+import '../../viewmodels/expense_viewmodel.dart';
 
 const List<String> _categories = [
   'Food', 'Transport', 'Housing', 'Utilities', 'Entertainment', 'Other',
 ];
 
-const _sampleSuggestedAction =
-    'Housing is your biggest category this month — see if any recurring '
-    'subscriptions under Entertainment can be trimmed.';
-
-class PlanExpensesScreen extends StatefulWidget {
+class PlanExpensesScreen extends StatelessWidget {
   const PlanExpensesScreen({super.key});
 
   @override
-  State<PlanExpensesScreen> createState() => _PlanExpensesScreenState();
-}
-
-class _PlanExpensesScreenState extends State<PlanExpensesScreen> {
-  final _expenses = <ExpenseModel>[
-    ExpenseModel(userId: 'sample', amount: 18500, category: 'Housing', note: 'Rent'),
-    ExpenseModel(userId: 'sample', amount: 6200, category: 'Food', note: 'Groceries'),
-    ExpenseModel(userId: 'sample', amount: 3400, category: 'Transport'),
-    ExpenseModel(userId: 'sample', amount: 2100, category: 'Entertainment', note: 'Streaming'),
-  ];
-
-  double get _total => _expenses.fold(0, (sum, e) => sum + e.amount);
-
-  Map<String, double> get _byCategory {
-    final map = <String, double>{};
-    for (final e in _expenses) {
-      map[e.category] = (map[e.category] ?? 0) + e.amount;
-    }
-    return map;
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return GradientScaffold(
-      maxContentWidth: 860,
-      appBar: AppBar(
-        leading: Container(
-          margin: const EdgeInsets.only(left: 12, top: 8, bottom: 8),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            shape: BoxShape.circle,
-            border: Border.all(color: AppColors.borderLight),
-          ),
-          child: const BackButton(color: AppColors.textDark),
-        ),
-        title: Text('Plan My Expenses', style: GoogleFonts.outfit(fontWeight: FontWeight.w700, color: AppColors.textDark)),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: AppColors.primary,
-        icon: const Icon(Icons.add_rounded, color: Colors.white),
-        label: Text('Add Expense', style: GoogleFonts.outfit(fontWeight: FontWeight.w700, color: Colors.white)),
-        onPressed: () => _showAddExpenseDialog(context),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        physics: const BouncingScrollPhysics(),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Total spent hero tile
-            GlassCard(
-              padding: const EdgeInsets.all(22),
-              gradient: AppGradients.heroCard,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'TOTAL MONTHLY SPENT',
-                        style: GoogleFonts.outfit(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white70,
-                          letterSpacing: 0.8,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Rs ${_total.toStringAsFixed(2)}',
-                        style: GoogleFonts.outfit(
-                          fontSize: 28,
-                          fontWeight: FontWeight.w800,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.2),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(Icons.account_balance_wallet_rounded, color: Colors.white, size: 28),
-                  ),
-                ],
-              ),
+    final userId = AuthService().currentUser?.id;
+
+    return ChangeNotifierProvider(
+      create: (_) => ExpenseViewModel()..load(userId ?? ''),
+      child: GradientScaffold(
+        maxContentWidth: 860,
+        appBar: AppBar(
+          leading: Container(
+            margin: const EdgeInsets.only(left: 12, top: 8, bottom: 8),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              border: Border.all(color: AppColors.borderLight),
             ),
-
-            const SizedBox(height: 20),
-            const _PredictionCard(),
-            const SizedBox(height: 20),
-
-            // Category Breakdown Chart
-            if (_byCategory.isNotEmpty)
-              GlassCard(
-                padding: const EdgeInsets.all(20),
-                backgroundColor: Colors.white,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Expense Category Breakdown',
-                      style: GoogleFonts.outfit(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textDark),
-                    ),
-                    const SizedBox(height: 14),
-                    _CategoryPie(byCategory: _byCategory),
-                  ],
+            child: const BackButton(color: AppColors.textDark),
+          ),
+          title: Text('Plan My Expenses', style: GoogleFonts.outfit(fontWeight: FontWeight.w700, color: AppColors.textDark)),
+        ),
+        floatingActionButton: userId == null
+            ? null
+            : Builder(
+                builder: (context) => FloatingActionButton.extended(
+                  backgroundColor: AppColors.primary,
+                  icon: const Icon(Icons.add_rounded, color: Colors.white),
+                  label: Text('Add Expense', style: GoogleFonts.outfit(fontWeight: FontWeight.w700, color: Colors.white)),
+                  onPressed: () => _showAddExpenseDialog(context, userId),
                 ),
               ),
+        body: Consumer<ExpenseViewModel>(
+          builder: (context, vm, _) {
+            if (userId == null) {
+              return const Padding(
+                padding: EdgeInsets.all(20),
+                child: SuggestedActionCard(
+                  action: 'Log in to start tracking and planning your real expenses.',
+                ),
+              );
+            }
+            if (vm.isLoading) {
+              return const Center(child: CircularProgressIndicator(color: AppColors.primary));
+            }
 
-            const SizedBox(height: 24),
-            Text(
-              'Logged Expenses',
-              style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textDark),
-            ),
-            const SizedBox(height: 10),
-
-            if (_expenses.isEmpty)
-              Text(
-                'No expenses logged yet — tap + to log an expense.',
-                style: GoogleFonts.outfit(fontSize: 13, color: AppColors.textMuted),
-              ),
-
-            ..._expenses.map(
-              (e) => Container(
-                margin: const EdgeInsets.only(bottom: 10),
-                child: GlassCard(
-                  padding: const EdgeInsets.all(14),
-                  backgroundColor: Colors.white,
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: const BoxDecoration(
-                          color: AppColors.mintBg,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(_getCategoryIcon(e.category), color: AppColors.primary, size: 20),
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
+              physics: const BouncingScrollPhysics(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Total spent hero tile
+                  GlassCard(
+                    padding: const EdgeInsets.all(22),
+                    gradient: AppGradients.heroCard,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              e.category,
+                              'TOTAL LOGGED SPENT',
+                              style: GoogleFonts.outfit(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white70,
+                                letterSpacing: 0.8,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Rs ${vm.total.toStringAsFixed(2)}',
+                              style: GoogleFonts.outfit(
+                                fontSize: 28,
+                                fontWeight: FontWeight.w800,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.2),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.account_balance_wallet_rounded, color: Colors.white, size: 28),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+                  _PredictionCard(vm: vm),
+                  const SizedBox(height: 20),
+
+                  // Category Breakdown Chart
+                  if (vm.byCategory.isNotEmpty)
+                    GlassCard(
+                      padding: const EdgeInsets.all(20),
+                      backgroundColor: Colors.white,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Expense Category Breakdown',
+                            style: GoogleFonts.outfit(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textDark),
+                          ),
+                          const SizedBox(height: 14),
+                          _CategoryPie(byCategory: vm.byCategory),
+                        ],
+                      ),
+                    ),
+
+                  const SizedBox(height: 24),
+                  Text(
+                    'Logged Expenses',
+                    style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textDark),
+                  ),
+                  const SizedBox(height: 10),
+
+                  if (vm.expenses.isEmpty)
+                    Text(
+                      'No expenses logged yet — tap + to log an expense.',
+                      style: GoogleFonts.outfit(fontSize: 13, color: AppColors.textMuted),
+                    ),
+
+                  ...vm.expenses.map(
+                    (e) => Container(
+                      margin: const EdgeInsets.only(bottom: 10),
+                      child: GlassCard(
+                        padding: const EdgeInsets.all(14),
+                        backgroundColor: Colors.white,
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: const BoxDecoration(
+                                color: AppColors.mintBg,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(_getCategoryIcon(e.category), color: AppColors.primary, size: 20),
+                            ),
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    e.category,
+                                    style: GoogleFonts.outfit(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textDark),
+                                  ),
+                                  if (e.note != null && e.note!.isNotEmpty)
+                                    Text(
+                                      e.note!,
+                                      style: GoogleFonts.outfit(fontSize: 12, color: AppColors.textMuted),
+                                    ),
+                                ],
+                              ),
+                            ),
+                            Text(
+                              'Rs ${e.amount.toStringAsFixed(2)}',
                               style: GoogleFonts.outfit(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textDark),
                             ),
-                            if (e.note != null && e.note!.isNotEmpty)
-                              Text(
-                                e.note!,
-                                style: GoogleFonts.outfit(fontSize: 12, color: AppColors.textMuted),
-                              ),
                           ],
                         ),
                       ),
-                      Text(
-                        'Rs ${e.amount.toStringAsFixed(2)}',
-                        style: GoogleFonts.outfit(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textDark),
-                      ),
-                    ],
+                    ),
                   ),
-                ),
-              ),
-            ),
 
-            const SizedBox(height: 20),
-            const SuggestedActionCard(action: _sampleSuggestedAction),
-            const SizedBox(height: 16),
-            const AskBotButton(seedContext: "You're looking at your expense plan."),
-            const SizedBox(height: 40),
-          ],
+                  const SizedBox(height: 20),
+                  SuggestedActionCard(action: vm.suggestedAction),
+                  const SizedBox(height: 16),
+                  const AskBotButton(seedContext: "You're looking at your expense plan."),
+                  const SizedBox(height: 40),
+                ],
+              ),
+            );
+          },
         ),
       ),
     );
@@ -216,10 +217,11 @@ class _PlanExpensesScreenState extends State<PlanExpensesScreen> {
     }
   }
 
-  void _showAddExpenseDialog(BuildContext context) {
+  void _showAddExpenseDialog(BuildContext context, String userId) {
     final amountController = TextEditingController();
     final noteController = TextEditingController();
     String category = _categories.first;
+    final vm = context.read<ExpenseViewModel>();
 
     showDialog(
       context: context,
@@ -277,21 +279,16 @@ class _PlanExpensesScreenState extends State<PlanExpensesScreen> {
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
-              onPressed: () {
+              onPressed: () async {
                 final amount = double.tryParse(amountController.text) ?? 0;
                 Navigator.pop(dialogContext);
                 if (amount > 0) {
-                  setState(() {
-                    _expenses.insert(
-                      0,
-                      ExpenseModel(
-                        userId: 'sample',
-                        amount: amount,
-                        category: category,
-                        note: noteController.text.trim(),
-                      ),
-                    );
-                  });
+                  await vm.addExpense(
+                    userId: userId,
+                    amount: amount,
+                    category: category,
+                    note: noteController.text.trim(),
+                  );
                 }
               },
               child: Text('Save Expense', style: GoogleFonts.outfit(fontWeight: FontWeight.w700)),
@@ -304,10 +301,20 @@ class _PlanExpensesScreenState extends State<PlanExpensesScreen> {
 }
 
 class _PredictionCard extends StatelessWidget {
-  const _PredictionCard();
+  final ExpenseViewModel vm;
+  const _PredictionCard({required this.vm});
 
   @override
   Widget build(BuildContext context) {
+    final String message;
+    if (vm.isLoadingPrediction) {
+      message = 'Forecasting next month from your spending history…';
+    } else if (vm.predictedNextMonthTotal != null) {
+      message = 'Predicted next month: Rs ${vm.predictedNextMonthTotal!.toStringAsFixed(2)}';
+    } else {
+      message = vm.predictionMessage ?? 'Spending forecast unavailable.';
+    }
+
     return GlassCard(
       padding: const EdgeInsets.all(16),
       backgroundColor: AppColors.mintBg,
@@ -325,7 +332,7 @@ class _PredictionCard extends StatelessWidget {
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              'On-device AI forecast model is calculating your next month expenditure trend.',
+              message,
               style: GoogleFonts.outfit(fontSize: 12.5, color: AppColors.textDark, fontWeight: FontWeight.w500),
             ),
           ),
@@ -366,5 +373,3 @@ class _CategoryPie extends StatelessWidget {
     );
   }
 }
-
-

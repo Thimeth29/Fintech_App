@@ -54,11 +54,11 @@ class SandboxScreen extends StatelessWidget {
             style: ElevatedButton.styleFrom(
               backgroundColor: isBuy ? AppColors.primary : AppColors.rose,
             ),
-            onPressed: () {
+            onPressed: () async {
               final qty = double.tryParse(controller.text) ?? 0;
-              final success = isBuy ? vm.buy(instrument, qty) : vm.sell(instrument, qty);
-              Navigator.pop(dialogContext);
-              if (!success && vm.errorMessage != null) {
+              final success = isBuy ? await vm.buy(instrument, qty) : await vm.sell(instrument, qty);
+              if (dialogContext.mounted) Navigator.pop(dialogContext);
+              if (!success && vm.errorMessage != null && context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(vm.errorMessage!, style: GoogleFonts.outfit()),
@@ -77,7 +77,7 @@ class SandboxScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => SandboxViewModel(),
+      create: (_) => SandboxViewModel()..loadSandboxData(),
       child: GradientScaffold(
         maxContentWidth: 860,
         appBar: AppBar(

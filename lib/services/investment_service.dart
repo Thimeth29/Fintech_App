@@ -1,27 +1,33 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../core/config/supabase_config.dart';
 import '../models/investment_action_model.dart';
 
 /// Persists a history of investment actions the user takes (or marks as
 /// "considered") from the analytics pages, so "My Investments" can show
 /// a timeline of past decisions.
 class InvestmentService {
-  final SupabaseClient _client = Supabase.instance.client;
+  SupabaseClient? get _client => SupabaseConfig.isConfigured ? SupabaseConfig.client : null;
 
+  /// Fetch investment action logs for a given user
   Future<List<InvestmentActionModel>> fetchActions(String userId) async {
-    final rows = await _client
-        .from('investment_actions')
+    final client = _client;
+    if (client == null) return [];
+
+    final rows = await client
+        .from('investment_logs')
         .select()
         .eq('user_id', userId)
         .order('created_at', ascending: false);
+
     return (rows as List)
-        .map(
-          (row) =>
-              InvestmentActionModel.fromJson(row as Map<String, dynamic>),
-        )
+        .map((row) => InvestmentActionModel.fromJson(row as Map<String, dynamic>))
         .toList();
   }
 
+  /// Log an investment action
   Future<void> logAction(InvestmentActionModel action) async {
-    await _client.from('investment_actions').insert(action.toInsertJson());
+    final client = _client;
+    if (client == null) return;
+    await client.from('investment_logs').insert(action.toInsertJson());
   }
 }

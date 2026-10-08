@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import '../../viewmodels/auth_viewmodel.dart';
 import '../bot/chat_screen.dart';
 import '../sandbox/sandbox_screen.dart';
 import '../expenditure/expenditure_screen.dart';
@@ -16,7 +18,33 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<AuthViewModel>().loadUserProfile();
+    });
+  }
+
+  String _greeting() {
+    final hour = DateTime.now().hour;
+    if (hour < 12) return 'Good morning';
+    if (hour < 17) return 'Good afternoon';
+    return 'Good evening';
+  }
+
+  /// "Nimal Perera" -> "NP"; falls back to "?" if there's nothing to show.
+  String _initialsOf(String name) {
+    final parts = name.trim().split(RegExp(r'\s+')).where((p) => p.isNotEmpty).toList();
+    if (parts.isEmpty) return '?';
+    if (parts.length == 1) return parts.first[0].toUpperCase();
+    return (parts.first[0] + parts.last[0]).toUpperCase();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final authVm = context.watch<AuthViewModel>();
+    final displayName = authVm.displayName.isNotEmpty ? authVm.displayName : 'there';
+    final initials = _initialsOf(displayName == 'there' ? '' : displayName);
     return Scaffold(
       backgroundColor: const Color(0xFFF7F9F7),
       floatingActionButton: FloatingActionButton.extended(
@@ -47,7 +75,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // 1. Top Header Bar
-                  _buildHeaderBar(context),
+                  _buildHeaderBar(context, displayName, initials),
                   const SizedBox(height: 20),
 
                   // 2. October Spending Hero Card
@@ -97,7 +125,7 @@ class _HomeScreenState extends State<HomeScreen> {
   // ==========================================
   // 1. TOP HEADER BAR
   // ==========================================
-  Widget _buildHeaderBar(BuildContext context) {
+  Widget _buildHeaderBar(BuildContext context, String displayName, String initials) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -106,14 +134,14 @@ class _HomeScreenState extends State<HomeScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Good morning',
+              _greeting(),
               style: GoogleFonts.outfit(
                 fontSize: 13,
                 color: const Color(0xFF5A6578),
               ),
             ),
             Text(
-              'Nimali',
+              displayName,
               style: GoogleFonts.outfit(
                 fontSize: 26,
                 fontWeight: FontWeight.w800,
@@ -169,7 +197,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 child: Center(
                   child: Text(
-                    'NP',
+                    initials,
                     style: GoogleFonts.outfit(
                       fontSize: 15,
                       fontWeight: FontWeight.w700,

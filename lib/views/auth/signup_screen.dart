@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../services/auth_service.dart';
 import '../home/home_screen.dart';
 import 'login_screen.dart';
@@ -130,30 +131,94 @@ class _SignupScreenState extends State<SignupScreen> {
     });
   }
 
+  bool _isFinishing = false;
+
+  void _showSnackBar(String message, {bool isError = true}) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.w500),
+        ),
+        backgroundColor: isError ? const Color(0xFFD32F2F) : const Color(0xFF0D653E),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        margin: const EdgeInsets.all(16),
+        duration: const Duration(seconds: 5),
+      ),
+    );
+  }
+
   Future<void> _finishOnboarding() async {
     final name = _fullNameController.text.trim();
     final email = _emailOrPhoneController.text.trim();
     final password = _passwordController.text.trim();
 
-    if (name.isNotEmpty && email.isNotEmpty && password.isNotEmpty) {
-      try {
-        final authService = AuthService();
-        await authService.signUp(
-          name: name,
-          email: email,
-          password: password,
-          mobile: email,
-        );
-      } catch (_) {
-        // Ignore errors if offline or demo
-      }
+    if (name.isEmpty || email.isEmpty || password.isEmpty) {
+      _showSnackBar('Please fill in your name, email/phone and password first.');
+      setState(() => _currentStep = 1);
+      return;
     }
 
-    if (mounted) {
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
-        (route) => false,
+    setState(() => _isFinishing = true);
+
+    try {
+      final authService = AuthService();
+      final response = await authService.signUp(
+        name: name,
+        emailOrPhone: email,
+        password: password,
+        extraMetaData: {
+          'user_role': _userRole,
+          'occupation': _occupationController.text.trim().isNotEmpty
+              ? _occupationController.text.trim()
+              : 'Employed',
+          'district': _selectedDistrict ?? 'Colombo',
+          'preferred_language': _selectedLanguage,
+          'is_under_18': _isUnder18,
+          'guardian_name': _guardianNameController.text.trim(),
+          'guardian_mobile': _guardianContactController.text.trim(),
+          'guardian_relation': _guardianRelation,
+          'selected_assets': _selectedAssets.toList(),
+        },
       );
+
+      if (!mounted) return;
+
+      if (response?.session != null) {
+        // Signed up AND already has a live session (email confirmation is
+        // off for this project) — go straight to the dashboard.
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const HomeScreen()),
+          (route) => false,
+        );
+      } else if (response?.user != null) {
+        // Account was created, but Supabase requires email confirmation
+        // before a session can start — there is no session yet, so sending
+        // the user to Home would show a logged-out state. Send them to
+        // Login instead with a clear explanation.
+        _showSnackBar(
+          'Account created! Check $email for a confirmation link, then log in.',
+          isError: false,
+        );
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
+          (route) => false,
+        );
+      } else {
+        _showSnackBar('Sign up did not complete — please try again.');
+        setState(() => _isFinishing = false);
+      }
+    } on AuthException catch (e) {
+      if (!mounted) return;
+      _showSnackBar(e.message);
+      setState(() => _isFinishing = false);
+    } catch (e) {
+      if (!mounted) return;
+      _showSnackBar('Sign up failed: ${e.toString()}');
+      setState(() => _isFinishing = false);
     }
   }
 
@@ -1123,8 +1188,9 @@ class _SignupScreenState extends State<SignupScreen> {
 
         // Continue Button
         _buildPrimaryButton(
-          label: 'Continue',
+          label: 'Create Account',
           onTap: _nextStep,
+          isLoading: _isFinishing,
         ),
         const SizedBox(height: 16),
       ],
@@ -1219,25 +1285,36 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
 
-  Widget _buildPrimaryButton({required String label, required VoidCallback onTap}) {
+  Widget _buildPrimaryButton({
+    required String label,
+    required VoidCallback onTap,
+    bool isLoading = false,
+  }) {
     return SizedBox(
       width: double.infinity,
       height: 52,
       child: ElevatedButton(
-        onPressed: onTap,
+        onPressed: isLoading ? null : onTap,
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFF0D653E),
+          disabledBackgroundColor: const Color(0xFF0D653E).withValues(alpha: 0.6),
           elevation: 0,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         ),
-        child: Text(
-          label,
-          style: GoogleFonts.outfit(
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-            color: Colors.white,
-          ),
-        ),
+        child: isLoading
+            ? const SizedBox(
+                width: 22,
+                height: 22,
+                child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
+              )
+            : Text(
+                label,
+                style: GoogleFonts.outfit(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                ),
+              ),
       ),
     );
   }

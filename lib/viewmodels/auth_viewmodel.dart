@@ -7,14 +7,15 @@ class AuthViewModel extends ChangeNotifier {
   bool isLoading = false;
   String? errorMessage;
   String displayName = '';
+  Map<String, dynamic>? userProfile;
 
   bool get isLoggedIn => _authService.currentUser != null;
 
   Future<bool> signUp({
     required String name,
-    required String email,
+    required String emailOrPhone,
     required String password,
-    required String mobile,
+    Map<String, dynamic>? extraMetaData,
   }) async {
     isLoading = true;
     errorMessage = null;
@@ -22,11 +23,12 @@ class AuthViewModel extends ChangeNotifier {
     try {
       await _authService.signUp(
         name: name,
-        email: email,
+        emailOrPhone: emailOrPhone,
         password: password,
-        mobile: mobile,
+        extraMetaData: extraMetaData,
       );
       displayName = name;
+      await loadUserProfile();
       return true;
     } catch (e) {
       errorMessage = 'Sign up failed: ${e.toString()}';
@@ -37,17 +39,38 @@ class AuthViewModel extends ChangeNotifier {
     }
   }
 
-  Future<bool> signIn({required String email, required String password}) async {
+  Future<bool> signIn({required String emailOrPhone, required String password}) async {
     isLoading = true;
     errorMessage = null;
     notifyListeners();
     try {
-      await _authService.signIn(email: email, password: password);
+      await _authService.signIn(emailOrPhone: emailOrPhone, password: password);
       displayName = await _authService.fetchDisplayName();
+      await loadUserProfile();
       return true;
     } catch (e) {
       errorMessage = 'Login failed: ${e.toString()}';
       return false;
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> loadUserProfile() async {
+    userProfile = await _authService.fetchProfile();
+    displayName = await _authService.fetchDisplayName();
+    notifyListeners();
+  }
+
+  Future<void> updateProfile(Map<String, dynamic> updates) async {
+    isLoading = true;
+    notifyListeners();
+    try {
+      await _authService.updateProfile(updates);
+      await loadUserProfile();
+    } catch (e) {
+      errorMessage = 'Update profile failed: ${e.toString()}';
     } finally {
       isLoading = false;
       notifyListeners();
@@ -62,6 +85,7 @@ class AuthViewModel extends ChangeNotifier {
   Future<void> signOut() async {
     await _authService.signOut();
     displayName = '';
+    userProfile = null;
     notifyListeners();
   }
 }
