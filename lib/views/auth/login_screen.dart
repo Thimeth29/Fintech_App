@@ -14,7 +14,7 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final _emailOrPhoneController = TextEditingController();
+  final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
   bool _keepLoggedIn = true;
@@ -25,7 +25,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   void dispose() {
-    _emailOrPhoneController.dispose();
+    _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -139,7 +139,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _handleLogin() async {
     FocusScope.of(context).unfocus();
-    final emailOrPhone = _emailOrPhoneController.text.trim();
+    final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
 
     setState(() {
@@ -148,22 +148,22 @@ class _LoginScreenState extends State<LoginScreen> {
       _passwordHasError = false;
     });
 
-    if (emailOrPhone.isEmpty && password.isEmpty) {
+    if (email.isEmpty && password.isEmpty) {
       setState(() {
-        _errorMessage = 'Please enter your email/phone and password.';
+        _errorMessage = 'Please enter your email and password.';
         _emailHasError = true;
         _passwordHasError = true;
       });
-      _showSnackBar('Please enter your email/phone and password.');
+      _showSnackBar('Please enter your email and password.');
       return;
     }
 
-    if (emailOrPhone.isEmpty) {
+    if (email.isEmpty) {
       setState(() {
-        _errorMessage = 'Please enter your email or mobile number.';
+        _errorMessage = 'Please enter your email.';
         _emailHasError = true;
       });
-      _showSnackBar('Please enter your email or mobile number.');
+      _showSnackBar('Please enter your email.');
       return;
     }
 
@@ -183,7 +183,7 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       final authService = AuthService();
       await authService.signIn(
-        emailOrPhone: emailOrPhone,
+        email: email,
         password: password,
       );
 
@@ -211,7 +211,7 @@ class _LoginScreenState extends State<LoginScreen> {
           _isLoading = false;
           _errorMessage = e.toString();
         });
-        _showDemoOrSignupDialog(emailOrPhone);
+        _showDemoOrSignupDialog(email);
       }
     }
   }
@@ -311,12 +311,12 @@ class _LoginScreenState extends State<LoginScreen> {
                           const SizedBox(height: 16),
                         ],
 
-                        // Email or mobile number
-                        _buildInputFieldLabel('Email or mobile number'),
+                        // Email
+                        _buildInputFieldLabel('Email'),
                         const SizedBox(height: 6),
                         _buildTextField(
-                          controller: _emailOrPhoneController,
-                          hintText: 'you@email.com or 07X XXX XXXX',
+                          controller: _emailController,
+                          hintText: 'you@email.com',
                           keyboardType: TextInputType.emailAddress,
                           hasError: _emailHasError,
                           onChanged: (_) {

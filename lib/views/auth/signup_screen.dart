@@ -21,7 +21,8 @@ class _SignupScreenState extends State<SignupScreen> {
 
   // Step 1 Controllers
   final _fullNameController = TextEditingController();
-  final _emailOrPhoneController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
   final _dobController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
@@ -82,7 +83,8 @@ class _SignupScreenState extends State<SignupScreen> {
   @override
   void dispose() {
     _fullNameController.dispose();
-    _emailOrPhoneController.dispose();
+    _emailController.dispose();
+    _phoneController.dispose();
     _dobController.dispose();
     _passwordController.dispose();
     _guardianNameController.dispose();
@@ -151,18 +153,26 @@ class _SignupScreenState extends State<SignupScreen> {
     });
   }
 
-  // Step 1 -> Step 2 (or straight past it for phone sign-ups). Email
-  // addresses get a real 6-digit code sent via Supabase; phone numbers
-  // skip verification entirely for now rather than faking a code, since
-  // real SMS delivery needs a paid provider that isn't configured yet.
+  // Step 1 -> Step 2. Verification is email-only: a real 6-digit code is
+  // sent via Supabase to the email address. The mobile number collected in
+  // Step 1 is contact info only — it's never used to sign in or verified.
   Future<void> _handleStep1Continue() async {
     FocusScope.of(context).unfocus();
     final name = _fullNameController.text.trim();
-    final input = _emailOrPhoneController.text.trim();
+    final email = _emailController.text.trim();
+    final phone = _phoneController.text.trim();
     final password = _passwordController.text.trim();
 
-    if (name.isEmpty || input.isEmpty || _dobController.text.isEmpty || password.isEmpty) {
-      _showSnackBar('Please fill in your name, email/phone, date of birth and password.');
+    if (name.isEmpty ||
+        email.isEmpty ||
+        phone.isEmpty ||
+        _dobController.text.isEmpty ||
+        password.isEmpty) {
+      _showSnackBar('Please fill in your name, email, mobile number, date of birth and password.');
+      return;
+    }
+    if (!AuthService.looksLikeEmail(email)) {
+      _showSnackBar('Enter a valid email address.');
       return;
     }
     if (password.length < 8) {
@@ -174,14 +184,9 @@ class _SignupScreenState extends State<SignupScreen> {
       return;
     }
 
-    if (!AuthService.looksLikeEmail(input)) {
-      setState(() => _currentStep = _isUnder18 ? 22 : 3);
-      return;
-    }
-
     setState(() => _isSendingOtp = true);
     try {
-      await AuthService().sendEmailOtp(email: input, name: name);
+      await AuthService().sendEmailOtp(email: email, name: name);
       if (!mounted) return;
       setState(() {
         _isSendingOtp = false;
@@ -204,7 +209,7 @@ class _SignupScreenState extends State<SignupScreen> {
     setState(() => _isResending = true);
     try {
       final name = _fullNameController.text.trim();
-      final email = _emailOrPhoneController.text.trim();
+      final email = _emailController.text.trim();
       await AuthService().sendEmailOtp(email: email, name: name);
       if (!mounted) return;
       _showSnackBar('A new code is on its way.', isError: false);
@@ -224,13 +229,13 @@ class _SignupScreenState extends State<SignupScreen> {
     FocusScope.of(context).unfocus();
     final code = _otpControllers.map((c) => c.text).join();
     if (code.length != 6) {
-      _showSnackBar('Enter the 6-digit code sent to your email.');
+      _showSnackBar('Enter the 6-digit code we sent you.');
       return;
     }
 
     setState(() => _isVerifyingOtp = true);
     try {
-      final email = _emailOrPhoneController.text.trim();
+      final email = _emailController.text.trim();
       final authService = AuthService();
       final response = await authService.verifyEmailOtp(email: email, token: code);
       if (response?.session == null) {
@@ -274,11 +279,12 @@ class _SignupScreenState extends State<SignupScreen> {
 
   Future<void> _finishOnboarding() async {
     final name = _fullNameController.text.trim();
-    final email = _emailOrPhoneController.text.trim();
+    final email = _emailController.text.trim();
+    final phone = _phoneController.text.trim();
     final password = _passwordController.text.trim();
 
     if (name.isEmpty || email.isEmpty || password.isEmpty) {
-      _showSnackBar('Please fill in your name, email/phone and password first.');
+      _showSnackBar('Please fill in your name, email and password first.');
       setState(() => _currentStep = 1);
       return;
     }
@@ -302,13 +308,14 @@ class _SignupScreenState extends State<SignupScreen> {
 
     try {
       if (authService.currentUser != null) {
-        // Email sign-up: the account already exists and is verified (from
-        // the OTP step), with a live session and password already set.
-        // Just attach the rest of the onboarding answers to that profile.
+        // The account already exists and is verified (from the email OTP
+        // step), with a live session and password already set. Just attach
+        // the rest of the onboarding answers, including the contact-only
+        // mobile number.
         await authService.updateProfile({
           'full_name': name,
-          if (AuthService.looksLikeEmail(email)) 'email': email,
-          if (!AuthService.looksLikeEmail(email)) 'mobile_number': email,
+          'email': email,
+          if (phone.isNotEmpty) 'mobile_number': phone,
           ...profileFields,
         });
         if (!mounted) return;
@@ -319,12 +326,13 @@ class _SignupScreenState extends State<SignupScreen> {
         return;
       }
 
-      // Phone sign-up: there's no verification step yet, so the account is
-      // created here for the first time.
+      // Defensive fallback: there's no live session (the OTP step wasn't
+      // completed), so the account is created here for the first time.
       final response = await authService.signUp(
         name: name,
-        emailOrPhone: email,
+        email: email,
         password: password,
+        phone: phone,
         extraMetaData: profileFields,
       );
 
@@ -579,17 +587,32 @@ class _SignupScreenState extends State<SignupScreen> {
         ),
         const SizedBox(height: 16),
 
-        // Email or mobile number
-        _buildInputFieldLabel('Email or mobile number'),
+        // Email
+        _buildInputFieldLabel('Email'),
         const SizedBox(height: 6),
         _buildTextField(
-          controller: _emailOrPhoneController,
-          hintText: 'you@email.com or 07X XXX XXXX',
+          controller: _emailController,
+          hintText: 'you@email.com',
           keyboardType: TextInputType.emailAddress,
         ),
         const SizedBox(height: 4),
         Text(
           "We'll send a one-time code to verify it.",
+          style: GoogleFonts.outfit(fontSize: 12, color: const Color(0xFF718096)),
+        ),
+        const SizedBox(height: 16),
+
+        // Mobile number
+        _buildInputFieldLabel('Mobile number'),
+        const SizedBox(height: 6),
+        _buildTextField(
+          controller: _phoneController,
+          hintText: '07X XXX XXXX',
+          keyboardType: TextInputType.phone,
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'For contact purposes only — not used to sign in.',
           style: GoogleFonts.outfit(fontSize: 12, color: const Color(0xFF718096)),
         ),
         const SizedBox(height: 16),
@@ -785,7 +808,7 @@ class _SignupScreenState extends State<SignupScreen> {
   // STEP 2: ENTER YOUR CODE
   // ==========================================
   Widget _buildStep2Verify() {
-    final contactText = _emailOrPhoneController.text.trim();
+    final contactText = _emailController.text.trim();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -799,8 +822,11 @@ class _SignupScreenState extends State<SignupScreen> {
             color: const Color(0xFFEBF4EE),
             borderRadius: BorderRadius.circular(16),
           ),
-          child: const Icon(Icons.mark_email_read_outlined,
-              color: Color(0xFF0D653E), size: 26),
+          child: const Icon(
+            Icons.mark_email_read_outlined,
+            color: Color(0xFF0D653E),
+            size: 26,
+          ),
         ),
         const SizedBox(height: 20),
 

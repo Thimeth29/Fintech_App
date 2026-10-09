@@ -10,95 +10,67 @@ class AuthService {
 
   Stream<AuthState>? get authStateChanges => _client?.auth.onAuthStateChange;
 
-  // Supabase's email/password auth needs a real email *format*, but a
-  // phone number has no inbox to confirm. Phone sign-ups are mapped to a
-  // synthetic "<digits>@finops.app" address so Supabase Auth accepts them,
-  // while the actual phone number the user typed is kept verbatim in
-  // profiles.mobile_number (and the real `email` column is left unset).
-  // This also means phone sign-ups never trigger Supabase's outbound
-  // confirmation email, so they're unaffected by its strict rate limit.
-  static const _syntheticEmailDomain = 'finops.app';
+  /// Light client-side sanity check for the signup/login email field.
+  static bool looksLikeEmail(String input) => RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(input);
 
-  static bool looksLikeEmail(String input) => input.contains('@');
+  // Dart's http client has no default timeout, so a bad connection (no
+  // internet, blocked DNS, a flaky network) leaves an awaited call hanging
+  // forever with no error and no UI update — it looks exactly like a stuck
+  // loading spinner. Every network call below is bounded so that case
+  // surfaces as a real, catchable error instead.
+  static const _networkTimeout = Duration(seconds: 15);
+  static Never _throwTimeout() => throw const AuthException(
+      'Request timed out — check your internet connection and try again.');
 
-  static String _authEmailFor(String emailOrPhone) {
-    final trimmed = emailOrPhone.trim();
-    if (looksLikeEmail(trimmed)) return trimmed;
-    final digits = trimmed.replaceAll(RegExp(r'[^0-9]'), '');
-    return '$digits@$_syntheticEmailDomain';
-  }
-
-  /// Sign Up with either an email address OR a mobile number, Password,
-  /// Name, and optional extra profile metadata.
+  /// Sign Up with an email, Password, Name, an optional contact-only mobile
+  /// number (stored on the profile, never used to sign in or verified),
+  /// and optional extra profile metadata. This is a direct, password-based
+  /// signup with no verification step — prefer sending a real code first
+  /// via [sendEmailOtp] and verifying it; this exists as a fallback for
+  /// when that wasn't done.
   Future<AuthResponse?> signUp({
     required String name,
-    required String emailOrPhone,
+    required String email,
     required String password,
+    String? phone,
     Map<String, dynamic>? extraMetaData,
   }) async {
     final client = _client;
     if (client == null) return null;
 
-    final input = emailOrPhone.trim();
-    final isEmail = looksLikeEmail(input);
-
+    final trimmedEmail = email.trim();
     final metaData = {
       'full_name': name,
-      'mobile_number': isEmail ? null : input,
       if (extraMetaData != null) ...extraMetaData,
     };
 
-    final response = await client.auth.signUp(
-      email: _authEmailFor(input),
-      password: password,
-      data: metaData,
-    );
+    final response = await client.auth
+        .signUp(email: trimmedEmail, password: password, data: metaData)
+        .timeout(_networkTimeout, onTimeout: _throwTimeout);
 
     final user = response.user;
     if (user != null) {
       await client.from('profiles').upsert({
         'id': user.id,
         'full_name': name,
-        if (isEmail) 'email': input,
-        if (!isEmail) 'mobile_number': input,
+        'email': trimmedEmail,
+        if (phone != null && phone.trim().isNotEmpty) 'mobile_number': phone.trim(),
         if (extraMetaData != null) ...extraMetaData,
-      });
+      }).timeout(_networkTimeout, onTimeout: _throwTimeout);
     }
     return response;
   }
 
-  /// Sign In with either an email address OR a mobile number, plus Password.
+  /// Sign In with an email address and password.
   Future<AuthResponse?> signIn({
-    required String emailOrPhone,
+    required String email,
     required String password,
   }) async {
     final client = _client;
     if (client == null) return null;
-    return client.auth.signInWithPassword(
-      email: _authEmailFor(emailOrPhone),
-      password: password,
-    );
-  }
-
-  /// Sign In with Phone OTP
-  Future<void> signInWithOtp(String phone) async {
-    final client = _client;
-    if (client == null) return;
-    await client.auth.signInWithOtp(phone: phone);
-  }
-
-  /// Verify Phone OTP Code
-  Future<AuthResponse?> verifyOtp({
-    required String phone,
-    required String token,
-  }) async {
-    final client = _client;
-    if (client == null) return null;
-    return client.auth.verifyOTP(
-      type: OtpType.sms,
-      phone: phone,
-      token: token,
-    );
+    return client.auth
+        .signInWithPassword(email: email.trim(), password: password)
+        .timeout(_networkTimeout, onTimeout: _throwTimeout);
   }
 
   /// Send a real 6-digit verification code to an email address. Creates the
@@ -108,11 +80,13 @@ class AuthService {
   Future<void> sendEmailOtp({required String email, String? name}) async {
     final client = _client;
     if (client == null) return;
-    await client.auth.signInWithOtp(
-      email: email,
-      shouldCreateUser: true,
-      data: name != null && name.isNotEmpty ? {'full_name': name} : null,
-    );
+    await client.auth
+        .signInWithOtp(
+          email: email,
+          shouldCreateUser: true,
+          data: name != null && name.isNotEmpty ? {'full_name': name} : null,
+        )
+        .timeout(_networkTimeout, onTimeout: _throwTimeout);
   }
 
   /// Verify a 6-digit email code. On success this starts a real session.
@@ -122,11 +96,9 @@ class AuthService {
   }) async {
     final client = _client;
     if (client == null) return null;
-    return client.auth.verifyOTP(
-      type: OtpType.email,
-      email: email,
-      token: token,
-    );
+    return client.auth
+        .verifyOTP(type: OtpType.email, email: email, token: token)
+        .timeout(_networkTimeout, onTimeout: _throwTimeout);
   }
 
   /// Set the password on the current session's account — used right after
@@ -134,7 +106,9 @@ class AuthService {
   Future<void> setPassword(String password) async {
     final client = _client;
     if (client == null) return;
-    await client.auth.updateUser(UserAttributes(password: password));
+    await client.auth
+        .updateUser(UserAttributes(password: password))
+        .timeout(_networkTimeout, onTimeout: _throwTimeout);
   }
 
   /// Sign Out User
@@ -181,6 +155,6 @@ class AuthService {
     await client.from('profiles').upsert({
       'id': user.id,
       ...updates,
-    });
+    }).timeout(_networkTimeout, onTimeout: _throwTimeout);
   }
 }

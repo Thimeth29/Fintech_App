@@ -13,8 +13,9 @@ class AuthViewModel extends ChangeNotifier {
 
   Future<bool> signUp({
     required String name,
-    required String emailOrPhone,
+    required String email,
     required String password,
+    String? phone,
     Map<String, dynamic>? extraMetaData,
   }) async {
     isLoading = true;
@@ -23,8 +24,9 @@ class AuthViewModel extends ChangeNotifier {
     try {
       await _authService.signUp(
         name: name,
-        emailOrPhone: emailOrPhone,
+        email: email,
         password: password,
+        phone: phone,
         extraMetaData: extraMetaData,
       );
       displayName = name;
@@ -39,12 +41,12 @@ class AuthViewModel extends ChangeNotifier {
     }
   }
 
-  Future<bool> signIn({required String emailOrPhone, required String password}) async {
+  Future<bool> signIn({required String email, required String password}) async {
     isLoading = true;
     errorMessage = null;
     notifyListeners();
     try {
-      await _authService.signIn(emailOrPhone: emailOrPhone, password: password);
+      await _authService.signIn(email: email, password: password);
       displayName = await _authService.fetchDisplayName();
       await loadUserProfile();
       return true;
