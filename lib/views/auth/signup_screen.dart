@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -93,22 +95,14 @@ class _SignupScreenState extends State<SignupScreen> {
     for (final f in _otpFocusNodes) {
       f.dispose();
     }
+    _resendTimer?.cancel();
     super.dispose();
   }
 
   void _nextStep() {
     FocusScope.of(context).unfocus();
     setState(() {
-      if (_currentStep == 1) {
-        // Check DOB or text for under 18 logic
-        _currentStep = 2;
-      } else if (_currentStep == 2) {
-        if (_isUnder18) {
-          _currentStep = 22; // Step 2b: Guardian
-        } else {
-          _currentStep = 3;
-        }
-      } else if (_currentStep == 22) {
+      if (_currentStep == 22) {
         _currentStep = 3;
       } else if (_currentStep == 3) {
         _currentStep = 4;
@@ -132,6 +126,133 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   bool _isFinishing = false;
+  bool _isSendingOtp = false;
+  bool _isVerifyingOtp = false;
+  bool _isResending = false;
+  Timer? _resendTimer;
+  int _resendSecondsLeft = 0;
+
+  void _startResendCountdown() {
+    _resendTimer?.cancel();
+    setState(() => _resendSecondsLeft = 45);
+    _resendTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+      setState(() {
+        if (_resendSecondsLeft <= 1) {
+          _resendSecondsLeft = 0;
+          timer.cancel();
+        } else {
+          _resendSecondsLeft--;
+        }
+      });
+    });
+  }
+
+  // Step 1 -> Step 2 (or straight past it for phone sign-ups). Email
+  // addresses get a real 6-digit code sent via Supabase; phone numbers
+  // skip verification entirely for now rather than faking a code, since
+  // real SMS delivery needs a paid provider that isn't configured yet.
+  Future<void> _handleStep1Continue() async {
+    FocusScope.of(context).unfocus();
+    final name = _fullNameController.text.trim();
+    final input = _emailOrPhoneController.text.trim();
+    final password = _passwordController.text.trim();
+
+    if (name.isEmpty || input.isEmpty || _dobController.text.isEmpty || password.isEmpty) {
+      _showSnackBar('Please fill in your name, email/phone, date of birth and password.');
+      return;
+    }
+    if (password.length < 8) {
+      _showSnackBar('Password must be at least 8 characters.');
+      return;
+    }
+    if (!_agreedToTerms) {
+      _showSnackBar('Please agree to the Terms and Privacy Policy to continue.');
+      return;
+    }
+
+    if (!AuthService.looksLikeEmail(input)) {
+      setState(() => _currentStep = _isUnder18 ? 22 : 3);
+      return;
+    }
+
+    setState(() => _isSendingOtp = true);
+    try {
+      await AuthService().sendEmailOtp(email: input, name: name);
+      if (!mounted) return;
+      setState(() {
+        _isSendingOtp = false;
+        _currentStep = 2;
+      });
+      _startResendCountdown();
+    } on AuthException catch (e) {
+      if (!mounted) return;
+      setState(() => _isSendingOtp = false);
+      _showSnackBar(e.message);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isSendingOtp = false);
+      _showSnackBar('Could not send a verification code: ${e.toString()}');
+    }
+  }
+
+  Future<void> _handleResendOtp() async {
+    if (_resendSecondsLeft > 0 || _isResending) return;
+    setState(() => _isResending = true);
+    try {
+      final name = _fullNameController.text.trim();
+      final email = _emailOrPhoneController.text.trim();
+      await AuthService().sendEmailOtp(email: email, name: name);
+      if (!mounted) return;
+      _showSnackBar('A new code is on its way.', isError: false);
+      _startResendCountdown();
+    } on AuthException catch (e) {
+      if (!mounted) return;
+      _showSnackBar(e.message);
+    } catch (e) {
+      if (!mounted) return;
+      _showSnackBar('Could not resend the code: ${e.toString()}');
+    } finally {
+      if (mounted) setState(() => _isResending = false);
+    }
+  }
+
+  Future<void> _handleVerifyOtp() async {
+    FocusScope.of(context).unfocus();
+    final code = _otpControllers.map((c) => c.text).join();
+    if (code.length != 6) {
+      _showSnackBar('Enter the 6-digit code sent to your email.');
+      return;
+    }
+
+    setState(() => _isVerifyingOtp = true);
+    try {
+      final email = _emailOrPhoneController.text.trim();
+      final authService = AuthService();
+      final response = await authService.verifyEmailOtp(email: email, token: code);
+      if (response?.session == null) {
+        throw const AuthException('That code did not work — please try again.');
+      }
+      await authService.setPassword(_passwordController.text.trim());
+      if (!mounted) return;
+      _resendTimer?.cancel();
+      setState(() {
+        _isVerifyingOtp = false;
+        _currentStep = _isUnder18 ? 22 : 3;
+      });
+    } on AuthException catch (e) {
+      if (!mounted) return;
+      setState(() => _isVerifyingOtp = false);
+      _showSnackBar(e.message);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isVerifyingOtp = false);
+      _showSnackBar('Verification failed: ${e.toString()}');
+    }
+  }
 
   void _showSnackBar(String message, {bool isError = true}) {
     if (!mounted) return;
@@ -163,26 +284,48 @@ class _SignupScreenState extends State<SignupScreen> {
     }
 
     setState(() => _isFinishing = true);
+    final authService = AuthService();
+
+    final profileFields = {
+      'user_role': _userRole,
+      'occupation': _occupationController.text.trim().isNotEmpty
+          ? _occupationController.text.trim()
+          : 'Employed',
+      'district': _selectedDistrict ?? 'Colombo',
+      'preferred_language': _selectedLanguage,
+      'is_under_18': _isUnder18,
+      'guardian_name': _guardianNameController.text.trim(),
+      'guardian_mobile': _guardianContactController.text.trim(),
+      'guardian_relation': _guardianRelation,
+      'selected_assets': _selectedAssets.toList(),
+    };
 
     try {
-      final authService = AuthService();
+      if (authService.currentUser != null) {
+        // Email sign-up: the account already exists and is verified (from
+        // the OTP step), with a live session and password already set.
+        // Just attach the rest of the onboarding answers to that profile.
+        await authService.updateProfile({
+          'full_name': name,
+          if (AuthService.looksLikeEmail(email)) 'email': email,
+          if (!AuthService.looksLikeEmail(email)) 'mobile_number': email,
+          ...profileFields,
+        });
+        if (!mounted) return;
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const HomeScreen()),
+          (route) => false,
+        );
+        return;
+      }
+
+      // Phone sign-up: there's no verification step yet, so the account is
+      // created here for the first time.
       final response = await authService.signUp(
         name: name,
         emailOrPhone: email,
         password: password,
-        extraMetaData: {
-          'user_role': _userRole,
-          'occupation': _occupationController.text.trim().isNotEmpty
-              ? _occupationController.text.trim()
-              : 'Employed',
-          'district': _selectedDistrict ?? 'Colombo',
-          'preferred_language': _selectedLanguage,
-          'is_under_18': _isUnder18,
-          'guardian_name': _guardianNameController.text.trim(),
-          'guardian_mobile': _guardianContactController.text.trim(),
-          'guardian_relation': _guardianRelation,
-          'selected_assets': _selectedAssets.toList(),
-        },
+        extraMetaData: profileFields,
       );
 
       if (!mounted) return;
@@ -553,7 +696,8 @@ class _SignupScreenState extends State<SignupScreen> {
         // Create account button
         _buildPrimaryButton(
           label: 'Create account',
-          onTap: _nextStep,
+          onTap: _handleStep1Continue,
+          isLoading: _isSendingOtp,
         ),
         const SizedBox(height: 16),
 
@@ -599,7 +743,8 @@ class _SignupScreenState extends State<SignupScreen> {
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16)),
             ),
-            onPressed: _nextStep,
+            onPressed: () =>
+                _showSnackBar('Google sign-in is coming soon.', isError: false),
           ),
         ),
         const SizedBox(height: 20),
@@ -640,15 +785,13 @@ class _SignupScreenState extends State<SignupScreen> {
   // STEP 2: ENTER YOUR CODE
   // ==========================================
   Widget _buildStep2Verify() {
-    final contactText = _emailOrPhoneController.text.isNotEmpty
-        ? _emailOrPhoneController.text
-        : '077 • • • • 42';
+    final contactText = _emailOrPhoneController.text.trim();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 12),
-        // Phone Icon Emblem
+        // Email Icon Emblem
         Container(
           width: 56,
           height: 56,
@@ -656,7 +799,7 @@ class _SignupScreenState extends State<SignupScreen> {
             color: const Color(0xFFEBF4EE),
             borderRadius: BorderRadius.circular(16),
           ),
-          child: const Icon(Icons.smartphone_rounded,
+          child: const Icon(Icons.mark_email_read_outlined,
               color: Color(0xFF0D653E), size: 26),
         ),
         const SizedBox(height: 20),
@@ -687,7 +830,13 @@ class _SignupScreenState extends State<SignupScreen> {
             ),
             const SizedBox(width: 6),
             GestureDetector(
-              onTap: () => setState(() => _currentStep = 1),
+              onTap: () {
+                _resendTimer?.cancel();
+                setState(() {
+                  _currentStep = 1;
+                  _resendSecondsLeft = 0;
+                });
+              },
               child: Text(
                 'Change',
                 style: GoogleFonts.outfit(
@@ -756,10 +905,31 @@ class _SignupScreenState extends State<SignupScreen> {
           }),
         ),
         const SizedBox(height: 16),
-        Text(
-          "Didn't get it? Resend in 0:45",
-          style: GoogleFonts.outfit(
-              fontSize: 13, color: const Color(0xFF718096)),
+        Row(
+          children: [
+            Text(
+              _resendSecondsLeft > 0
+                  ? "Didn't get it? Resend in 0:${_resendSecondsLeft.toString().padLeft(2, '0')}"
+                  : "Didn't get it?",
+              style: GoogleFonts.outfit(
+                  fontSize: 13, color: const Color(0xFF718096)),
+            ),
+            if (_resendSecondsLeft == 0) ...[
+              const SizedBox(width: 6),
+              GestureDetector(
+                onTap: _isResending ? null : _handleResendOtp,
+                child: Text(
+                  _isResending ? 'Sending…' : 'Resend code',
+                  style: GoogleFonts.outfit(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF0D653E),
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
+              ),
+            ],
+          ],
         ),
         const SizedBox(height: 140),
 
@@ -794,7 +964,8 @@ class _SignupScreenState extends State<SignupScreen> {
         // Verify button
         _buildPrimaryButton(
           label: 'Verify',
-          onTap: _nextStep,
+          onTap: _handleVerifyOtp,
+          isLoading: _isVerifyingOtp,
         ),
         const SizedBox(height: 16),
       ],

@@ -101,6 +101,42 @@ class AuthService {
     );
   }
 
+  /// Send a real 6-digit verification code to an email address. Creates the
+  /// auth user now (passwordless) if they don't exist yet — [setPassword]
+  /// must be called after [verifyEmailOtp] succeeds to give the account a
+  /// password, since OTP sign-up/sign-in is passwordless by default.
+  Future<void> sendEmailOtp({required String email, String? name}) async {
+    final client = _client;
+    if (client == null) return;
+    await client.auth.signInWithOtp(
+      email: email,
+      shouldCreateUser: true,
+      data: name != null && name.isNotEmpty ? {'full_name': name} : null,
+    );
+  }
+
+  /// Verify a 6-digit email code. On success this starts a real session.
+  Future<AuthResponse?> verifyEmailOtp({
+    required String email,
+    required String token,
+  }) async {
+    final client = _client;
+    if (client == null) return null;
+    return client.auth.verifyOTP(
+      type: OtpType.email,
+      email: email,
+      token: token,
+    );
+  }
+
+  /// Set the password on the current session's account — used right after
+  /// email OTP verification, since that sign-in path has no password yet.
+  Future<void> setPassword(String password) async {
+    final client = _client;
+    if (client == null) return;
+    await client.auth.updateUser(UserAttributes(password: password));
+  }
+
   /// Sign Out User
   Future<void> signOut() async {
     await _client?.auth.signOut();

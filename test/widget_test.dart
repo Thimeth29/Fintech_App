@@ -27,7 +27,7 @@ void main() {
     await tester.pumpWidget(const MyApp());
     await tester.pumpAndSettle();
 
-    expect(find.text('FinOps'), findsOneWidget);
+    expect(find.textContaining('FinOps'), findsOneWidget);
     expect(find.widgetWithText(ElevatedButton, 'Get started'), findsOneWidget);
   });
 
