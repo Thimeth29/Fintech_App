@@ -13,6 +13,7 @@ import '../bot/chat_screen.dart';
 import '../sandbox/sandbox_screen.dart';
 import '../expenditure/expenditure_screen.dart';
 import '../expenditure/explore_plans_screen.dart';
+import '../investments/investing_options_screen.dart';
 import '../profile/profile_screen.dart';
 
 const List<String> _monthNames = [
@@ -232,6 +233,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       const SizedBox(height: 16),
 
                       _buildAiAssistantBanner(context),
+                      const SizedBox(height: 16),
+
+                      _buildInvestingOptionsCard(context),
                       const SizedBox(height: 20),
 
                       _buildForecastCard(_expenseViewModel),
@@ -635,6 +639,66 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               child: const Icon(Icons.arrow_forward_rounded, color: AppColors.primary, size: 18),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ==========================================
+  // 3c. INVESTING OPTIONS CARD
+  // ==========================================
+  Widget _buildInvestingOptionsCard(BuildContext context) {
+    return GestureDetector(
+      onTap: () => Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const InvestingOptionsScreen()),
+      ),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: AppColors.cardBg,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: AppColors.borderLight),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: const BoxDecoration(
+                color: AppColors.mintBg,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.account_balance_wallet_rounded,
+                  color: AppColors.primary, size: 22),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Investing options',
+                    style: GoogleFonts.outfit(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textDark,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'Explore ways to grow your money',
+                    style: GoogleFonts.outfit(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.textMuted,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.chevron_right_rounded,
+                color: AppColors.primary, size: 24),
           ],
         ),
       ),
