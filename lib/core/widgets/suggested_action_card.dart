@@ -13,15 +13,14 @@ class SuggestedActionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GlassCard(
-      backgroundColor: AppColors.mintBg,
-      borderColor: AppColors.primary.withValues(alpha: 0.25),
+      borderColor: AppColors.accentCyan.withValues(alpha: 0.4),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
             padding: const EdgeInsets.all(8),
             decoration: const BoxDecoration(
-              color: AppColors.primary,
+              gradient: AppGradients.action,
               shape: BoxShape.circle,
             ),
             child: const Icon(Icons.flag_rounded, color: Colors.white, size: 16),
@@ -36,7 +35,7 @@ class SuggestedActionCard extends StatelessWidget {
                   style: GoogleFonts.outfit(
                     fontWeight: FontWeight.w700,
                     fontSize: 14,
-                    color: AppColors.primary,
+                    color: AppColors.accentCyan,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -44,7 +43,7 @@ class SuggestedActionCard extends StatelessWidget {
                   action,
                   style: GoogleFonts.outfit(
                     fontSize: 13,
-                    color: AppColors.textDark,
+                    color: AppColors.onGlass,
                     height: 1.35,
                   ),
                 ),
@@ -74,11 +73,15 @@ class AskBotButton extends StatelessWidget {
           'ASK FINBOT AI',
           style: GoogleFonts.outfit(fontSize: 15, fontWeight: FontWeight.w700, letterSpacing: 0.5),
         ),
+        // White "Contact me"-style pill: deep-navy text and icon.
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
-          foregroundColor: Colors.white,
+          backgroundColor: Colors.white,
+          foregroundColor: AppColors.onLight,
           elevation: 0,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+        ).copyWith(
+          shadowColor: WidgetStatePropertyAll(Colors.white.withValues(alpha: 0.35)),
+          elevation: const WidgetStatePropertyAll(6),
         ),
         onPressed: () => Navigator.of(context).push(
           MaterialPageRoute(

@@ -9,6 +9,7 @@ import '../../models/chat_message_model.dart';
 import '../../services/auth_service.dart';
 import '../../core/config/gemini_config.dart';
 import '../../viewmodels/chat_viewmodel.dart';
+import '../../viewmodels/sandbox_viewmodel.dart';
 
 const List<String> _suggestedPrompts = [
   "🇱🇰 Current CSE Stock Trends",
@@ -21,7 +22,10 @@ class ChatScreen extends StatefulWidget {
   final String title;
   final String? seedContext;
 
-  const ChatScreen({super.key, this.title = 'Ask FinBot AI', this.seedContext});
+  /// Pre-filled into the message box (e.g. from the trainer's Ask FinBot).
+  final String? initialPrompt;
+
+  const ChatScreen({super.key, this.title = 'Ask FinBot AI', this.seedContext, this.initialPrompt});
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -40,7 +44,14 @@ class _ChatScreenState extends State<ChatScreen> {
         ? ''
         : "I see you're exploring: ${widget.seedContext}.";
     _chatViewModel.seed(contextNote);
-    _chatViewModel.loadFinancialContext(userId: AuthService().currentUser?.id);
+    _controller.text = widget.initialPrompt ?? '';
+    String? sandbox;
+    try {
+      sandbox = context.read<SandboxViewModel>().finBotSummary();
+    } catch (_) {
+      sandbox = null; // no trainer state provided (e.g. widget tests)
+    }
+    _chatViewModel.loadFinancialContext(userId: AuthService().currentUser?.id, sandboxSummary: sandbox);
   }
 
   @override
@@ -97,8 +108,7 @@ class _ChatScreenState extends State<ChatScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: GlassCard(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              backgroundColor: AppColors.mintBg,
-              borderColor: AppColors.primary.withValues(alpha: 0.2),
+              borderColor: AppColors.accentCyan.withValues(alpha: 0.4),
               child: Row(
                 children: [
                   Stack(
@@ -106,7 +116,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       Container(
                         padding: const EdgeInsets.all(10),
                         decoration: const BoxDecoration(
-                          color: AppColors.primary,
+                          gradient: AppGradients.action,
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(Icons.smart_toy_rounded, color: Colors.white, size: 20),
@@ -118,7 +128,7 @@ class _ChatScreenState extends State<ChatScreen> {
                           width: 10,
                           height: 10,
                           decoration: BoxDecoration(
-                            color: isConfigured ? const Color(0xFF16A34A) : Colors.amber,
+                            color: isConfigured ? AppColors.accentCyan : AppColors.warning,
                             shape: BoxShape.circle,
                             border: Border.all(color: Colors.white, width: 1.5),
                           ),
@@ -136,7 +146,7 @@ class _ChatScreenState extends State<ChatScreen> {
                           style: GoogleFonts.outfit(
                             fontSize: 15,
                             fontWeight: FontWeight.w700,
-                            color: AppColors.textDark,
+                            color: AppColors.onGlass,
                           ),
                         ),
                         Text(
@@ -146,7 +156,7 @@ class _ChatScreenState extends State<ChatScreen> {
                           style: GoogleFonts.outfit(
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
-                            color: isConfigured ? AppColors.primary : Colors.amber[800],
+                            color: isConfigured ? AppColors.accentCyan : AppColors.warning,
                           ),
                         ),
                       ],
@@ -184,24 +194,14 @@ class _ChatScreenState extends State<ChatScreen> {
                       padding: const EdgeInsets.only(right: 8),
                       child: GestureDetector(
                         onTap: () => _send(prompt),
-                        child: Container(
+                        child: GlassCard(
                           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                          decoration: BoxDecoration(
-                            color: AppColors.cardBg,
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(color: AppColors.borderLight),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.02),
-                                blurRadius: 4,
-                              ),
-                            ],
-                          ),
+                          borderRadius: 20,
                           child: Text(
                             prompt,
                             style: GoogleFonts.outfit(
                               fontSize: 13,
-                              color: AppColors.textDark,
+                              color: AppColors.onGlass,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -219,31 +219,20 @@ class _ChatScreenState extends State<ChatScreen> {
             child: Row(
               children: [
                 Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: AppColors.cardBg,
-                      borderRadius: BorderRadius.circular(24),
-                      border: Border.all(color: AppColors.borderLight),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.03),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
+                  child: GlassCard(
+                    padding: EdgeInsets.zero,
                     child: TextField(
                       controller: _controller,
                       enabled: !vm.isSending,
-                      style: GoogleFonts.outfit(color: AppColors.textDark, fontSize: 14),
+                      style: GoogleFonts.outfit(color: AppColors.onGlass, fontSize: 14),
                       decoration: InputDecoration(
                         hintText: 'Ask FinBot about stocks, budget, or taxes...',
-                        hintStyle: GoogleFonts.outfit(color: AppColors.textMuted, fontSize: 14),
+                        hintStyle: GoogleFonts.outfit(color: AppColors.onGlassMuted, fontSize: 14),
                         border: InputBorder.none,
                         enabledBorder: InputBorder.none,
                         focusedBorder: InputBorder.none,
                         contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-                        prefixIcon: const Icon(Icons.chat_bubble_outline_rounded, color: AppColors.textMuted, size: 18),
+                        prefixIcon: const Icon(Icons.chat_bubble_outline_rounded, color: AppColors.onGlassMuted, size: 18),
                       ),
                       onSubmitted: _send,
                     ),
@@ -256,13 +245,14 @@ class _ChatScreenState extends State<ChatScreen> {
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
-                      color: vm.isSending ? AppColors.textMuted : AppColors.primary,
+                      color: vm.isSending ? AppColors.glassFillStrong : Colors.white,
                       shape: BoxShape.circle,
+                      border: Border.all(color: AppColors.glassBorderStrong),
                       boxShadow: [
                         BoxShadow(
-                          color: AppColors.primary.withValues(alpha: 0.3),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
+                          color: Colors.white.withValues(alpha: vm.isSending ? 0 : 0.3),
+                          blurRadius: 14,
+                          offset: const Offset(0, 2),
                         ),
                       ],
                     ),
@@ -274,7 +264,7 @@ class _ChatScreenState extends State<ChatScreen> {
                               color: Colors.white,
                             ),
                           )
-                        : const Icon(Icons.send_rounded, color: Colors.white, size: 20),
+                        : const Icon(Icons.send_rounded, color: AppColors.onLight, size: 20),
                   ),
                 ),
               ],
@@ -308,7 +298,7 @@ class _Bubble extends StatelessWidget {
                 padding: const EdgeInsets.all(6),
                 margin: const EdgeInsets.only(right: 8, bottom: 4),
                 decoration: const BoxDecoration(
-                  color: AppColors.primary,
+                  gradient: AppGradients.action,
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(Icons.smart_toy_rounded, color: Colors.white, size: 14),
@@ -318,7 +308,8 @@ class _Bubble extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 decoration: BoxDecoration(
-                  color: isUser ? AppColors.primary : AppColors.cardBg,
+                  color: isUser ? null : AppColors.glassFill,
+                  gradient: isUser ? AppGradients.primary : null,
                   borderRadius: BorderRadius.only(
                     topLeft: const Radius.circular(20),
                     topRight: const Radius.circular(20),
@@ -326,14 +317,14 @@ class _Bubble extends StatelessWidget {
                     bottomRight: Radius.circular(isUser ? 4 : 20),
                   ),
                   border: Border.all(
-                    color: isUser ? AppColors.primary : AppColors.borderLight,
+                    color: isUser ? AppColors.glassBorderStrong : AppColors.glassBorder,
                     width: 1,
                   ),
-                  boxShadow: [
+                  boxShadow: const [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.04),
-                      blurRadius: 6,
-                      offset: const Offset(0, 2),
+                      color: AppColors.glassShadow,
+                      blurRadius: 10,
+                      offset: Offset(0, 2),
                     ),
                   ],
                 ),
@@ -341,7 +332,7 @@ class _Bubble extends StatelessWidget {
                   message.content,
                   style: GoogleFonts.outfit(
                     fontSize: 14,
-                    color: isUser ? Colors.white : AppColors.textDark,
+                    color: isUser ? Colors.white : AppColors.onGlass,
                     height: 1.4,
                   ),
                 ),
@@ -365,14 +356,14 @@ class _TypingBubble extends StatelessWidget {
         margin: const EdgeInsets.symmetric(vertical: 6),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: AppColors.cardBg,
+          color: AppColors.glassFill,
           borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(20),
             topRight: Radius.circular(20),
             bottomLeft: Radius.circular(4),
             bottomRight: Radius.circular(20),
           ),
-          border: Border.all(color: AppColors.borderLight),
+          border: Border.all(color: AppColors.glassBorder),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -382,7 +373,7 @@ class _TypingBubble extends StatelessWidget {
               height: 14,
               child: CircularProgressIndicator(
                 strokeWidth: 2,
-                color: AppColors.primary,
+                color: AppColors.accentCyan,
               ),
             ),
             const SizedBox(width: 10),
@@ -390,7 +381,7 @@ class _TypingBubble extends StatelessWidget {
               'FinBot is generating AI response...',
               style: GoogleFonts.outfit(
                 fontSize: 13,
-                color: AppColors.textMuted,
+                color: AppColors.onGlassMuted,
                 fontStyle: FontStyle.italic,
               ),
             ),

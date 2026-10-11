@@ -6,6 +6,7 @@ import '../../core/widgets/top_nav_bar.dart';
 import '../../core/widgets/glass_card.dart';
 import '../../core/theme/app_theme.dart';
 import '../../viewmodels/auth_viewmodel.dart';
+import '../community/community_screen.dart';
 import '../auth/welcome_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -34,11 +35,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     showDialog(
       context: context,
       builder: (dialogCtx) => AlertDialog(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.deepNavy,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Text(
           'Edit Profile Details',
-          style: GoogleFonts.outfit(fontWeight: FontWeight.w700, color: AppColors.textDark),
+          style: GoogleFonts.outfit(fontWeight: FontWeight.w700, color: AppColors.onGlass),
         ),
         content: SingleChildScrollView(
           child: Column(
@@ -48,7 +49,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 controller: nameController,
                 decoration: InputDecoration(
                   labelText: 'Full Name',
-                  labelStyle: GoogleFonts.outfit(color: AppColors.textMuted),
+                  labelStyle: GoogleFonts.outfit(color: AppColors.onGlassMuted),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 ),
               ),
@@ -57,7 +58,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 controller: occupationController,
                 decoration: InputDecoration(
                   labelText: 'Occupation',
-                  labelStyle: GoogleFonts.outfit(color: AppColors.textMuted),
+                  labelStyle: GoogleFonts.outfit(color: AppColors.onGlassMuted),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 ),
               ),
@@ -84,11 +85,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogCtx),
-            child: Text('Cancel', style: GoogleFonts.outfit(color: AppColors.textMuted)),
+            child: Text('Cancel', style: GoogleFonts.outfit(color: AppColors.onGlassMuted)),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
             onPressed: () async {
@@ -140,32 +142,37 @@ class _ProfileScreenState extends State<ProfileScreen> {
             padding: const EdgeInsets.all(20),
             physics: const BouncingScrollPhysics(),
             children: [
-              // Avatar Header
-              Center(
+              // Avatar Header — translucent blue profile card, avatar with a
+              // white ring.
+              GlassCard(
+                gradient: AppGradients.heroCard,
+                borderColor: AppColors.glassBorderStrong,
+                padding: const EdgeInsets.fromLTRB(20, 24, 20, 22),
+                child: Center(
                 child: Column(
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(4),
+                      padding: const EdgeInsets.all(3),
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: AppColors.primary,
+                        color: Colors.white,
                         boxShadow: [
                           BoxShadow(
-                            color: AppColors.primary.withValues(alpha: 0.25),
-                            blurRadius: 16,
-                            spreadRadius: 2,
+                            color: Colors.white.withValues(alpha: 0.3),
+                            blurRadius: 18,
+                            spreadRadius: 1,
                           ),
                         ],
                       ),
                       child: CircleAvatar(
                         radius: 44,
-                        backgroundColor: AppColors.mintBg,
+                        backgroundColor: AppColors.primaryDark,
                         child: Text(
                           name.isNotEmpty ? name[0].toUpperCase() : '?',
                           style: GoogleFonts.outfit(
                             fontSize: 36,
                             fontWeight: FontWeight.w800,
-                            color: AppColors.primary,
+                            color: Colors.white,
                           ),
                         ),
                       ),
@@ -173,34 +180,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     const SizedBox(height: 14),
                     Text(
                       name,
-                      style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.textDark),
+                      style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.onGlass),
                     ),
                     Text(
                       email,
-                      style: GoogleFonts.outfit(fontSize: 13, color: AppColors.textMuted),
+                      style: GoogleFonts.outfit(fontSize: 13, color: AppColors.onGlassMuted),
                     ),
                     const SizedBox(height: 10),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                       decoration: BoxDecoration(
-                        color: AppColors.mintBg,
+                        color: AppColors.innerFillSelected,
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: AppColors.primary.withValues(alpha: 0.25)),
+                        border: Border.all(color: AppColors.glassBorderStrong),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.stars_rounded, color: AppColors.primary, size: 16),
+                          const Icon(Icons.stars_rounded, color: AppColors.accentCyan, size: 16),
                           const SizedBox(width: 6),
-                          Text(
-                            'Financial Literacy Rank: $literacyRank',
-                            style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.primary),
+                          Flexible(
+                            child: Text(
+                              'Financial Literacy Rank: $literacyRank',
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.accentCyan),
+                            ),
                           ),
                         ],
                       ),
                     ),
                   ],
                 ),
+              ),
               ),
               const SizedBox(height: 24),
 
@@ -209,14 +220,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 children: [
                   Text(
                     'Personal Details',
-                    style: GoogleFonts.outfit(fontWeight: FontWeight.w700, fontSize: 16, color: AppColors.textDark),
+                    style: GoogleFonts.outfit(fontWeight: FontWeight.w700, fontSize: 16, color: AppColors.onGlass),
                   ),
                   TextButton.icon(
                     onPressed: () => _showEditProfileDialog(context, authVm),
-                    icon: const Icon(Icons.edit_outlined, size: 16, color: AppColors.primary),
+                    icon: const Icon(Icons.edit_outlined, size: 16, color: AppColors.accentCyan),
                     label: Text(
                       'Edit',
-                      style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.primary),
+                      style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.accentCyan),
                     ),
                   ),
                 ],
@@ -234,22 +245,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
               const SizedBox(height: 24),
               Text(
                 'Preferences & Security',
-                style: GoogleFonts.outfit(fontWeight: FontWeight.w700, fontSize: 16, color: AppColors.textDark),
+                style: GoogleFonts.outfit(fontWeight: FontWeight.w700, fontSize: 16, color: AppColors.onGlass),
               ),
               const SizedBox(height: 10),
 
-              const GlassCard(
-                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                backgroundColor: Colors.white,
+              GlassCard(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                 child: Column(
                   children: [
-                    _SettingsRow(icon: Icons.lock_outline_rounded, label: 'Change Password & Security'),
-                    Divider(height: 1, color: AppColors.borderLight),
-                    _SettingsRow(icon: Icons.notifications_outlined, label: 'Push Notifications'),
-                    Divider(height: 1, color: AppColors.borderLight),
-                    _SettingsRow(icon: Icons.auto_awesome_outlined, label: 'AI Advisor Customizations'),
-                    Divider(height: 1, color: AppColors.borderLight),
-                    _SettingsRow(icon: Icons.privacy_tip_outlined, label: 'Privacy & Data Governance')
+                    _SettingsRow(
+                      icon: Icons.groups_outlined,
+                      label: 'Community profile & privacy',
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const CommunityScreen(initialTab: 3)),
+                      ),
+                    ),
+                    const Divider(height: 1, color: AppColors.glassBorder),
+                    const _SettingsRow(icon: Icons.lock_outline_rounded, label: 'Change Password & Security'),
+                    const Divider(height: 1, color: AppColors.glassBorder),
+                    const _SettingsRow(icon: Icons.notifications_outlined, label: 'Push Notifications'),
+                    const Divider(height: 1, color: AppColors.glassBorder),
+                    const _SettingsRow(icon: Icons.auto_awesome_outlined, label: 'AI Advisor Customizations'),
+                    const Divider(height: 1, color: AppColors.glassBorder),
+                    const _SettingsRow(icon: Icons.privacy_tip_outlined, label: 'Privacy & Data Governance')
                   ],
                 ),
               ),
@@ -258,7 +276,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
               Center(
                 child: TextButton.icon(
-                  style: TextButton.styleFrom(foregroundColor: AppColors.rose),
+                  style: TextButton.styleFrom(foregroundColor: AppColors.loss),
                   icon: const Icon(Icons.logout_rounded, size: 18),
                   label: Text('Log out of account', style: GoogleFonts.outfit(fontWeight: FontWeight.w700)),
                   onPressed: () async {
@@ -293,25 +311,24 @@ class _InfoTile extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 10),
       child: GlassCard(
         padding: const EdgeInsets.all(16),
-        backgroundColor: Colors.white,
         child: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(8),
               decoration: const BoxDecoration(
-                color: AppColors.mintBg,
+                color: AppColors.glassFillStrong,
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, size: 20, color: AppColors.primary),
+              child: Icon(icon, size: 20, color: AppColors.accentCyan),
             ),
             const SizedBox(width: 14),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(label, style: GoogleFonts.outfit(fontSize: 12, color: AppColors.textMuted)),
+                  Text(label, style: GoogleFonts.outfit(fontSize: 12, color: AppColors.onGlassMuted)),
                   const SizedBox(height: 1),
-                  Text(value, style: GoogleFonts.outfit(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.textDark)),
+                  Text(value, style: GoogleFonts.outfit(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.onGlass)),
                 ],
               ),
             ),
@@ -325,17 +342,18 @@ class _InfoTile extends StatelessWidget {
 class _SettingsRow extends StatelessWidget {
   final IconData icon;
   final String label;
+  final VoidCallback? onTap;
 
-  const _SettingsRow({required this.icon, required this.label});
+  const _SettingsRow({required this.icon, required this.label, this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      leading: Icon(icon, color: AppColors.textDark, size: 20),
-      title: Text(label, style: GoogleFonts.outfit(fontSize: 14, color: AppColors.textDark, fontWeight: FontWeight.w500)),
-      trailing: const Icon(Icons.chevron_right_rounded, size: 20, color: AppColors.textMuted),
-      onTap: () {},
+      leading: Icon(icon, color: AppColors.onGlass, size: 20),
+      title: Text(label, style: GoogleFonts.outfit(fontSize: 14, color: AppColors.onGlass, fontWeight: FontWeight.w500)),
+      trailing: const Icon(Icons.chevron_right_rounded, size: 20, color: AppColors.onGlassMuted),
+      onTap: onTap ?? () {},
     );
   }
 }

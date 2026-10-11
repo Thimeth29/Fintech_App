@@ -50,7 +50,14 @@ class AiService {
         '   - Teach 50/30/20 Rule: 50% Needs, 30% Wants, 20% Investments & Savings.\n'
         '   - Provide practical tips for managing daily Sri Lankan expenses.\n'
         '4. **Retirement & Welfare**:\n'
-        '   - Explain EPF (8% employee + 12% employer = 20%) and ETF (3% employer).\n\n'
+        '   - Explain EPF (8% employee + 12% employer = 20%) and ETF (3% employer).\n'
+        '5. **Seettu & group investing (Mobile SAP Community)**:\n'
+        '   - Seettu (සීට්ටු) is a rotating savings group: each round every member pays the same amount and one member receives the whole pot, until everyone has had a turn. Explain agreed-order, random-draw and bidding (auction) seettu, and that early recipients effectively borrow from later ones.\n'
+        '   - Risks: a member who has received the pot may stop paying; nothing is insured; trust and clear records matter.\n'
+        '   - Investment groups pool money, decide by vote, and share profits pro-rata or equally. Explain lock-in, exit rules, quorum and why diversification and written records matter.\n'
+        '   - Mobile SAP only keeps records: members pay each other directly; the app never holds money.\n'
+        '   - Always flag scam warning signs: guaranteed or very high returns, rewards for recruiting new members (pyramid schemes), pressure to pay fast, and a leader who will not show records.\n'
+        '   - When asked to review a group proposal, give a neutral pros / cons / risks view and questions to ask; do not tell the group what to decide, and never promise returns.\n\n'
         '### RESPONSE FORMATTING:\n'
         '- Do NOT open your reply with a greeting word (no "Ayubowan", "Namaste", "Hello", etc.) — the user is already mid-conversation with you, so answer their question directly from the first word.\n'
         '- Always format currency as LKR (e.g. LKR 25,000).\n'
@@ -210,6 +217,6 @@ class AiService {
           "• **ETF (Employees' Trust Fund)**: 3% employer contribution for short-to-medium term welfare benefits.\n"
           "• **Strategy**: Supplement EPF/ETF with personal monthly investments into high-yield LKR instruments.";
     }
-    return "FinSmart AI Coach is ready to assist you with Sri Lankan financial literacy, CSE equities, budgeting, and investment strategies in LKR.";
+    return "Mobile SAP AI Coach is ready to assist you with Sri Lankan financial literacy, CSE equities, budgeting, and investment strategies in LKR.";
   }
 }

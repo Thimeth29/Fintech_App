@@ -9,6 +9,8 @@ import 'package:flutter/material.dart';
 
 import '../../../models/investing_models.dart';
 import '../../../services/investing_data_service.dart';
+import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/glass_card.dart';
 import 'investing_widgets.dart';
 
 enum _NewsFilter { all, local, world }
@@ -110,13 +112,9 @@ class _NewsCarouselState extends State<NewsCarousel> {
   @override
   Widget build(BuildContext context) {
     final items = _visible;
-    return Container(
+    return GlassCard(
       padding: const EdgeInsets.fromLTRB(0, 16, 0, 14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: InvestColors.border),
-      ),
+      borderRadius: 20,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -210,13 +208,13 @@ class _NewsCarouselState extends State<NewsCarousel> {
     return ChoiceChip(
       label: Text(label,
           style: investText(12,
-              weight: FontWeight.w600, color: selected ? Colors.white : InvestColors.text)),
+              weight: FontWeight.w600, color: selected ? AppColors.onLight : InvestColors.text)),
       selected: selected,
       showCheckmark: false,
       visualDensity: VisualDensity.compact,
-      selectedColor: InvestColors.green,
-      backgroundColor: Colors.white,
-      side: BorderSide(color: selected ? InvestColors.green : InvestColors.border),
+      selectedColor: Colors.white,
+      backgroundColor: AppColors.glassFill,
+      side: BorderSide(color: selected ? Colors.white : InvestColors.border),
       onSelected: (_) => _setFilter(value),
     );
   }
@@ -231,7 +229,7 @@ class _NewsSlide extends StatelessWidget {
     final fallback = Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [InvestColors.green, Color(0xFF147A4D)],
+          colors: [AppColors.primary, AppColors.accentViolet],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -295,7 +293,7 @@ class _NewsSlide extends StatelessWidget {
                     Row(
                       children: [
                         Text(formatUpdated(item.publishedAt),
-                            style: investText(11, color: Colors.white70)),
+                            style: investText(11, color: AppColors.onGlassMuted)),
                         const Spacer(),
                         Text('Read on site',
                             style: investText(11, weight: FontWeight.w700, color: Colors.white)),

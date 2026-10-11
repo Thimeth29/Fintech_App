@@ -39,7 +39,7 @@ class _LabeledTextFieldState extends State<LabeledTextField> {
           style: GoogleFonts.outfit(
             fontSize: 13,
             fontWeight: FontWeight.w600,
-            color: AppColors.textDark,
+            color: AppColors.onGlass,
             letterSpacing: 0.3,
           ),
         ),
@@ -48,15 +48,15 @@ class _LabeledTextFieldState extends State<LabeledTextField> {
           controller: widget.controller,
           keyboardType: widget.keyboardType,
           obscureText: widget.isPassword && _obscure,
-          style: GoogleFonts.outfit(fontSize: 15, color: AppColors.textDark),
-          cursorColor: AppColors.primary,
+          style: GoogleFonts.outfit(fontSize: 15, color: AppColors.onGlass),
+          cursorColor: AppColors.accentCyan,
           decoration: InputDecoration(
             isDense: true,
             filled: true,
-            fillColor: Colors.white,
+            fillColor: AppColors.glassFillStrong,
             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             hintText: widget.hintText ?? 'Enter your ${widget.label.toLowerCase()}...',
-            hintStyle: GoogleFonts.outfit(fontSize: 14, color: AppColors.textMuted),
+            hintStyle: GoogleFonts.outfit(fontSize: 14, color: AppColors.onGlassMuted),
             prefixIcon: Icon(
               widget.prefixIcon ??
                   (widget.isPassword
@@ -65,14 +65,14 @@ class _LabeledTextFieldState extends State<LabeledTextField> {
                               widget.label.toLowerCase().contains('email')
                           ? Icons.email_outlined
                           : Icons.edit_note_rounded)),
-              color: AppColors.textMuted,
+              color: AppColors.onGlassMuted,
               size: 20,
             ),
             suffixIcon: widget.isPassword
                 ? IconButton(
                     icon: Icon(
                       _obscure ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                      color: AppColors.textMuted,
+                      color: AppColors.onGlassMuted,
                       size: 20,
                     ),
                     onPressed: () => setState(() => _obscure = !_obscure),
@@ -81,17 +81,17 @@ class _LabeledTextFieldState extends State<LabeledTextField> {
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
               borderSide: BorderSide(
-                color: widget.borderColor ?? AppColors.borderLight,
+                color: widget.borderColor ?? AppColors.glassBorder,
               ),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
-              borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+              borderSide: const BorderSide(color: AppColors.accentCyan, width: 1.5),
             ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
               borderSide: BorderSide(
-                color: widget.borderColor ?? AppColors.borderLight,
+                color: widget.borderColor ?? AppColors.glassBorder,
               ),
             ),
           ),

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../../models/investing_models.dart';
 import '../../../services/investing_data_service.dart';
+import '../../../core/theme/app_theme.dart';
 import 'investing_widgets.dart';
 
 class GoldInvestmentsScreen extends StatefulWidget {
@@ -153,9 +154,9 @@ class _GoldInvestmentsScreenState extends State<GoldInvestmentsScreen> {
             showSelectedIcon: false,
             style: ButtonStyle(
               backgroundColor: WidgetStateProperty.resolveWith((s) =>
-                  s.contains(WidgetState.selected) ? InvestColors.green : Colors.white),
+                  s.contains(WidgetState.selected) ? Colors.white : InvestColors.greenTint),
               foregroundColor: WidgetStateProperty.resolveWith((s) =>
-                  s.contains(WidgetState.selected) ? Colors.white : InvestColors.text),
+                  s.contains(WidgetState.selected) ? AppColors.onLight : InvestColors.text),
             ),
             onSelectionChanged: (s) => setState(() => _is24k = s.first),
           ),

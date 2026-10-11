@@ -1,18 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import '../../core/responsive.dart';
+import '../../core/widgets/glass_card.dart';
+import '../../core/theme/app_backgrounds.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/widgets/top_nav_bar.dart';
 import '../../models/market_data_model.dart';
 import '../../services/asset_data_service.dart';
 import '../../services/auth_service.dart';
 import '../../services/market_rates_service.dart';
 import '../../viewmodels/auth_viewmodel.dart';
 import '../../viewmodels/expense_viewmodel.dart';
+import '../../viewmodels/debts_viewmodel.dart';
 import '../../viewmodels/sandbox_viewmodel.dart';
 import '../bot/chat_screen.dart';
 import '../sandbox/sandbox_screen.dart';
 import '../expenditure/expenditure_screen.dart';
 import '../expenditure/explore_plans_screen.dart';
+import '../investments/investing/fd_investments_screen.dart';
+import '../investments/investing/gold_investments_screen.dart';
+import '../investments/investing/gov_securities_screen.dart';
 import '../investments/investing_options_screen.dart';
 import '../profile/profile_screen.dart';
 
@@ -22,11 +30,12 @@ const List<String> _monthNames = [
 ];
 
 Map<String, Color> get _sandboxTypeColors => {
-  'cash': AppColors.textDark,
+  'cash': Colors.white,
   'stock': AppColors.primary,
-  'gold': AppColors.goldAccent,
-  'fixed_deposit': const Color(0xFF2563EB),
-  'treasury_bond': const Color(0xFF7C3AED),
+  'gold': AppColors.gold,
+  'fixed_deposit': AppColors.accentCyan,
+  'treasury_bond': AppColors.accentLavender,
+  'trading': AppColors.accentTeal,
 };
 
 String _sandboxTypeLabel(String type) {
@@ -40,7 +49,9 @@ String _sandboxTypeLabel(String type) {
     case 'fixed_deposit':
       return 'Fixed deposit';
     case 'treasury_bond':
-      return 'Treasury bond';
+      return 'T-bills & bonds';
+    case 'trading':
+      return 'Trading';
     default:
       return type;
   }
@@ -58,30 +69,6 @@ String _formatMoney(double value) {
   return (value < 0 ? '-' : '') + buffer.toString();
 }
 
-double? _parseMoney(String? raw) {
-  if (raw == null) return null;
-  final cleaned = raw.replaceAll(RegExp(r'[^0-9.]'), '');
-  if (cleaned.isEmpty) return null;
-  return double.tryParse(cleaned);
-}
-
-/// Rough number of months of spending covered by the signup "emergency
-/// savings" bracket — used to estimate, not track, an emergency fund.
-double _monthsCoveredForBracket(String bracket) {
-  switch (bracket) {
-    case 'None yet':
-      return 0;
-    case 'Under 1 month of spending':
-      return 0.5;
-    case '1–3 months':
-      return 2;
-    case '3+ months':
-      return 3;
-    default:
-      return 0;
-  }
-}
-
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -91,7 +78,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late final ExpenseViewModel _expenseViewModel;
-  late final SandboxViewModel _sandboxViewModel;
+  final DebtsViewModel _debtsViewModel = DebtsViewModel();
 
   double? _usdLkr;
   double? _goldPricePerGram;
@@ -106,21 +93,21 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     final userId = AuthService().currentUser?.id;
     _expenseViewModel = ExpenseViewModel();
-    _sandboxViewModel = SandboxViewModel();
     if (userId != null) {
       _expenseViewModel.load(userId);
+      _debtsViewModel.load(userId);
     }
-    _sandboxViewModel.loadSandboxData();
     _loadMarketRates();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<AuthViewModel>().loadUserProfile();
+      context.read<SandboxViewModel>().load();
     });
   }
 
   @override
   void dispose() {
     _expenseViewModel.dispose();
-    _sandboxViewModel.dispose();
+    _debtsViewModel.dispose();
     super.dispose();
   }
 
@@ -153,19 +140,8 @@ class _HomeScreenState extends State<HomeScreen> {
   double _currentMonthSpend(ExpenseViewModel vm) {
     final now = DateTime.now();
     return vm.expenses
-        .where((e) => e.createdAt.year == now.year && e.createdAt.month == now.month)
+        .where((e) => e.effectiveDate.year == now.year && e.effectiveDate.month == now.month)
         .fold(0.0, (sum, e) => sum + e.amount);
-  }
-
-  Map<String, double> _currentMonthByCategory(ExpenseViewModel vm) {
-    final now = DateTime.now();
-    final map = <String, double>{};
-    for (final e in vm.expenses) {
-      if (e.createdAt.year == now.year && e.createdAt.month == now.month) {
-        map[e.category] = (map[e.category] ?? 0) + e.amount;
-      }
-    }
-    return map;
   }
 
   double _totalBudget(ExpenseViewModel vm) =>
@@ -189,20 +165,25 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final authVm = context.watch<AuthViewModel>();
+    final sandboxVm = context.watch<SandboxViewModel>();
     final displayName = authVm.displayName.isNotEmpty ? authVm.displayName : 'there';
     final initials = _initialsOf(displayName == 'there' ? '' : displayName);
-    return Scaffold(
-      backgroundColor: AppColors.bgLight,
+    return AppBackground(
+      child: Scaffold(
+      backgroundColor: Colors.transparent,
+      appBar: const TopNavBar(current: AppSection.home, title: ''),
       floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: AppColors.primary,
-        elevation: 4,
-        icon: const Icon(Icons.smart_toy_rounded, color: Colors.white, size: 22),
+        backgroundColor: Colors.white,
+        foregroundColor: AppColors.onLight,
+        elevation: 6,
+        shape: const StadiumBorder(),
+        icon: const Icon(Icons.smart_toy_rounded, color: AppColors.onLight, size: 22),
         label: Text(
           'Ask FinBot AI',
           style: GoogleFonts.outfit(
             fontSize: 14,
             fontWeight: FontWeight.w700,
-            color: Colors.white,
+            color: AppColors.onLight,
             letterSpacing: 0.3,
           ),
         ),
@@ -212,56 +193,80 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: SafeArea(
         child: ListenableBuilder(
-          listenable: Listenable.merge([_expenseViewModel, _sandboxViewModel]),
+          listenable: Listenable.merge([_expenseViewModel, _debtsViewModel]),
           builder: (context, _) {
+            // Left: what's happening now. Right: plans and portfolio.
+            // Phones and tablets stack both lists in this order.
+            List<Widget> spaced(List<Widget> cards) => [
+                  for (final c in cards) ...[c, const SizedBox(height: 20)],
+                ];
+            final primary = <Widget>[
+              _buildSpendingCard(_expenseViewModel),
+              _buildQuickActionsGrid(context),
+              _buildForecastCard(_expenseViewModel),
+            ];
+            final secondary = <Widget>[
+              _buildSuggestedCard(context, _expenseViewModel),
+              _buildSandboxPortfolioCard(context, sandboxVm),
+              _buildMarketTodayCard(context),
+            ];
+
             return SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
               physics: const BouncingScrollPhysics(),
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 520),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildHeaderBar(context, displayName, initials),
-                      const SizedBox(height: 20),
-
-                      _buildSpendingCard(_expenseViewModel),
-                      const SizedBox(height: 20),
-
-                      _buildQuickActionsRow(context),
-                      const SizedBox(height: 16),
-
-                      _buildAiAssistantBanner(context),
-                      const SizedBox(height: 16),
-
-                      _buildInvestingOptionsCard(context),
-                      const SizedBox(height: 20),
-
-                      _buildForecastCard(_expenseViewModel),
-                      const SizedBox(height: 20),
-
-                      _buildBudgetsCard(context, _expenseViewModel),
-                      const SizedBox(height: 20),
-
-                      _buildEmergencyFundCard(authVm.userProfile),
-                      const SizedBox(height: 20),
-
-                      _buildSuggestedCard(context, _expenseViewModel),
-                      const SizedBox(height: 20),
-
-                      _buildSandboxPortfolioCard(context, _sandboxViewModel),
-                      const SizedBox(height: 20),
-
-                      _buildMarketTodayCard(context),
-                      const SizedBox(height: 80),
-                    ],
+              child: AdaptiveLayout(
+                mobile: (_) => Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 520),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildHeaderBar(context, displayName, initials),
+                        const SizedBox(height: 20),
+                        ...spaced(primary),
+                        ...spaced(secondary),
+                        const SizedBox(height: 60),
+                      ],
+                    ),
+                  ),
+                ),
+                desktop: (_) => Center(
+                  child: ConstrainedBox(
+                    constraints:
+                        const BoxConstraints(maxWidth: Responsive.desktopMaxWidth),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildHeaderBar(context, displayName, initials),
+                        const SizedBox(height: 24),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: spaced(primary),
+                              ),
+                            ),
+                            const SizedBox(width: 24),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: spaced(secondary),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 60),
+                      ],
+                    ),
                   ),
                 ),
               ),
             );
           },
         ),
+      ),
       ),
     );
   }
@@ -281,7 +286,8 @@ class _HomeScreenState extends State<HomeScreen> {
               _greeting(),
               style: GoogleFonts.outfit(
                 fontSize: 13,
-                color: AppColors.textMuted,
+                color: AppColors.onGlass,
+                shadows: kTitleShadow,
               ),
             ),
             Text(
@@ -289,8 +295,9 @@ class _HomeScreenState extends State<HomeScreen> {
               style: GoogleFonts.outfit(
                 fontSize: 26,
                 fontWeight: FontWeight.w800,
-                color: AppColors.textDark,
+                color: AppColors.onGlass,
                 letterSpacing: -0.5,
+                shadows: kTitleShadow,
               ),
             ),
           ],
@@ -303,12 +310,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   width: 42,
                   height: 42,
                   decoration: BoxDecoration(
-                    color: AppColors.cardBg,
+                    color: AppColors.glassFill,
                     shape: BoxShape.circle,
-                    border: Border.all(color: AppColors.borderLight),
+                    border: Border.all(color: AppColors.glassBorder),
                   ),
                   child: const Icon(Icons.notifications_none_rounded,
-                      color: AppColors.textDark, size: 22),
+                      color: AppColors.onGlass, size: 22),
                 ),
                 Positioned(
                   right: 10,
@@ -317,7 +324,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     width: 8,
                     height: 8,
                     decoration: const BoxDecoration(
-                      color: AppColors.rose,
+                      color: AppColors.loss,
                       shape: BoxShape.circle,
                     ),
                   ),
@@ -332,9 +339,16 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Container(
                 width: 42,
                 height: 42,
-                decoration: const BoxDecoration(
-                  color: AppColors.primary,
+                decoration: BoxDecoration(
+                  gradient: AppGradients.action,
                   shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 2),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.white.withValues(alpha: 0.25),
+                      blurRadius: 10,
+                    ),
+                  ],
                 ),
                 child: Center(
                   child: Text(
@@ -365,16 +379,16 @@ class _HomeScreenState extends State<HomeScreen> {
     final spent = _currentMonthSpend(vm);
     final budget = _totalBudget(vm);
     final hasBudget = budget > 0;
-    final ratio = hasBudget ? (spent / budget).clamp(0.0, 1.0) : 0.0;
-    final remaining = hasBudget ? (budget - spent) : 0.0;
+    // Compare the budget with spending in budgeted categories only.
+    final budgetedSpent = vm.budgetedSpend;
+    final ratio = hasBudget ? (budgetedSpent / budget).clamp(0.0, 1.0) : 0.0;
+    final remaining = hasBudget ? (budget - budgetedSpent) : 0.0;
 
-    return Container(
+    return GlassCard(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppColors.primary,
-        borderRadius: BorderRadius.circular(24),
-      ),
+      gradient: AppGradients.heroCard,
+      borderColor: AppColors.glassBorderStrong,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -386,7 +400,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 style: GoogleFonts.outfit(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: Colors.white70,
+                  color: AppColors.onGlassMuted,
                 ),
               ),
               Text(
@@ -394,7 +408,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 style: GoogleFonts.outfit(
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
-                  color: Colors.white70,
+                  color: AppColors.onGlassMuted,
                 ),
               ),
             ],
@@ -419,7 +433,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   style: GoogleFonts.outfit(
                     fontSize: 15,
                     fontWeight: FontWeight.w500,
-                    color: Colors.white70,
+                    color: AppColors.onGlassMuted,
                   ),
                 ),
               ],
@@ -437,14 +451,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     Expanded(
                       flex: (ratio * 100).round().clamp(1, 100),
                       child: Container(
-                        color: ratio >= 0.9
-                            ? AppColors.goldAccent
-                            : const Color(0xFF147A4D),
+                        color: ratio >= 0.9 ? AppColors.gold : AppColors.accentCyan,
                       ),
                     ),
                     Expanded(
                       flex: (100 - (ratio * 100).round()).clamp(0, 99),
-                      child: Container(color: Colors.white.withValues(alpha: 0.15)),
+                      child: Container(color: Colors.white.withValues(alpha: 0.2)),
                     ),
                   ],
                 ),
@@ -453,7 +465,7 @@ class _HomeScreenState extends State<HomeScreen> {
           else
             Text(
               'No monthly budget set yet — set one in Plan My Expenses to track against a goal.',
-              style: GoogleFonts.outfit(fontSize: 12.5, color: Colors.white70, height: 1.4),
+              style: GoogleFonts.outfit(fontSize: 12.5, color: AppColors.onGlassMuted, height: 1.4),
             ),
           const SizedBox(height: 20),
 
@@ -476,7 +488,7 @@ class _HomeScreenState extends State<HomeScreen> {
       children: [
         Text(
           label,
-          style: GoogleFonts.outfit(fontSize: 12, color: Colors.white70),
+          style: GoogleFonts.outfit(fontSize: 12, color: AppColors.onGlassMuted),
         ),
         const SizedBox(height: 2),
         Text(
@@ -492,237 +504,19 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   // ==========================================
-  // 3. QUICK ACTIONS ROW
-  // ==========================================
-  Widget _buildQuickActionsRow(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        _buildActionTile(
-          context: context,
-          icon: Icons.add_rounded,
-          label: 'Add expense',
-          onTap: () => Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => const ExpenditureScreen()),
-          ),
-        ),
-        _buildActionTile(
-          context: context,
-          icon: Icons.trending_up_rounded,
-          label: 'Practise trade',
-          onTap: () => Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => const SandboxScreen()),
-          ),
-        ),
-        _buildActionTile(
-          context: context,
-          icon: Icons.chat_bubble_outline_rounded,
-          label: 'Ask coach',
-          onTap: () => Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => const ChatScreen()),
-          ),
-        ),
-        _buildActionTile(
-          context: context,
-          icon: Icons.menu_book_rounded,
-          label: 'Learn',
-          onTap: () => Navigator.of(context).push(
-            MaterialPageRoute(
-                builder: (_) => const ExploreExpenditurePlansScreen()),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildActionTile({
-    required BuildContext context,
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-  }) {
-    return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        child: Column(
-          children: [
-            Container(
-              width: 58,
-              height: 58,
-              decoration: BoxDecoration(
-                color: AppColors.cardBg,
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: AppColors.borderLight),
-              ),
-              child: Icon(icon, color: AppColors.primary, size: 24),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              label,
-              style: GoogleFonts.outfit(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textDark,
-              ),
-              textAlign: TextAlign.center,
-              maxLines: 2,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // ==========================================
-  // 3b. AI COACH QUICK SHORTCUT BANNER
-  // ==========================================
-  Widget _buildAiAssistantBanner(BuildContext context) {
-    return GestureDetector(
-      onTap: () => Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => const ChatScreen()),
-      ),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        decoration: BoxDecoration(
-          color: AppColors.mintBg,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: AppColors.primary.withValues(alpha: 0.25)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.02),
-              blurRadius: 6,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: const BoxDecoration(
-                color: AppColors.primary,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.smart_toy_rounded, color: Colors.white, size: 22),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'FinBot AI Financial Advisor',
-                    style: GoogleFonts.outfit(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textDark,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Ask anything about CSE stocks, budgets or taxes',
-                    style: GoogleFonts.outfit(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.textMuted,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: const BoxDecoration(
-                color: AppColors.cardBg,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.arrow_forward_rounded, color: AppColors.primary, size: 18),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // ==========================================
-  // 3c. INVESTING OPTIONS CARD
-  // ==========================================
-  Widget _buildInvestingOptionsCard(BuildContext context) {
-    return GestureDetector(
-      onTap: () => Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => const InvestingOptionsScreen()),
-      ),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        decoration: BoxDecoration(
-          color: AppColors.cardBg,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: AppColors.borderLight),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: const BoxDecoration(
-                color: AppColors.mintBg,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.account_balance_wallet_rounded,
-                  color: AppColors.primary, size: 22),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Investing options',
-                    style: GoogleFonts.outfit(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textDark,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Explore ways to grow your money',
-                    style: GoogleFonts.outfit(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.textMuted,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const Icon(Icons.chevron_right_rounded,
-                color: AppColors.primary, size: 24),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // ==========================================
   // 4. NEXT MONTH FORECAST CARD
   // ==========================================
   Widget _buildForecastCard(ExpenseViewModel vm) {
     final months = vm.monthlyTotals;
-    final hasEnoughHistory = months.length >= 3;
+    final forecast = vm.forecast;
+    final hasEnoughHistory = vm.predictedNextMonthTotal != null;
     final now = DateTime.now();
     final nextMonth = DateTime(now.year, now.month + 1);
     final nextMonthName = _monthNames[nextMonth.month - 1];
 
-    return Container(
+    return GlassCard(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppColors.cardBg,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.borderLight),
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -731,7 +525,7 @@ class _HomeScreenState extends State<HomeScreen> {
             style: GoogleFonts.outfit(
               fontSize: 18,
               fontWeight: FontWeight.w700,
-              color: AppColors.textDark,
+              color: AppColors.onGlass,
             ),
           ),
           const SizedBox(height: 2),
@@ -739,7 +533,7 @@ class _HomeScreenState extends State<HomeScreen> {
             'Predicted from your own spending history',
             style: GoogleFonts.outfit(
               fontSize: 13,
-              color: AppColors.textMuted,
+              color: AppColors.onGlassMuted,
             ),
           ),
           const SizedBox(height: 12),
@@ -747,15 +541,14 @@ class _HomeScreenState extends State<HomeScreen> {
           if (vm.isLoadingPrediction)
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 24),
-              child: Center(child: CircularProgressIndicator(color: AppColors.primary, strokeWidth: 2)),
+              child: Center(child: CircularProgressIndicator(color: AppColors.accentCyan, strokeWidth: 2)),
             )
           else if (!hasEnoughHistory || vm.predictedNextMonthTotal == null)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 12),
               child: Text(
-                vm.predictionMessage ??
-                    'Log expenses across at least 3 different months to unlock a spending forecast.',
-                style: GoogleFonts.outfit(fontSize: 13, color: AppColors.textMuted, height: 1.4),
+                vm.predictionMessage ?? 'Log a few expenses to unlock a spending forecast.',
+                style: GoogleFonts.outfit(fontSize: 13, color: AppColors.onGlassMuted, height: 1.4),
               ),
             )
           else ...[
@@ -764,9 +557,15 @@ class _HomeScreenState extends State<HomeScreen> {
               style: GoogleFonts.outfit(
                 fontSize: 26,
                 fontWeight: FontWeight.w800,
-                color: AppColors.textDark,
+                color: AppColors.onGlass,
               ),
             ),
+            if (forecast != null)
+              Text(
+                'Range Rs ${_formatMoney(forecast.low)} – ${_formatMoney(forecast.high)} · '
+                '${forecast.confidenceLabel} confidence',
+                style: GoogleFonts.outfit(fontSize: 12.5, color: AppColors.onGlassMuted),
+              ),
             const SizedBox(height: 20),
             SizedBox(
               height: 115,
@@ -778,8 +577,12 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              'Based on your spending across the last ${months.length > 5 ? 5 : months.length} month(s) you\'ve logged.',
-              style: GoogleFonts.outfit(fontSize: 12.5, color: AppColors.textMuted, height: 1.4),
+              forecast == null
+                  ? 'Based on your logged spending.'
+                  : forecast.usedPartialMonth
+                      ? 'Based on this month so far, scaled to a full month, plus upcoming bills.'
+                      : 'Based on your last ${forecast.monthsUsed} month${forecast.monthsUsed == 1 ? '' : 's'} of spending, plus upcoming bills.',
+              style: GoogleFonts.outfit(fontSize: 12.5, color: AppColors.onGlassMuted, height: 1.4),
             ),
           ],
         ],
@@ -813,12 +616,12 @@ class _HomeScreenState extends State<HomeScreen> {
           height: height,
           decoration: BoxDecoration(
             color: isSolidDark
-                ? AppColors.primary
-                : (isForecast ? Colors.transparent : const Color(0xFFC6E7D5)),
+                ? AppColors.accentCyan
+                : (isForecast ? Colors.transparent : AppColors.chartPast),
             borderRadius: BorderRadius.circular(8),
             border: isForecast
                 ? Border.all(
-                    color: AppColors.primary,
+                    color: AppColors.accentCyan,
                     width: 1.5,
                     style: BorderStyle.solid)
                 : null,
@@ -830,248 +633,25 @@ class _HomeScreenState extends State<HomeScreen> {
           style: GoogleFonts.outfit(
             fontSize: 12,
             fontWeight: FontWeight.w600,
-            color: AppColors.textMuted,
+            color: AppColors.onGlassMuted,
           ),
         ),
       ],
-    );
-  }
-
-  // ==========================================
-  // 5. BUDGETS CARD
-  // ==========================================
-  Widget _buildBudgetsCard(BuildContext context, ExpenseViewModel vm) {
-    final spentByCategory = _currentMonthByCategory(vm);
-    final budgetsToShow = vm.budgets.take(3).toList();
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppColors.cardBg,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.borderLight),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Budgets',
-                style: GoogleFonts.outfit(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textDark,
-                ),
-              ),
-              GestureDetector(
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const ExpenditureScreen()),
-                ),
-                child: Text(
-                  'See all',
-                  style: GoogleFonts.outfit(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.primary,
-                    decoration: TextDecoration.underline,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-
-          if (budgetsToShow.isEmpty)
-            Text(
-              'No budgets set yet — set one from Plan My Expenses to track your spending against a goal.',
-              style: GoogleFonts.outfit(fontSize: 13, color: AppColors.textMuted, height: 1.4),
-            )
-          else
-            for (int i = 0; i < budgetsToShow.length; i++) ...[
-              if (i > 0) const SizedBox(height: 14),
-              Builder(builder: (context) {
-                final b = budgetsToShow[i];
-                final category = (b['category'] as String?) ?? 'Other';
-                final limit = (b['limit_amount'] as num?)?.toDouble() ?? 0;
-                final spent = spentByCategory[category] ?? 0;
-                final ratio = limit > 0 ? (spent / limit).clamp(0.0, 1.0) : 0.0;
-                final isWarning = limit > 0 && ratio >= 0.85;
-                return _buildBudgetItem(
-                  category,
-                  'Rs ${_formatMoney(spent)} / ${_formatMoney(limit)}',
-                  ratio,
-                  isWarning ? AppColors.rose : AppColors.primary,
-                  warningText: isWarning
-                      ? '${(ratio * 100).round()}% used${daysLeftNote()}'
-                      : null,
-                );
-              }),
-            ],
-        ],
-      ),
-    );
-  }
-
-  String daysLeftNote() {
-    final now = DateTime.now();
-    final daysInMonth = DateTime(now.year, now.month + 1, 0).day;
-    final daysLeft = daysInMonth - now.day;
-    return daysLeft > 0 ? ' with $daysLeft days to go' : '';
-  }
-
-  Widget _buildBudgetItem(
-      String label, String amountText, double ratio, Color color,
-      {String? warningText}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              label,
-              style: GoogleFonts.outfit(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textDark,
-              ),
-            ),
-            Text(
-              amountText,
-              style: GoogleFonts.outfit(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: warningText != null ? color : AppColors.textMuted,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 6),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(4),
-          child: LinearProgressIndicator(
-            value: ratio,
-            minHeight: 6,
-            backgroundColor: AppColors.borderLight,
-            valueColor: AlwaysStoppedAnimation<Color>(color),
-          ),
-        ),
-        if (warningText != null) ...[
-          const SizedBox(height: 4),
-          Text(
-            warningText,
-            style: GoogleFonts.outfit(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: color,
-            ),
-          ),
-        ],
-      ],
-    );
-  }
-
-  // ==========================================
-  // 6. EMERGENCY FUND CARD
-  // ==========================================
-  Widget _buildEmergencyFundCard(Map<String, dynamic>? profile) {
-    final bracket = profile?['emergency_savings'] as String?;
-    final monthlySpend = _parseMoney(profile?['typical_monthly_spending'] as String?);
-    final hasData = bracket != null && bracket.isNotEmpty && monthlySpend != null && monthlySpend > 0;
-
-    double ratio = 0;
-    double goal = 0;
-    double estimatedSaved = 0;
-    double monthsCovered = 0;
-    if (hasData) {
-      monthsCovered = _monthsCoveredForBracket(bracket);
-      goal = monthlySpend * 3;
-      estimatedSaved = (monthsCovered * monthlySpend).clamp(0, goal);
-      ratio = goal > 0 ? (estimatedSaved / goal).clamp(0.0, 1.0) : 0.0;
-    }
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppColors.cardBg,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.borderLight),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Emergency fund',
-                style: GoogleFonts.outfit(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textDark,
-                ),
-              ),
-              if (hasData)
-                Text(
-                  '${(ratio * 100).round()}%',
-                  style: GoogleFonts.outfit(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.primary,
-                  ),
-                ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          if (!hasData)
-            Text(
-              'Answer the money questions during signup (or update your profile) to see this.',
-              style: GoogleFonts.outfit(fontSize: 13, color: AppColors.textMuted, height: 1.4),
-            )
-          else ...[
-            Text(
-              'Rs ${_formatMoney(estimatedSaved)} of a Rs ${_formatMoney(goal)} goal (3 months of spending) — estimated from what you told us, not a tracked balance.',
-              style: GoogleFonts.outfit(fontSize: 13, color: AppColors.textMuted, height: 1.4),
-            ),
-            const SizedBox(height: 12),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(4),
-              child: LinearProgressIndicator(
-                value: ratio,
-                minHeight: 6,
-                backgroundColor: AppColors.borderLight,
-                valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              monthsCovered >= 3
-                  ? 'You\'re at or above a 3-month safety net based on what you told us — nice work.'
-                  : 'Aim to build this toward 3 months of spending for a solid safety net.',
-              style: GoogleFonts.outfit(fontSize: 13, color: AppColors.textMuted, height: 1.4),
-            ),
-          ],
-        ],
-      ),
     );
   }
 
   // ==========================================
   // 7. SUGGESTED FOR YOU CARD
   // ==========================================
+  /// Debt reminders (due within 7 days or overdue) take priority over the
+  /// spending suggestion.
+  String _suggestion(ExpenseViewModel vm) => _debtsViewModel.reminderText ?? vm.suggestedAction;
+
   Widget _buildSuggestedCard(BuildContext context, ExpenseViewModel vm) {
-    return Container(
+    return GlassCard(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppColors.cardBg,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.primary, width: 1.5),
-      ),
+      borderColor: AppColors.accentCyan,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1080,17 +660,17 @@ class _HomeScreenState extends State<HomeScreen> {
             style: GoogleFonts.outfit(
               fontSize: 12,
               fontWeight: FontWeight.w800,
-              color: AppColors.primary,
+              color: AppColors.accentCyan,
               letterSpacing: 0.8,
             ),
           ),
           const SizedBox(height: 8),
           Text(
-            vm.suggestedAction,
+            _suggestion(vm),
             style: GoogleFonts.outfit(
               fontSize: 16,
               fontWeight: FontWeight.w700,
-              color: AppColors.textDark,
+              color: AppColors.onGlass,
               height: 1.35,
             ),
           ),
@@ -1107,12 +687,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
                       elevation: 0,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14)),
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      shape: const StadiumBorder(),
                     ),
                     child: Text(
                       'Plan my expenses',
+                      textAlign: TextAlign.center,
                       style: GoogleFonts.outfit(
                           fontSize: 14, fontWeight: FontWeight.w700),
                     ),
@@ -1126,20 +708,21 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: OutlinedButton(
                     onPressed: () => Navigator.of(context).push(
                       MaterialPageRoute(
-                          builder: (_) => ChatScreen(seedContext: vm.suggestedAction)),
+                          builder: (_) => ChatScreen(seedContext: _suggestion(vm))),
                     ),
                     style: OutlinedButton.styleFrom(
-                      backgroundColor: AppColors.cardBg,
-                      side: const BorderSide(color: AppColors.borderLight),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14)),
+                      backgroundColor: AppColors.innerFill,
+                      side: const BorderSide(color: AppColors.glassBorderStrong),
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      shape: const StadiumBorder(),
                     ),
                     child: Text(
                       'Ask FinBot about this',
+                      textAlign: TextAlign.center,
                       style: GoogleFonts.outfit(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.textDark,
+                        color: AppColors.onGlass,
                       ),
                     ),
                   ),
@@ -1156,15 +739,13 @@ class _HomeScreenState extends State<HomeScreen> {
   // 8. SANDBOX PORTFOLIO CARD
   // ==========================================
   Widget _buildSandboxPortfolioCard(BuildContext context, SandboxViewModel svm) {
-    final portfolioValue = svm.portfolioValue;
+    // Total across every unlocked trainer module; % is against
+    // Rs 100,000 per unlocked module.
+    final portfolioValue = svm.totalValue;
     final returnPct = svm.totalReturnPercent;
     final isUp = returnPct >= 0;
 
-    final valueByType = <String, double>{'cash': svm.virtualBalance};
-    for (final h in svm.holdings) {
-      final value = h.quantity * h.instrument.currentPrice;
-      valueByType[h.instrument.type] = (valueByType[h.instrument.type] ?? 0) + value;
-    }
+    final valueByType = svm.allocationByType;
     final safeTotal = portfolioValue > 0 ? portfolioValue : 1.0;
     final entries = valueByType.entries.where((e) => e.value > 0).toList()
       ..sort((a, b) => b.value.compareTo(a.value));
@@ -1173,33 +754,49 @@ class _HomeScreenState extends State<HomeScreen> {
       onTap: () => Navigator.of(context).push(
         MaterialPageRoute(builder: (_) => const SandboxScreen()),
       ),
-      child: Container(
+      child: GlassCard(
         width: double.infinity,
         padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: AppColors.cardBg,
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: AppColors.borderLight),
-        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  'Sandbox portfolio',
-                  style: GoogleFonts.outfit(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textDark,
+                Flexible(
+                  child: Text(
+                    'Sandbox portfolio',
+                    style: GoogleFonts.outfit(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.onGlass,
+                    ),
                   ),
                 ),
+                const SizedBox(width: 8),
+                if (svm.isLoggedIn) ...[
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.16),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Text(
+                      'Lv ${svm.progress.level}',
+                      style: GoogleFonts.outfit(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.onGlass,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                ],
                 Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: AppColors.goldAccent,
+                    color: AppColors.gold,
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: Text(
@@ -1207,32 +804,35 @@ class _HomeScreenState extends State<HomeScreen> {
                     style: GoogleFonts.outfit(
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.textDark,
+                      color: AppColors.onGlass,
                     ),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 6),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.baseline,
-              textBaseline: TextBaseline.alphabetic,
+            Wrap(
+              crossAxisAlignment: WrapCrossAlignment.end,
               children: [
                 Text(
                   'Rs ${_formatMoney(portfolioValue)}',
                   style: GoogleFonts.outfit(
                     fontSize: 26,
                     fontWeight: FontWeight.w800,
-                    color: AppColors.textDark,
+                    color: AppColors.onGlass,
                   ),
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  '${isUp ? "+" : ""}${returnPct.toStringAsFixed(1)}% since start',
+                  svm.wallets.isEmpty
+                      ? 'Start the Investment Trainer'
+                      : '${isUp ? "+" : ""}${returnPct.toStringAsFixed(1)}% since start',
                   style: GoogleFonts.outfit(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
-                    color: isUp ? AppColors.primary : AppColors.rose,
+                    color: svm.wallets.isEmpty
+                        ? AppColors.onGlassMuted
+                        : (isUp ? AppColors.gain : AppColors.loss),
                   ),
                 ),
               ],
@@ -1249,7 +849,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       Expanded(
                         flex: ((e.value / safeTotal) * 100).round().clamp(1, 100),
                         child: Container(
-                            color: _sandboxTypeColors[e.key] ?? AppColors.textMuted),
+                            color: _sandboxTypeColors[e.key] ?? AppColors.onGlassMuted),
                       ),
                   ],
                 ),
@@ -1264,7 +864,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 for (final e in entries)
                   _buildLegendItem(
                     '${_sandboxTypeLabel(e.key)} ${((e.value / safeTotal) * 100).round()}%',
-                    _sandboxTypeColors[e.key] ?? AppColors.textMuted,
+                    _sandboxTypeColors[e.key] ?? AppColors.onGlassMuted,
                   ),
               ],
             ),
@@ -1289,9 +889,78 @@ class _HomeScreenState extends State<HomeScreen> {
           style: GoogleFonts.outfit(
             fontSize: 12,
             fontWeight: FontWeight.w600,
-            color: AppColors.textMuted,
+            color: AppColors.onGlassMuted,
           ),
         ),
+      ],
+    );
+  }
+
+  // ==========================================
+  // 3. QUICK ACTIONS GRID
+  // ==========================================
+  Widget _buildQuickActionsGrid(BuildContext context) {
+    void open(Widget page) =>
+        Navigator.of(context).push(MaterialPageRoute(builder: (_) => page));
+
+    final actions = [
+      _QuickAction(
+        icon: Icons.receipt_long_rounded,
+        color: const Color(0xFF34D399),
+        title: 'Manage Personal Expenses',
+        subtitle: 'Add and track spending',
+        onTap: () => open(const ExpenditureScreen()),
+      ),
+      _QuickAction(
+        icon: Icons.candlestick_chart_rounded,
+        color: const Color(0xFFFBBF24),
+        title: 'SandBox Environment',
+        subtitle: 'Practise trading risk-free',
+        onTap: () => open(const SandboxScreen()),
+      ),
+      _QuickAction(
+        icon: Icons.smart_toy_rounded,
+        color: const Color(0xFF60A5FA),
+        title: 'Financial AI Coach',
+        subtitle: 'Ask about stocks, budgets, taxes',
+        onTap: () => open(const ChatScreen()),
+      ),
+      _QuickAction(
+        icon: Icons.account_balance_rounded,
+        color: const Color(0xFFA78BFA),
+        title: 'My Investing',
+        subtitle: 'FD, gold, CSE & securities',
+        onTap: () => open(const InvestingOptionsScreen()),
+      ),
+      _QuickAction(
+        icon: Icons.menu_book_rounded,
+        color: const Color(0xFFF472B6),
+        title: 'Get Knowledge',
+        subtitle: 'Learn budgeting models',
+        onTap: () => open(const ExploreExpenditurePlansScreen()),
+      ),
+    ];
+
+    // Two per row, each row as tall as its taller tile; an odd last tile
+    // takes the full width.
+    const gap = 12.0;
+    return Column(
+      children: [
+        for (int i = 0; i < actions.length; i += 2) ...[
+          if (i > 0) const SizedBox(height: gap),
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(child: _QuickActionTile(action: actions[i])),
+                if (i + 1 < actions.length) ...[
+                  const SizedBox(width: gap),
+                  Expanded(child: _QuickActionTile(action: actions[i + 1])),
+                ],
+              ],
+            ),
+          ),
+        ],
       ],
     );
   }
@@ -1300,31 +969,47 @@ class _HomeScreenState extends State<HomeScreen> {
   // 9. MARKET TODAY CARD
   // ==========================================
   Widget _buildMarketTodayCard(BuildContext context) {
-    return Container(
+    void open(Widget page) =>
+        Navigator.of(context).push(MaterialPageRoute(builder: (_) => page));
+
+    return GlassCard(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppColors.cardBg,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.borderLight),
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Market today',
-            style: GoogleFonts.outfit(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              color: AppColors.textDark,
-            ),
+          Row(
+            children: [
+              const Icon(Icons.show_chart_rounded, color: AppColors.accentCyan, size: 22),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Market today',
+                  style: GoogleFonts.outfit(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.onGlass,
+                  ),
+                ),
+              ),
+              IconButton(
+                tooltip: 'Refresh rates',
+                onPressed: _marketLoading
+                    ? null
+                    : () {
+                        setState(() => _marketLoading = true);
+                        _loadMarketRates();
+                      },
+                icon: const Icon(Icons.refresh_rounded, color: AppColors.onGlass, size: 20),
+              ),
+            ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
 
           if (_marketLoading)
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 16),
-              child: Center(child: CircularProgressIndicator(color: AppColors.primary, strokeWidth: 2)),
+              child: Center(child: CircularProgressIndicator(color: AppColors.accentCyan, strokeWidth: 2)),
             )
           else
             GridView.count(
@@ -1333,60 +1018,261 @@ class _HomeScreenState extends State<HomeScreen> {
               physics: const NeverScrollableScrollPhysics(),
               mainAxisSpacing: 10,
               crossAxisSpacing: 10,
-              childAspectRatio: 2.1,
+              // Wider tiles in the desktop half-column; taller on phones so
+              // large accessibility text still fits.
+              childAspectRatio: context.isDesktop ? 2.4 : 1.45,
               children: [
-                _buildMarketTile('USD / LKR',
-                    _usdLkr != null ? 'Rs ${_usdLkr!.toStringAsFixed(2)}' : 'Unavailable'),
-                _buildMarketTile('Gold (per gram)',
-                    _goldPricePerGram != null ? 'Rs ${_formatMoney(_goldPricePerGram!)}' : 'Unavailable'),
-                _buildMarketTile(_fdLabel ?? 'Fixed deposit',
-                    _fdRate != null ? '${_fdRate!.toStringAsFixed(2)}%' : 'Unavailable'),
-                _buildMarketTile(_tbillLabel ?? 'Treasury bill',
-                    _tbillRate != null ? '${_tbillRate!.toStringAsFixed(2)}%' : 'Unavailable'),
+                _buildMarketTile(
+                  icon: Icons.currency_exchange_rounded,
+                  color: const Color(0xFF34D399),
+                  label: 'USD / LKR',
+                  value: _usdLkr != null ? 'Rs ${_usdLkr!.toStringAsFixed(2)}' : 'Unavailable',
+                  onTap: () => open(const InvestingOptionsScreen()),
+                ),
+                _buildMarketTile(
+                  icon: Icons.diamond_rounded,
+                  color: AppColors.gold,
+                  label: 'Gold (per gram)',
+                  value: _goldPricePerGram != null
+                      ? 'Rs ${_formatMoney(_goldPricePerGram!)}'
+                      : 'Unavailable',
+                  onTap: () => open(const GoldInvestmentsScreen()),
+                ),
+                _buildMarketTile(
+                  icon: Icons.savings_rounded,
+                  color: AppColors.accentCyan,
+                  label: _fdLabel ?? 'Fixed deposit',
+                  value: _fdRate != null ? '${_fdRate!.toStringAsFixed(2)}%' : 'Unavailable',
+                  onTap: () => open(const FdInvestmentsScreen()),
+                ),
+                _buildMarketTile(
+                  icon: Icons.account_balance_rounded,
+                  color: AppColors.accentLavender,
+                  label: _tbillLabel ?? 'Treasury bill',
+                  value: _tbillRate != null ? '${_tbillRate!.toStringAsFixed(2)}%' : 'Unavailable',
+                  onTap: () => open(const GovSecuritiesScreen()),
+                ),
               ],
             ),
           const SizedBox(height: 14),
           Text(
-            'USD/LKR updates live. Gold, FD and T-Bill are reference rates, not real-time.',
-            style: GoogleFonts.outfit(fontSize: 12, color: AppColors.textMuted),
+            'Tap a rate for details. USD/LKR updates live; gold, FD and T-bill are reference rates.',
+            style: GoogleFonts.outfit(fontSize: 12, color: AppColors.onGlassMuted),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildMarketTile(String label, String value) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.mintBg,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.borderLight),
+  Widget _buildMarketTile({
+    required IconData icon,
+    required Color color,
+    required String label,
+    required String value,
+    required VoidCallback onTap,
+  }) {
+    return _Pressable(
+      onTap: onTap,
+      borderRadius: 16,
+      fill: AppColors.innerFill,
+      accent: color,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(5),
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(icon, color: color, size: 15),
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    label,
+                    style: GoogleFonts.outfit(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.onGlassMuted,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Text(
+              value,
+              style: GoogleFonts.outfit(
+                fontSize: 15,
+                fontWeight: FontWeight.w800,
+                color: AppColors.onGlass,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            label,
-            style: GoogleFonts.outfit(
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              color: AppColors.textMuted,
+    );
+  }
+}
+
+class _QuickAction {
+  final IconData icon;
+  final Color color;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  const _QuickAction({
+    required this.icon,
+    required this.color,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+}
+
+class _QuickActionTile extends StatelessWidget {
+  final _QuickAction action;
+  const _QuickActionTile({required this.action});
+
+  @override
+  Widget build(BuildContext context) {
+    final color = action.color;
+    return _Pressable(
+      onTap: action.onTap,
+      borderRadius: 22,
+      fill: AppColors.glassFill,
+      accent: color,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 50,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [color, Color.lerp(color, Colors.black, 0.35)!],
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: color.withValues(alpha: 0.45),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Icon(action.icon, color: Colors.white, size: 26),
+                ),
+                const Spacer(),
+                Icon(Icons.arrow_outward_rounded, color: color, size: 20),
+              ],
             ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 2),
-          Text(
-            value,
-            style: GoogleFonts.outfit(
-              fontSize: 15,
-              fontWeight: FontWeight.w800,
-              color: AppColors.textDark,
+            const SizedBox(height: 14),
+            Text(
+              action.title,
+              style: GoogleFonts.outfit(
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: AppColors.onGlass,
+                height: 1.2,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              action.subtitle,
+              style: GoogleFonts.outfit(fontSize: 12, color: AppColors.onGlassMuted),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Tappable glass surface that shrinks slightly while pressed and lights up
+/// its border on hover, so Home's tiles feel like buttons.
+class _Pressable extends StatefulWidget {
+  final Widget child;
+  final VoidCallback onTap;
+  final double borderRadius;
+  final Color fill;
+  final Color? accent;
+
+  const _Pressable({
+    required this.child,
+    required this.onTap,
+    required this.borderRadius,
+    required this.fill,
+    this.accent,
+  });
+
+  @override
+  State<_Pressable> createState() => _PressableState();
+}
+
+class _PressableState extends State<_Pressable> {
+  bool _pressed = false;
+  bool _hover = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final radius = BorderRadius.circular(widget.borderRadius);
+    final accent = widget.accent ?? AppColors.accentCyan;
+    final lit = _pressed || _hover;
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _hover = true),
+      onExit: (_) => setState(() => _hover = false),
+      child: AnimatedScale(
+        scale: _pressed ? 0.96 : 1,
+        duration: const Duration(milliseconds: 120),
+        curve: Curves.easeOut,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          decoration: BoxDecoration(
+            color: widget.fill,
+            borderRadius: radius,
+            border: Border.all(
+              color: lit ? accent.withValues(alpha: 0.8) : AppColors.glassBorder,
+              width: 1.2,
             ),
           ),
-        ],
+          child: Material(
+            type: MaterialType.transparency,
+            child: InkWell(
+              borderRadius: radius,
+              splashColor: accent.withValues(alpha: 0.2),
+              highlightColor: accent.withValues(alpha: 0.08),
+              onTap: widget.onTap,
+              onTapDown: (_) => setState(() => _pressed = true),
+              onTapUp: (_) => setState(() => _pressed = false),
+              onTapCancel: () => setState(() => _pressed = false),
+              child: widget.child,
+            ),
+          ),
+        ),
       ),
     );
   }

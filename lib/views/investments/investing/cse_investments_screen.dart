@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../../models/investing_models.dart';
 import '../../../services/investing_data_service.dart';
+import '../../../core/theme/app_theme.dart';
 import 'investing_widgets.dart';
 
 enum _MoversTab { gainers, losers, active }
@@ -112,11 +113,13 @@ class _CseInvestmentsScreenState extends State<CseInvestmentsScreen> {
               Icon(Icons.circle, size: 10,
                   color: _marketOpen ? InvestColors.green : InvestColors.muted),
               const SizedBox(width: 6),
-              Text(
-                _marketOpen
-                    ? 'Market open · closes 2:30 pm'
-                    : 'Market closed · trades 9:30 am – 2:30 pm, Mon–Fri',
-                style: investText(12, weight: FontWeight.w600, color: InvestColors.muted),
+              Expanded(
+                child: Text(
+                  _marketOpen
+                      ? 'Market open · closes 2:30 pm'
+                      : 'Market closed · trades 9:30 am – 2:30 pm, Mon–Fri',
+                  style: investText(12, weight: FontWeight.w600, color: InvestColors.muted),
+                ),
               ),
             ],
           ),
@@ -136,7 +139,7 @@ class _CseInvestmentsScreenState extends State<CseInvestmentsScreen> {
                   value: idx.value?.toStringAsFixed(2) ?? '—',
                   sub: '${idx.isUp ? '▲' : '▼'} ${(idx.change ?? 0).abs().toStringAsFixed(2)} '
                       '(${(idx.changePercentage ?? 0).toStringAsFixed(2)}%)',
-                  subColor: idx.isUp ? InvestColors.green : InvestColors.red,
+                  subColor: idx.isUp ? InvestColors.gain : InvestColors.red,
                 ),
               for (final idx in snap.indices)
                 if (idx.high != null && idx.low != null)
@@ -191,9 +194,9 @@ class _CseInvestmentsScreenState extends State<CseInvestmentsScreen> {
             showSelectedIcon: false,
             style: ButtonStyle(
               backgroundColor: WidgetStateProperty.resolveWith((s) =>
-                  s.contains(WidgetState.selected) ? InvestColors.green : Colors.white),
+                  s.contains(WidgetState.selected) ? Colors.white : InvestColors.greenTint),
               foregroundColor: WidgetStateProperty.resolveWith((s) =>
-                  s.contains(WidgetState.selected) ? Colors.white : InvestColors.text),
+                  s.contains(WidgetState.selected) ? AppColors.onLight : InvestColors.text),
             ),
             onSelectionChanged: (s) => setState(() => _tab = s.first),
           ),
@@ -247,7 +250,7 @@ class _CseInvestmentsScreenState extends State<CseInvestmentsScreen> {
                         textAlign: TextAlign.end,
                         style: investText(13,
                             weight: FontWeight.w700,
-                            color: q.isUp ? InvestColors.green : InvestColors.red),
+                            color: q.isUp ? InvestColors.gain : InvestColors.red),
                       ),
                     ),
                   ],
@@ -282,7 +285,7 @@ class _CseInvestmentsScreenState extends State<CseInvestmentsScreen> {
                     decoration: const BoxDecoration(
                         color: InvestColors.green, shape: BoxShape.circle),
                     child: Text('${i + 1}',
-                        style: investText(12, weight: FontWeight.w700, color: Colors.white)),
+                        style: investText(12, weight: FontWeight.w700, color: AppColors.onLight)),
                   ),
                   const SizedBox(width: 12),
                   Expanded(

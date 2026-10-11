@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../models/investing_models.dart';
 import '../../../services/investing_data_service.dart';
+import '../../../core/theme/app_theme.dart';
 import 'investing_widgets.dart';
 
 enum _FdFilter { all, banks, financeCompanies }
@@ -255,12 +256,12 @@ class _FdInvestmentsScreenState extends State<FdInvestmentsScreen> {
       label: Text(label,
           style: investText(12,
               weight: FontWeight.w600,
-              color: selected ? Colors.white : InvestColors.text)),
+              color: selected ? AppColors.onLight : InvestColors.text)),
       selected: selected,
       showCheckmark: false,
-      selectedColor: InvestColors.green,
-      backgroundColor: Colors.white,
-      side: BorderSide(color: selected ? InvestColors.green : InvestColors.border),
+      selectedColor: Colors.white,
+      backgroundColor: AppColors.glassFill,
+      side: BorderSide(color: selected ? Colors.white : InvestColors.border),
       onSelected: (_) => setState(() => _filter = value),
     );
   }
@@ -268,7 +269,7 @@ class _FdInvestmentsScreenState extends State<FdInvestmentsScreen> {
   void _showInstitution(FdRate r) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.deepNavy,
       shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
       builder: (context) => SafeArea(
@@ -308,14 +309,14 @@ class _FdInvestmentsScreenState extends State<FdInvestmentsScreen> {
                 child: ElevatedButton.icon(
                   onPressed: () => openExternal(r.sourceUrl),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: InvestColors.green,
-                    foregroundColor: Colors.white,
+                    backgroundColor: Colors.white,
+                    foregroundColor: AppColors.onLight,
                     elevation: 0,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    shape: const StadiumBorder(),
                   ),
                   icon: const Icon(Icons.open_in_new_rounded, size: 18),
                   label: Text('Open official rates page',
-                      style: investText(14, weight: FontWeight.w700, color: Colors.white)),
+                      style: investText(14, weight: FontWeight.w700, color: AppColors.onLight)),
                 ),
               ),
             ],

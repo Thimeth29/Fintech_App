@@ -61,7 +61,7 @@ class ChatViewModel extends ChangeNotifier {
   }
 
   /// Loads live CSE market data (and user's financial history) into FinBot
-  Future<void> loadFinancialContext({String? userId}) async {
+  Future<void> loadFinancialContext({String? userId, String? sandboxSummary}) async {
     if (_contextReady || _loadingContext) return;
     _loadingContext = true;
     try {
@@ -91,6 +91,8 @@ class ChatViewModel extends ChangeNotifier {
         expenses: expenses,
         investmentActions: actions,
         profile: profile,
+        userId: userId,
+        sandboxSummary: sandboxSummary,
       );
       _aiService = AiService(financialContext: snapshot);
       _contextReady = true;

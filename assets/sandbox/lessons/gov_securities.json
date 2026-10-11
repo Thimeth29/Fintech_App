@@ -1,0 +1,80 @@
+{
+  "module": "gov_securities",
+  "lessons": [
+    {
+      "id": "gov_basics",
+      "title": "Lending to the government",
+      "summary": "Who issues T-bills and T-bonds, and why they're considered low-risk.",
+      "cards": [
+        { "title": "Who issues them", "body": "The Government of Sri Lanka borrows by selling Treasury bills and bonds, managed by the Central Bank's Public Debt Department. Buying one means lending to the government.", "visual": "bank" },
+        { "title": "Why low-risk", "body": "They're seen as the lowest-risk rupee investment, because the government can raise taxes or borrow to repay in rupees. Low-risk isn't no-risk, but it's lower than a company or a bank.", "visual": "shield" },
+        { "title": "How to buy", "body": "Individuals usually buy through a primary dealer or a bank's treasury desk. The government sells new ones at regular auctions.", "visual": "receipt" }
+      ],
+      "quiz": [
+        { "question": "Buying a T-bill means you are…", "options": ["Buying a share of the government", "Lending money to the government", "Depositing in the Central Bank", "Paying tax early"], "answer": 1, "explanation": "You're a lender; the government repays you." },
+        { "question": "Why are government securities considered low-risk?", "options": ["They can never lose value", "The government can repay in its own currency", "They're insured by banks", "They're not traded"], "answer": 1, "explanation": "Low risk, but not zero." },
+        { "question": "Who manages the issuing of T-bills and T-bonds?", "options": ["The CSE", "The Central Bank's Public Debt Department", "Commercial banks", "The SEC"], "answer": 1, "explanation": "The Central Bank runs the auctions." }
+      ]
+    },
+    {
+      "id": "gov_tbills",
+      "title": "Treasury bills",
+      "summary": "Short-term, sold at a discount.",
+      "cards": [
+        { "title": "91, 182 or 364 days", "body": "T-bills are short-term: about 3, 6 or 12 months.", "visual": "calendar" },
+        { "title": "Sold at a discount", "body": "There's no interest payment. You pay less than the face value now, and get the full face value at maturity. The gap is your return.", "visual": "coins" },
+        { "title": "Example", "body": "A Rs 100,000 364-day bill at an 8.65% yield costs about Rs 92,060 today. At maturity you get Rs 100,000 (less 10% tax on the Rs 7,940 gain in the trainer).", "visual": "percent" }
+      ],
+      "quiz": [
+        { "question": "How does a T-bill pay you?", "options": ["Monthly interest", "You buy below face value and receive face value at maturity", "Dividends", "Coupons every 6 months"], "answer": 1, "explanation": "That's what 'sold at a discount' means." },
+        { "question": "Which is NOT a standard T-bill tenure?", "options": ["91 days", "182 days", "364 days", "5 years"], "answer": 3, "explanation": "5 years would be a T-bond." },
+        { "question": "A higher yield on a new T-bill means you pay…", "options": ["More today", "Less today for the same face value", "The same", "Nothing"], "answer": 1, "explanation": "Bigger discount = higher return." }
+      ]
+    },
+    {
+      "id": "gov_tbonds",
+      "title": "Treasury bonds and auctions",
+      "summary": "Longer loans with regular coupons.",
+      "cards": [
+        { "title": "2 to 20 years", "body": "T-bonds last much longer than bills. In the trainer you can choose 2, 5 or 10 years.", "visual": "calendar" },
+        { "title": "Coupons", "body": "A bond pays a fixed coupon every 6 months. A Rs 100,000 bond with a 10% coupon pays Rs 5,000 twice a year, and your Rs 100,000 back at maturity.", "visual": "coins" },
+        { "title": "Auctions", "body": "Investors bid the yields they want; the government accepts the lowest-cost bids it needs. The results set the going rate for that tenure.", "visual": "target" }
+      ],
+      "quiz": [
+        { "question": "A Rs 200,000 bond has a 9% coupon. Each 6-monthly coupon (before tax) is…", "options": ["Rs 9,000", "Rs 18,000", "Rs 4,500", "Rs 900"], "answer": 0, "explanation": "200,000 × 9% ÷ 2 = Rs 9,000." },
+        { "question": "How often do T-bonds pay coupons?", "options": ["Monthly", "Every 6 months", "Only at maturity", "Every day"], "answer": 1, "explanation": "Semi-annual coupons." },
+        { "question": "At a bond auction, investors bid…", "options": ["The yield they want", "The share price", "Their tax rate", "Nothing"], "answer": 0, "explanation": "Auctions discover the market yield." }
+      ]
+    },
+    {
+      "id": "gov_yield_price",
+      "title": "Yields, prices and selling early",
+      "summary": "When rates rise, existing bond prices fall.",
+      "cards": [
+        { "title": "The seesaw", "body": "Your bond pays a fixed coupon. If new bonds start paying more, nobody will pay full price for yours — its price drops. If rates fall, your bond is worth more.", "visual": "seesaw" },
+        { "title": "Hold to maturity", "body": "If you hold until maturity, price changes along the way don't matter: you get every coupon and your face value back.", "visual": "shield" },
+        { "title": "Selling early", "body": "Sell before maturity and you get today's market price — a loss if rates have risen since you bought. This is interest-rate risk. Longer bonds feel it more.", "visual": "line_down" }
+      ],
+      "quiz": [
+        { "question": "Market yields rise after you buy a bond. Its price…", "options": ["Rises", "Falls", "Stays at face value", "Doubles"], "answer": 1, "explanation": "Its fixed coupon looks worse than new bonds." },
+        { "question": "You hold a bond to maturity. What do you get?", "options": ["Today's market price", "All coupons and the face value", "Nothing if rates rose", "Only the last coupon"], "answer": 1, "explanation": "Price swings only matter if you sell early." },
+        { "question": "Which bond is hit harder by a rate rise?", "options": ["A 2-year bond", "A 10-year bond", "Both equally", "Neither"], "answer": 1, "explanation": "Longer bonds have more coupons at the old rate." }
+      ]
+    },
+    {
+      "id": "gov_vs_fd",
+      "title": "T-bills vs fixed deposits",
+      "summary": "Two low-risk choices, compared.",
+      "cards": [
+        { "title": "Who you lend to", "body": "An FD is a loan to a bank or finance company; a T-bill is a loan to the government. The government is generally seen as the safer borrower.", "visual": "scale" },
+        { "title": "Rates", "body": "Some finance companies pay more than T-bills, while big banks often pay less. Compare after-tax rates for the same period.", "visual": "percent" },
+        { "title": "Flexibility", "body": "T-bills and bonds can be sold before maturity at the market price. FDs can be broken early, usually with an interest penalty.", "visual": "idea" }
+      ],
+      "quiz": [
+        { "question": "A T-bill is a loan to…", "options": ["A bank", "The government", "A company", "The CSE"], "answer": 1, "explanation": "FDs are loans to banks or finance companies." },
+        { "question": "To compare a 1-year T-bill and a 12-month FD fairly, compare…", "options": ["Their names", "Their after-tax returns for the same period", "Which bank is closer", "Their logos"], "answer": 1, "explanation": "Same period, same tax treatment." },
+        { "question": "What usually happens if you need your FD money early?", "options": ["You get a bonus", "You pay an interest penalty", "You can't get it at all", "The government pays you"], "answer": 1, "explanation": "Breaking early reduces interest." }
+      ]
+    }
+  ]
+}

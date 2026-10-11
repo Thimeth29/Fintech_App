@@ -2,7 +2,12 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 
-/// Clean rounded Card container with subtle border & shadow matching the Forest Green light theme system.
+/// Frosted-glass card: backdrop blur, navy-tinted translucent fill, thin
+/// white border, top-left sheen and a soft navy shadow.
+///
+/// [blur] defaults to the glass sigma; pass 0 for a flat translucent pane.
+/// Blur is skipped automatically when [AppGlass.useBlur] is false, and the
+/// fill gets more opaque to compensate.
 class GlassCard extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry padding;
@@ -13,6 +18,7 @@ class GlassCard extends StatelessWidget {
   final double borderRadius;
   final Color? borderColor;
   final VoidCallback? onTap;
+  final double? width;
 
   const GlassCard({
     super.key,
@@ -21,62 +27,87 @@ class GlassCard extends StatelessWidget {
     this.margin,
     this.gradient,
     this.backgroundColor,
-    this.blur = 0.0,
-    this.borderRadius = 22.0,
+    this.blur = AppGlass.blurSigma,
+    this.borderRadius = AppGlass.radius,
     this.borderColor,
     this.onTap,
+    this.width,
   });
 
   @override
   Widget build(BuildContext context) {
-    final cardContent = Container(
-      padding: padding,
+    final useBlur = blur > 0 && AppGlass.useBlur(context);
+    final radius = BorderRadius.circular(borderRadius);
+    final fill = backgroundColor ??
+        (gradient == null
+            ? (useBlur ? AppColors.glassFill : AppColors.glassFillNoBlur)
+            : null);
+
+    Widget pane = Container(
       decoration: BoxDecoration(
-        color: backgroundColor ?? (gradient == null ? Colors.white : null),
+        color: fill,
         gradient: gradient,
-        borderRadius: BorderRadius.circular(borderRadius),
-        border: Border.all(
-          color: borderColor ?? AppColors.borderLight,
-          width: 1.0,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 12,
-            spreadRadius: 0,
-            offset: const Offset(0, 4),
+        borderRadius: radius,
+      ),
+      foregroundDecoration: BoxDecoration(
+        borderRadius: radius,
+        border: Border.all(color: borderColor ?? AppColors.glassBorder, width: 1.0),
+      ),
+      child: Stack(
+        // Passthrough keeps the child's constraints identical to the old
+        // plain-Container card, so existing layouts don't shift.
+        fit: StackFit.passthrough,
+        children: [
+          const Positioned.fill(
+            child: IgnorePointer(
+              child: DecoratedBox(
+                decoration: BoxDecoration(gradient: AppGradients.glassHighlight),
+              ),
+            ),
           ),
+          Padding(padding: padding, child: child),
         ],
       ),
-      child: child,
     );
 
-    Widget result = cardContent;
-
-    if (blur > 0) {
-      result = ClipRRect(
-        borderRadius: BorderRadius.circular(borderRadius),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
-          child: result,
+    if (onTap != null) {
+      pane = Material(
+        type: MaterialType.transparency,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: radius,
+          splashColor: Colors.white.withValues(alpha: 0.10),
+          highlightColor: Colors.white.withValues(alpha: 0.06),
+          child: pane,
         ),
       );
+    }
+
+    pane = ClipRRect(
+      borderRadius: radius,
+      child: useBlur
+          ? BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
+              child: pane,
+            )
+          : pane,
+    );
+
+    Widget result = RepaintBoundary(
+      child: DecoratedBox(
+        decoration: BoxDecoration(borderRadius: radius, boxShadow: AppGlass.shadow),
+        child: pane,
+      ),
+    );
+
+    if (width != null) {
+      result = SizedBox(width: width, child: result);
     }
 
     if (margin != null) {
       result = Padding(padding: margin!, child: result);
     }
 
-    if (onTap != null) {
-      result = InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(borderRadius),
-        child: result,
-      );
-    }
-
     return result;
   }
 }
-
-

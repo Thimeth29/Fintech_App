@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/widgets/gradient_scaffold.dart';
 import '../../core/widgets/glass_card.dart';
+import '../../core/theme/app_backgrounds.dart';
 import '../../core/theme/app_theme.dart';
 import '../../services/auth_service.dart';
 import 'reset_password_screen.dart';
@@ -139,6 +140,7 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
   @override
   Widget build(BuildContext context) {
     return GradientScaffold(
+      background: AppBackgroundKind.welcome,
       maxContentWidth: 440,
       body: SafeArea(
         child: Column(
@@ -157,10 +159,10 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
                       child: Container(
                         padding: const EdgeInsets.all(18),
                         decoration: const BoxDecoration(
-                          color: AppColors.mintBg,
+                          color: AppColors.glassFillStrong,
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.mark_email_read_rounded, size: 36, color: AppColors.primary),
+                        child: const Icon(Icons.mark_email_read_rounded, size: 36, color: AppColors.accentCyan),
                       ),
                     ),
                     const SizedBox(height: 20),
@@ -170,7 +172,7 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
                       style: GoogleFonts.outfit(
                         fontSize: 28,
                         fontWeight: FontWeight.w800,
-                        color: AppColors.textDark,
+                        color: AppColors.onGlass,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -179,8 +181,9 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
                       textAlign: TextAlign.center,
                       style: GoogleFonts.outfit(
                         fontSize: 13,
-                        color: AppColors.textMuted,
+                        color: AppColors.onGlass,
                         height: 1.5,
+                        shadows: kTitleShadow,
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -188,16 +191,16 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                         decoration: BoxDecoration(
-                          color: AppColors.mintBg,
+                          color: AppColors.glassFillStrong,
                           borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: AppColors.primary.withValues(alpha: 0.25)),
+                          border: Border.all(color: AppColors.accentCyan.withValues(alpha: 0.25)),
                         ),
                         child: Text(
                           'Expires in: $_timerLabel',
                           style: GoogleFonts.outfit(
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
-                            color: AppColors.primary,
+                            color: AppColors.accentCyan,
                           ),
                         ),
                       ),
@@ -205,7 +208,6 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
                     const SizedBox(height: 28),
                     GlassCard(
                       padding: const EdgeInsets.all(22),
-                      backgroundColor: Colors.white,
                       child: Column(
                         children: [
                           Row(
@@ -225,33 +227,33 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
                                       style: GoogleFonts.outfit(
                                         fontSize: 20,
                                         fontWeight: FontWeight.w700,
-                                        color: AppColors.textDark,
+                                        color: AppColors.onGlass,
                                       ),
-                                      cursorColor: AppColors.primary,
+                                      cursorColor: AppColors.accentCyan,
                                       inputFormatters: [
                                         FilteringTextInputFormatter.digitsOnly
                                       ],
                                       decoration: InputDecoration(
                                         counterText: '',
                                         filled: true,
-                                        fillColor: Colors.white,
+                                        fillColor: AppColors.glassFillStrong,
                                         contentPadding: EdgeInsets.zero,
                                         border: OutlineInputBorder(
                                           borderRadius: BorderRadius.circular(14),
                                           borderSide: const BorderSide(
-                                            color: AppColors.borderLight,
+                                            color: AppColors.glassBorder,
                                           ),
                                         ),
                                         enabledBorder: OutlineInputBorder(
                                           borderRadius: BorderRadius.circular(14),
                                           borderSide: const BorderSide(
-                                            color: AppColors.borderLight,
+                                            color: AppColors.glassBorder,
                                           ),
                                         ),
                                         focusedBorder: OutlineInputBorder(
                                           borderRadius: BorderRadius.circular(14),
                                           borderSide: const BorderSide(
-                                            color: AppColors.primary,
+                                            color: AppColors.accentCyan,
                                             width: 1.8,
                                           ),
                                         ),
@@ -269,7 +271,7 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
                               _errorMessage!,
                               textAlign: TextAlign.center,
                               style: GoogleFonts.outfit(
-                                color: AppColors.rose,
+                                color: AppColors.loss,
                                 fontSize: 13,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -282,14 +284,15 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
                             onPressed: _confirm,
                           ),
                           const SizedBox(height: 16),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                          Wrap(
+                            alignment: WrapAlignment.center,
+                            crossAxisAlignment: WrapCrossAlignment.center,
                             children: [
                               Text(
                                 "Didn't receive the code? ",
                                 style: GoogleFonts.outfit(
                                   fontSize: 13,
-                                  color: AppColors.textMuted,
+                                  color: AppColors.onGlassMuted,
                                 ),
                               ),
                               GestureDetector(
@@ -300,8 +303,8 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
                                     fontSize: 13,
                                     fontWeight: FontWeight.w700,
                                     color: _secondsLeft == 0
-                                        ? AppColors.primary
-                                        : AppColors.textMuted,
+                                        ? AppColors.accentCyan
+                                        : AppColors.onGlassMuted,
                                   ),
                                 ),
                               ),

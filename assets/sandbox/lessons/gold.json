@@ -1,0 +1,66 @@
+{
+  "module": "gold",
+  "lessons": [
+    {
+      "id": "gold_basics",
+      "title": "Gold as a store of value",
+      "summary": "Why people have trusted gold for thousands of years — and its limits.",
+      "cards": [
+        { "title": "Holds value", "body": "Gold can't be printed, rarely rusts or breaks, and is wanted worldwide. Over long periods it has tended to keep its buying power.", "visual": "gold" },
+        { "title": "No income", "body": "Gold pays no interest and no dividends. Your return comes only from the price going up — which it doesn't always do.", "visual": "scale" },
+        { "title": "24K vs 22K", "body": "24K is 99.9% pure, used for bullion (bars and coins). 22K is 91.6% gold mixed with other metals, which makes it harder — used for jewellery.", "visual": "pie" }
+      ],
+      "quiz": [
+        { "question": "Which is purer?", "options": ["22K", "24K", "They're the same", "18K"], "answer": 1, "explanation": "24K ≈ 99.9% pure; 22K = 91.6%." },
+        { "question": "What income does gold pay while you hold it?", "options": ["Monthly interest", "Dividends", "None", "Coupons"], "answer": 2, "explanation": "Your return depends only on its price." },
+        { "question": "Why is 22K used for jewellery?", "options": ["It's cheaper to mine", "The mixed metals make it harder and more durable", "It's purer", "It's required by law"], "answer": 1, "explanation": "Pure gold is soft." }
+      ]
+    },
+    {
+      "id": "gold_units",
+      "title": "Grams and sovereigns",
+      "summary": "How gold is priced in Sri Lanka.",
+      "cards": [
+        { "title": "Per gram", "body": "Prices are quoted per gram. The trainer starts from the same reference price shown on your Home screen's \"Market today\" card.", "visual": "gold" },
+        { "title": "The sovereign (pavun)", "body": "Jewellers often quote per sovereign — 8 grams. If gold is Rs 25,000 a gram, a sovereign of 24K is Rs 200,000.", "visual": "coins" },
+        { "title": "22K pricing", "body": "A gram of 22K contains 0.916 g of pure gold, so it's priced at about 91.6% of 24K.", "visual": "percent" }
+      ],
+      "quiz": [
+        { "question": "How many grams in one sovereign?", "options": ["1", "8", "10", "31.1"], "answer": 1, "explanation": "A sovereign (pavun) is 8 grams." },
+        { "question": "24K gold is Rs 25,000/g. About how much is 1 g of 22K?", "options": ["Rs 25,000", "Rs 22,900", "Rs 20,000", "Rs 27,000"], "answer": 1, "explanation": "25,000 × 0.916 ≈ Rs 22,900." },
+        { "question": "Where does the trainer's starting gold price come from?", "options": ["A random number", "The same reference as Home's Market today card", "Your bank", "The CSE"], "answer": 1, "explanation": "They start from the same source, so the numbers match." }
+      ]
+    },
+    {
+      "id": "gold_costs",
+      "title": "The spread and making charges",
+      "summary": "The hidden costs of buying gold.",
+      "cards": [
+        { "title": "Buy high, sell low", "body": "Dealers sell to you above the market price and buy back below it. That gap is the spread. In the trainer it's 3% in total.", "visual": "scale" },
+        { "title": "Making charges", "body": "Jewellery adds a making charge for the craftsmanship — often 10–20%. When you sell jewellery, you're paid only for the gold weight, so the making charge is gone.", "visual": "receipt" },
+        { "title": "Bullion for investing", "body": "If your goal is investment, bullion avoids making charges. Jewellery is something you enjoy wearing; treat it as consumption, not an investment.", "visual": "idea" }
+      ],
+      "quiz": [
+        { "question": "The spread is…", "options": ["A tax", "The gap between the buying and selling price", "Interest on gold", "A jeweller's discount"], "answer": 1, "explanation": "It's the dealer's margin." },
+        { "question": "When you sell gold jewellery, the making charge is…", "options": ["Refunded in full", "Not refunded", "Doubled", "Paid by the government"], "answer": 1, "explanation": "You're paid for the gold content only." },
+        { "question": "You buy and immediately sell gold. What happens?", "options": ["You break even", "You lose about the spread", "You make a profit", "Nothing happens"], "answer": 1, "explanation": "The price must rise more than the spread before you profit." }
+      ]
+    },
+    {
+      "id": "gold_moves",
+      "title": "Why gold prices move",
+      "summary": "Dollars, rupees, inflation and fear.",
+      "cards": [
+        { "title": "Priced in dollars", "body": "Gold trades worldwide in US dollars. The Sri Lankan price is roughly the dollar price × the USD/LKR rate.", "visual": "chart_index" },
+        { "title": "Rupee moves matter", "body": "If the rupee weakens against the dollar, local gold prices rise even if the world price doesn't change.", "visual": "line_up" },
+        { "title": "Inflation hedge", "body": "When people worry about inflation or crises, they buy gold, pushing prices up. This 'hedge' works over long periods, but not every year.", "visual": "shield" },
+        { "title": "Global demand", "body": "Central banks, jewellery demand in India and China, and investors all move the price. When shares look exciting, gold can fall.", "visual": "pie" }
+      ],
+      "quiz": [
+        { "question": "The rupee weakens against the dollar. What usually happens to local gold prices?", "options": ["They rise", "They fall", "No change", "Gold stops trading"], "answer": 0, "explanation": "Each dollar of gold now costs more rupees." },
+        { "question": "Gold as an 'inflation hedge' means…", "options": ["It always beats inflation every year", "It has tended to hold value when prices rise over long periods", "It is taxed less", "It pays interest linked to inflation"], "answer": 1, "explanation": "It's a long-run tendency, not a guarantee." },
+        { "question": "Gold's world price is mainly quoted in…", "options": ["Rupees", "US dollars", "Euros", "Yen"], "answer": 1, "explanation": "Local prices are converted from the dollar price." }
+      ]
+    }
+  ]
+}

@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/widgets/gradient_scaffold.dart';
 import '../../core/widgets/glass_card.dart';
+import '../../core/theme/app_backgrounds.dart';
 import '../../core/theme/app_theme.dart';
 import '../../services/auth_service.dart';
 import 'login_screen.dart';
@@ -70,6 +71,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return GradientScaffold(
+      background: AppBackgroundKind.welcome,
       maxContentWidth: 440,
       body: SafeArea(
         child: Column(
@@ -88,10 +90,10 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                       child: Container(
                         padding: const EdgeInsets.all(18),
                         decoration: const BoxDecoration(
-                          color: AppColors.mintBg,
+                          color: AppColors.glassFillStrong,
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.key_rounded, size: 36, color: AppColors.primary),
+                        child: const Icon(Icons.key_rounded, size: 36, color: AppColors.accentCyan),
                       ),
                     ),
                     const SizedBox(height: 20),
@@ -101,7 +103,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                       style: GoogleFonts.outfit(
                         fontSize: 28,
                         fontWeight: FontWeight.w800,
-                        color: AppColors.textDark,
+                        color: AppColors.onGlass,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -110,13 +112,13 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                       textAlign: TextAlign.center,
                       style: GoogleFonts.outfit(
                         fontSize: 13,
-                        color: AppColors.textMuted,
+                        color: AppColors.onGlass,
+                        shadows: kTitleShadow,
                       ),
                     ),
                     const SizedBox(height: 28),
                     GlassCard(
                       padding: const EdgeInsets.all(22),
-                      backgroundColor: Colors.white,
                       child: Column(
                         children: [
                           LabeledTextField(
@@ -137,7 +139,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                             Text(
                               _errorMessage!,
                               style: GoogleFonts.outfit(
-                                color: AppColors.rose,
+                                color: AppColors.loss,
                                 fontSize: 13,
                                 fontWeight: FontWeight.w500,
                               ),

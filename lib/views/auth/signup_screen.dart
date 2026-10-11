@@ -4,8 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../core/theme/app_backgrounds.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/widgets/glass_card.dart';
+import '../../core/widgets/glass_icon_button.dart';
+import 'widgets/auth_back_button.dart';
+import '../../core/utils/money.dart';
 import '../../services/auth_service.dart';
+import '../../services/community_service.dart';
 import '../home/home_screen.dart';
 import 'login_screen.dart';
 
@@ -19,6 +25,9 @@ class SignupScreen extends StatefulWidget {
 class _SignupScreenState extends State<SignupScreen> {
   int _currentStep = 1; // 1: Account, 2: Verify, 22: Guardian (2b), 3: About You, 4: Money Profile, 5: Complete
   bool _isUnder18 = false;
+  DateTime? _dateOfBirth;
+  // Community opt-in. Off by default.
+  bool _availableForGroups = false;
 
   // Step 1 Controllers
   final _fullNameController = TextEditingController();
@@ -117,13 +126,15 @@ class _SignupScreenState extends State<SignupScreen> {
 
   void _prevStep() {
     FocusScope.of(context).unfocus();
+    if (_currentStep <= 1) {
+      authGoBack(context);
+      return;
+    }
     setState(() {
       if (_currentStep == 22) {
         _currentStep = 2;
-      } else if (_currentStep > 1) {
-        _currentStep--;
       } else {
-        Navigator.of(context).maybePop();
+        _currentStep--;
       }
     });
   }
@@ -269,13 +280,31 @@ class _SignupScreenState extends State<SignupScreen> {
           message,
           style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.w500),
         ),
-        backgroundColor: isError ? AppColors.rose : AppColors.primary,
+        backgroundColor: isError ? AppColors.lossStrong : AppColors.primary,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         margin: const EdgeInsets.all(16),
         duration: const Duration(seconds: 5),
       ),
     );
+  }
+
+  /// Best-effort: a community problem must never block sign-up. The user
+  /// can always turn this on later in Community → My Profile.
+  Future<void> _optIntoCommunity(String name, String phone) async {
+    try {
+      final community = CommunityService();
+      await community.saveProfile(
+        displayName: name,
+        phone: phone.isEmpty ? null : phone,
+        phoneVisibleInSearch: false,
+        experience: 'none',
+        interests: [if (_selectedAssets.contains('Seettu')) 'seettu'],
+        district: _selectedDistrict,
+      );
+      if (_dateOfBirth == null) await community.confirmAge();
+      await community.setAvailable(true);
+    } catch (_) {}
   }
 
   Future<void> _finishOnboarding() async {
@@ -322,8 +351,10 @@ class _SignupScreenState extends State<SignupScreen> {
           'full_name': name,
           'email': email,
           if (phone.isNotEmpty) 'mobile_number': phone,
+          if (_dateOfBirth != null) 'date_of_birth': isoDate(_dateOfBirth!),
           ...profileFields,
         });
+        if (_availableForGroups && !_isUnder18) await _optIntoCommunity(name, phone);
         if (!mounted) return;
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (_) => const HomeScreen()),
@@ -387,32 +418,32 @@ class _SignupScreenState extends State<SignupScreen> {
       firstDate: DateTime(1940),
       lastDate: DateTime.now(),
       builder: (context, child) {
-        return Theme(
-          data: ThemeData.light().copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: AppColors.primary,
-              onPrimary: Colors.white,
-            ),
-          ),
-          child: child!,
-        );
+        // The app theme's datePickerTheme already styles this as a navy
+        // glass dialog; keep the builder as a hook for future overrides.
+        return Theme(data: Theme.of(context), child: child!);
       },
     );
     if (picked != null) {
       final formatted =
           "${picked.month.toString().padLeft(2, '0')}/${picked.day.toString().padLeft(2, '0')}/${picked.year}";
-      final age = DateTime.now().year - picked.year;
+      // Exact age: the 18th birthday must have passed.
+      final now = DateTime.now();
+      final eighteenth = DateTime(picked.year + 18, picked.month, picked.day);
       setState(() {
         _dobController.text = formatted;
-        _isUnder18 = age < 18;
+        _dateOfBirth = picked;
+        _isUnder18 = eighteenth.isAfter(DateTime(now.year, now.month, now.day));
+        if (_isUnder18) _availableForGroups = false;
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.bgLight,
+    return AppBackground(
+      kind: AppBackgroundKind.welcome,
+      child: Scaffold(
+      backgroundColor: Colors.transparent,
       body: SafeArea(
         child: Column(
           children: [
@@ -427,13 +458,17 @@ class _SignupScreenState extends State<SignupScreen> {
                 child: Center(
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 480),
-                    child: _buildCurrentStepBody(),
+                    child: GlassCard(
+                      padding: const EdgeInsets.fromLTRB(20, 8, 20, 22),
+                      child: _buildCurrentStepBody(),
+                    ),
                   ),
                 ),
               ),
             ),
           ],
         ),
+      ),
       ),
     );
   }
@@ -474,20 +509,12 @@ class _SignupScreenState extends State<SignupScreen> {
           Row(
             children: [
               // Circular Back Button
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: AppColors.cardBg,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.borderLight),
-                ),
-                child: IconButton(
-                  icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                      size: 16, color: AppColors.textDark),
-                  onPressed: _prevStep,
-                  padding: EdgeInsets.zero,
-                ),
+              GlassIconButton(
+                icon: Icons.arrow_back_ios_new_rounded,
+                size: 40,
+                iconSize: 16,
+                tooltip: 'Back',
+                onPressed: _prevStep,
               ),
               const SizedBox(width: 16),
               // Progress Line & Texts
@@ -502,7 +529,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           style: GoogleFonts.outfit(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
-                            color: AppColors.textMuted,
+                            color: AppColors.onGlassMuted,
                           ),
                         ),
                         Text(
@@ -510,7 +537,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           style: GoogleFonts.outfit(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
-                            color: AppColors.textMuted,
+                            color: AppColors.onGlassMuted,
                           ),
                         ),
                       ],
@@ -521,9 +548,9 @@ class _SignupScreenState extends State<SignupScreen> {
                       child: LinearProgressIndicator(
                         value: progressRatio,
                         minHeight: 6,
-                        backgroundColor: AppColors.borderLight,
+                        backgroundColor: AppColors.glassBorder,
                         valueColor:
-                            const AlwaysStoppedAnimation<Color>(AppColors.primary),
+                            const AlwaysStoppedAnimation<Color>(AppColors.accentCyan),
                       ),
                     ),
                   ],
@@ -569,7 +596,7 @@ class _SignupScreenState extends State<SignupScreen> {
           style: GoogleFonts.outfit(
             fontSize: 26,
             fontWeight: FontWeight.w800,
-            color: AppColors.textDark,
+            color: AppColors.onGlass,
             letterSpacing: -0.5,
           ),
         ),
@@ -578,7 +605,7 @@ class _SignupScreenState extends State<SignupScreen> {
           'Practise investing safely and get money advice that explains itself.',
           style: GoogleFonts.outfit(
             fontSize: 14,
-            color: AppColors.textMuted,
+            color: AppColors.onGlassMuted,
             height: 1.4,
           ),
         ),
@@ -604,7 +631,7 @@ class _SignupScreenState extends State<SignupScreen> {
         const SizedBox(height: 4),
         Text(
           "We'll send a one-time code to verify it.",
-          style: GoogleFonts.outfit(fontSize: 12, color: AppColors.textMuted),
+          style: GoogleFonts.outfit(fontSize: 12, color: AppColors.onGlassMuted),
         ),
         const SizedBox(height: 16),
 
@@ -619,7 +646,7 @@ class _SignupScreenState extends State<SignupScreen> {
         const SizedBox(height: 4),
         Text(
           'For contact purposes only — not used to sign in.',
-          style: GoogleFonts.outfit(fontSize: 12, color: AppColors.textMuted),
+          style: GoogleFonts.outfit(fontSize: 12, color: AppColors.onGlassMuted),
         ),
         const SizedBox(height: 16),
 
@@ -633,14 +660,14 @@ class _SignupScreenState extends State<SignupScreen> {
               controller: _dobController,
               hintText: 'mm/dd/yyyy',
               suffixIcon: const Icon(Icons.calendar_today_outlined,
-                  size: 18, color: AppColors.textDark),
+                  size: 18, color: AppColors.onGlass),
             ),
           ),
         ),
         const SizedBox(height: 4),
         Text(
           'Under 18? A parent or guardian approves your account.',
-          style: GoogleFonts.outfit(fontSize: 12, color: AppColors.textMuted),
+          style: GoogleFonts.outfit(fontSize: 12, color: AppColors.onGlassMuted),
         ),
         const SizedBox(height: 16),
 
@@ -657,7 +684,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   ? Icons.visibility_outlined
                   : Icons.visibility_off_outlined,
               size: 20,
-              color: AppColors.textMuted,
+              color: AppColors.onGlassMuted,
             ),
             onPressed: () =>
                 setState(() => _obscurePassword = !_obscurePassword),
@@ -666,7 +693,7 @@ class _SignupScreenState extends State<SignupScreen> {
         const SizedBox(height: 4),
         Text(
           'At least 8 characters, with letters and numbers.',
-          style: GoogleFonts.outfit(fontSize: 12, color: AppColors.textMuted),
+          style: GoogleFonts.outfit(fontSize: 12, color: AppColors.onGlassMuted),
         ),
         const SizedBox(height: 20),
 
@@ -691,13 +718,13 @@ class _SignupScreenState extends State<SignupScreen> {
               child: RichText(
                 text: TextSpan(
                   style: GoogleFonts.outfit(
-                      fontSize: 13, color: AppColors.textMuted, height: 1.4),
+                      fontSize: 13, color: AppColors.onGlassMuted, height: 1.4),
                   children: const [
                     TextSpan(text: 'I agree to the '),
                     TextSpan(
                       text: 'Terms',
                       style: TextStyle(
-                        color: AppColors.primary,
+                        color: AppColors.accentCyan,
                         fontWeight: FontWeight.w700,
                         decoration: TextDecoration.underline,
                       ),
@@ -706,14 +733,14 @@ class _SignupScreenState extends State<SignupScreen> {
                     TextSpan(
                       text: 'Privacy Policy',
                       style: TextStyle(
-                        color: AppColors.primary,
+                        color: AppColors.accentCyan,
                         fontWeight: FontWeight.w700,
                         decoration: TextDecoration.underline,
                       ),
                     ),
                     TextSpan(
                         text:
-                            ', and understand FinOps gives educational guidance, not professional financial advice.'),
+                            ', and understand Mobile SAP gives educational guidance, not professional financial advice.'),
                   ],
                 ),
               ),
@@ -733,16 +760,16 @@ class _SignupScreenState extends State<SignupScreen> {
         // Divider OR
         Row(
           children: [
-            const Expanded(child: Divider(color: AppColors.borderLight)),
+            const Expanded(child: Divider(color: AppColors.glassBorder)),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12),
               child: Text(
                 'or',
                 style: GoogleFonts.outfit(
-                    fontSize: 13, color: AppColors.textMuted),
+                    fontSize: 13, color: AppColors.onGlassMuted),
               ),
             ),
-            const Expanded(child: Divider(color: AppColors.borderLight)),
+            const Expanded(child: Divider(color: AppColors.glassBorder)),
           ],
         ),
         const SizedBox(height: 16),
@@ -756,19 +783,19 @@ class _SignupScreenState extends State<SignupScreen> {
               'https://lh3.googleusercontent.com/COxitJu2yaJnseERlu3rE4nMTBUkoAkKfiR2HTXvW5md_3gE1KKOd72ReOmj53zznl8',
               height: 20,
               errorBuilder: (_, __, ___) =>
-                  const Icon(Icons.g_mobiledata, size: 24, color: Colors.black87),
+                  const Icon(Icons.g_mobiledata, size: 24, color: AppColors.onGlass),
             ),
             label: Text(
               'Continue with Google',
               style: GoogleFonts.outfit(
                 fontSize: 15,
                 fontWeight: FontWeight.w700,
-                color: AppColors.textDark,
+                color: AppColors.onGlass,
               ),
             ),
             style: OutlinedButton.styleFrom(
-              backgroundColor: AppColors.cardBg,
-              side: const BorderSide(color: AppColors.borderLight),
+              backgroundColor: AppColors.innerFill,
+              side: const BorderSide(color: AppColors.glassBorder),
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16)),
             ),
@@ -780,13 +807,14 @@ class _SignupScreenState extends State<SignupScreen> {
 
         // Footer Log in link
         Center(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+          child: Wrap(
+            alignment: WrapAlignment.center,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               Text(
                 'Already have an account? ',
                 style: GoogleFonts.outfit(
-                    fontSize: 14, color: AppColors.textMuted),
+                    fontSize: 14, color: AppColors.onGlassMuted),
               ),
               GestureDetector(
                 onTap: () => Navigator.of(context).pushReplacement(
@@ -797,7 +825,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   style: GoogleFonts.outfit(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.primary,
+                    color: AppColors.accentCyan,
                     decoration: TextDecoration.underline,
                   ),
                 ),
@@ -825,12 +853,12 @@ class _SignupScreenState extends State<SignupScreen> {
           width: 56,
           height: 56,
           decoration: BoxDecoration(
-            color: AppColors.mintBg,
+            color: AppColors.glassFillStrong,
             borderRadius: BorderRadius.circular(16),
           ),
           child: const Icon(
             Icons.mark_email_read_outlined,
-            color: AppColors.primary,
+            color: AppColors.accentCyan,
             size: 26,
           ),
         ),
@@ -841,7 +869,7 @@ class _SignupScreenState extends State<SignupScreen> {
           style: GoogleFonts.outfit(
             fontSize: 26,
             fontWeight: FontWeight.w800,
-            color: AppColors.textDark,
+            color: AppColors.onGlass,
             letterSpacing: -0.5,
           ),
         ),
@@ -851,14 +879,14 @@ class _SignupScreenState extends State<SignupScreen> {
             Text(
               'We sent a 6-digit code to ',
               style: GoogleFonts.outfit(
-                  fontSize: 14, color: AppColors.textMuted),
+                  fontSize: 14, color: AppColors.onGlassMuted),
             ),
             Text(
               contactText,
               style: GoogleFonts.outfit(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textDark),
+                  color: AppColors.onGlass),
             ),
             const SizedBox(width: 6),
             GestureDetector(
@@ -874,7 +902,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 style: GoogleFonts.outfit(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.primary,
+                  color: AppColors.accentCyan,
                   decoration: TextDecoration.underline,
                 ),
               ),
@@ -900,28 +928,28 @@ class _SignupScreenState extends State<SignupScreen> {
                 style: GoogleFonts.outfit(
                   fontSize: 22,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textDark,
+                  color: AppColors.onGlass,
                 ),
-                cursorColor: AppColors.primary,
+                cursorColor: AppColors.accentCyan,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 decoration: InputDecoration(
                   counterText: '',
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: AppColors.glassFillStrong,
                   contentPadding: EdgeInsets.zero,
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide(
                       color: isFilled
-                          ? AppColors.primary
-                          : AppColors.borderLight,
+                          ? AppColors.accentCyan
+                          : AppColors.glassBorder,
                       width: isFilled ? 1.5 : 1,
                     ),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                     borderSide: const BorderSide(
-                        color: AppColors.primary, width: 2),
+                        color: AppColors.accentCyan, width: 2),
                   ),
                 ),
                 onChanged: (val) {
@@ -944,7 +972,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   ? "Didn't get it? Resend in 0:${_resendSecondsLeft.toString().padLeft(2, '0')}"
                   : "Didn't get it?",
               style: GoogleFonts.outfit(
-                  fontSize: 13, color: AppColors.textMuted),
+                  fontSize: 13, color: AppColors.onGlassMuted),
             ),
             if (_resendSecondsLeft == 0) ...[
               const SizedBox(width: 6),
@@ -955,7 +983,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   style: GoogleFonts.outfit(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.primary,
+                    color: AppColors.accentCyan,
                     decoration: TextDecoration.underline,
                   ),
                 ),
@@ -969,21 +997,21 @@ class _SignupScreenState extends State<SignupScreen> {
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: AppColors.cardBg,
+            color: AppColors.innerFill,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.borderLight),
+            border: Border.all(color: AppColors.glassBorder),
           ),
           child: Row(
             children: [
               const Icon(Icons.info_outline_rounded,
-                  color: AppColors.primary, size: 22),
+                  color: AppColors.accentCyan, size: 22),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   "If you're under 18, we'll ask a parent or guardian to approve your account next.",
                   style: GoogleFonts.outfit(
                     fontSize: 13,
-                    color: AppColors.textMuted,
+                    color: AppColors.onGlassMuted,
                     height: 1.4,
                   ),
                 ),
@@ -1017,7 +1045,7 @@ class _SignupScreenState extends State<SignupScreen> {
           style: GoogleFonts.outfit(
             fontSize: 26,
             fontWeight: FontWeight.w800,
-            color: AppColors.textDark,
+            color: AppColors.onGlass,
             letterSpacing: -0.5,
           ),
         ),
@@ -1026,7 +1054,7 @@ class _SignupScreenState extends State<SignupScreen> {
           "Because you're under 18, a parent or guardian needs to approve your account.",
           style: GoogleFonts.outfit(
             fontSize: 14,
-            color: AppColors.textMuted,
+            color: AppColors.onGlassMuted,
             height: 1.4,
           ),
         ),
@@ -1061,7 +1089,7 @@ class _SignupScreenState extends State<SignupScreen> {
         const SizedBox(height: 4),
         Text(
           "We'll send them a link to approve. They can see your learning progress, never your password.",
-          style: GoogleFonts.outfit(fontSize: 12, color: AppColors.textMuted),
+          style: GoogleFonts.outfit(fontSize: 12, color: AppColors.onGlassMuted),
         ),
         const SizedBox(height: 24),
 
@@ -1069,7 +1097,7 @@ class _SignupScreenState extends State<SignupScreen> {
         Container(
           padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
-            color: AppColors.mintBg,
+            color: AppColors.glassFillStrong,
             borderRadius: BorderRadius.circular(16),
           ),
           child: Column(
@@ -1080,7 +1108,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 style: GoogleFonts.outfit(
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.primary,
+                  color: AppColors.accentCyan,
                 ),
               ),
               const SizedBox(height: 12),
@@ -1117,7 +1145,7 @@ class _SignupScreenState extends State<SignupScreen> {
           style: GoogleFonts.outfit(
             fontSize: 26,
             fontWeight: FontWeight.w800,
-            color: AppColors.textDark,
+            color: AppColors.onGlass,
             letterSpacing: -0.5,
           ),
         ),
@@ -1126,7 +1154,7 @@ class _SignupScreenState extends State<SignupScreen> {
           'This shapes your dashboard, lessons and advice.',
           style: GoogleFonts.outfit(
             fontSize: 14,
-            color: AppColors.textMuted,
+            color: AppColors.onGlassMuted,
           ),
         ),
         const SizedBox(height: 24),
@@ -1231,7 +1259,7 @@ class _SignupScreenState extends State<SignupScreen> {
           style: GoogleFonts.outfit(
             fontSize: 26,
             fontWeight: FontWeight.w800,
-            color: AppColors.textDark,
+            color: AppColors.onGlass,
             letterSpacing: -0.5,
           ),
         ),
@@ -1240,7 +1268,7 @@ class _SignupScreenState extends State<SignupScreen> {
           'Ranges are fine. You can change these any time.',
           style: GoogleFonts.outfit(
             fontSize: 14,
-            color: AppColors.textMuted,
+            color: AppColors.onGlassMuted,
           ),
         ),
         const SizedBox(height: 24),
@@ -1298,7 +1326,7 @@ class _SignupScreenState extends State<SignupScreen> {
               style: GoogleFonts.outfit(
                 fontSize: 15,
                 fontWeight: FontWeight.w700,
-                color: AppColors.textDark,
+                color: AppColors.onGlass,
               ),
             ),
           ),
@@ -1347,7 +1375,7 @@ class _SignupScreenState extends State<SignupScreen> {
             _buildInputFieldLabel('What do you already have? '),
             Text(
               'Pick all that apply',
-              style: GoogleFonts.outfit(fontSize: 13, color: AppColors.textMuted),
+              style: GoogleFonts.outfit(fontSize: 13, color: AppColors.onGlassMuted),
             ),
           ],
         ),
@@ -1366,21 +1394,43 @@ class _SignupScreenState extends State<SignupScreen> {
             'None',
           ].map((asset) => _buildMultiAssetChip(asset)).toList(),
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 20),
+
+        // 7. Community opt-in (adults only; off by default)
+        if (!_isUnder18) ...[
+          _buildInputFieldLabel('Available for group investments?'),
+          const SizedBox(height: 4),
+          Text(
+            'If yes, other members can find you by name and see your experience and district. '
+            'Never your email, expenses or savings. You can change this any time in Community.',
+            style: GoogleFonts.outfit(fontSize: 12.5, color: AppColors.onGlassMuted, height: 1.4),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            children: [
+              _buildChoiceChip('No', _availableForGroups ? 'Yes' : 'No',
+                  (_) => setState(() => _availableForGroups = false)),
+              _buildChoiceChip('Yes', _availableForGroups ? 'Yes' : 'No',
+                  (_) => setState(() => _availableForGroups = true)),
+            ],
+          ),
+          const SizedBox(height: 24),
+        ],
 
         // Encrypted footer note
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Icon(Icons.lock_outline_rounded,
-                size: 16, color: AppColors.textMuted),
+                size: 16, color: AppColors.onGlassMuted),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
                 'Encrypted and only used to personalise your advice. We never ask for bank or card details.',
                 style: GoogleFonts.outfit(
                   fontSize: 12,
-                  color: AppColors.textMuted,
+                  color: AppColors.onGlassMuted,
                   height: 1.4,
                 ),
               ),
@@ -1410,7 +1460,7 @@ class _SignupScreenState extends State<SignupScreen> {
       style: GoogleFonts.outfit(
         fontSize: 14,
         fontWeight: FontWeight.w700,
-        color: AppColors.textDark,
+        color: AppColors.onGlass,
       ),
     );
   }
@@ -1427,28 +1477,28 @@ class _SignupScreenState extends State<SignupScreen> {
       controller: controller,
       keyboardType: keyboardType,
       obscureText: obscureText,
-      style: GoogleFonts.outfit(fontSize: 15, color: AppColors.textDark),
-      cursorColor: AppColors.primary,
+      style: GoogleFonts.outfit(fontSize: 15, color: AppColors.onGlass),
+      cursorColor: AppColors.accentCyan,
       decoration: InputDecoration(
         isDense: true,
         filled: true,
-        fillColor: AppColors.cardBg,
+        fillColor: AppColors.glassFillStrong,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         hintText: hintText,
-        hintStyle: GoogleFonts.outfit(fontSize: 14, color: AppColors.textMuted),
+        hintStyle: GoogleFonts.outfit(fontSize: 14, color: AppColors.onGlassMuted),
         prefixIcon: prefixIcon,
         suffixIcon: suffixIcon,
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: AppColors.borderLight),
+          borderSide: const BorderSide(color: AppColors.glassBorder),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: AppColors.primary, width: 1.8),
+          borderSide: const BorderSide(color: AppColors.accentCyan, width: 1.8),
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: AppColors.borderLight),
+          borderSide: const BorderSide(color: AppColors.glassBorder),
         ),
       ),
     );
@@ -1463,19 +1513,19 @@ class _SignupScreenState extends State<SignupScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       decoration: BoxDecoration(
-        color: AppColors.cardBg,
+        color: AppColors.innerFill,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.borderLight),
+        border: Border.all(color: AppColors.glassBorder),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: items.contains(value) ? value : null,
           hint: Text(hintText ?? 'Select',
-              style: GoogleFonts.outfit(fontSize: 14, color: AppColors.textMuted)),
+              style: GoogleFonts.outfit(fontSize: 14, color: AppColors.onGlassMuted)),
           isExpanded: true,
           icon: const Icon(Icons.keyboard_arrow_down_rounded,
-              color: AppColors.textDark),
-          style: GoogleFonts.outfit(fontSize: 15, color: AppColors.textDark),
+              color: AppColors.onGlass),
+          style: GoogleFonts.outfit(fontSize: 15, color: AppColors.onGlass),
           onChanged: onChanged,
           items: items.map((String item) {
             return DropdownMenuItem<String>(
@@ -1499,23 +1549,23 @@ class _SignupScreenState extends State<SignupScreen> {
       child: ElevatedButton(
         onPressed: isLoading ? null : onTap,
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
-          disabledBackgroundColor: AppColors.primary.withValues(alpha: 0.6),
+          backgroundColor: Colors.white,
+          disabledBackgroundColor: Colors.white.withValues(alpha: 0.7),
           elevation: 0,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: const StadiumBorder(),
         ),
         child: isLoading
             ? const SizedBox(
                 width: 22,
                 height: 22,
-                child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
+                child: CircularProgressIndicator(color: AppColors.onLight, strokeWidth: 2.5),
               )
             : Text(
                 label,
                 style: GoogleFonts.outfit(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
-                  color: Colors.white,
+                  color: AppColors.onLight,
                 ),
               ),
       ),
@@ -1526,7 +1576,7 @@ class _SignupScreenState extends State<SignupScreen> {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Icon(Icons.check_rounded, color: AppColors.primary, size: 18),
+        const Icon(Icons.check_rounded, color: AppColors.accentCyan, size: 18),
         const SizedBox(width: 8),
         Expanded(
           child: Text(
@@ -1534,7 +1584,7 @@ class _SignupScreenState extends State<SignupScreen> {
             style: GoogleFonts.outfit(
               fontSize: 13,
               fontWeight: FontWeight.w500,
-              color: AppColors.textDark,
+              color: AppColors.onGlass,
             ),
           ),
         ),
@@ -1555,10 +1605,10 @@ class _SignupScreenState extends State<SignupScreen> {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.mintBg : Colors.white,
+          color: isSelected ? AppColors.innerFillSelected : AppColors.innerFill,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? AppColors.primary : AppColors.borderLight,
+            color: isSelected ? AppColors.accentCyan : AppColors.glassBorder,
             width: isSelected ? 1.8 : 1,
           ),
         ),
@@ -1567,7 +1617,7 @@ class _SignupScreenState extends State<SignupScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(icon,
-                color: isSelected ? AppColors.primary : AppColors.textMuted,
+                color: isSelected ? AppColors.accentCyan : AppColors.onGlassMuted,
                 size: 22),
             const SizedBox(height: 8),
             Text(
@@ -1575,7 +1625,7 @@ class _SignupScreenState extends State<SignupScreen> {
               style: GoogleFonts.outfit(
                 fontSize: 15,
                 fontWeight: FontWeight.w700,
-                color: AppColors.textDark,
+                color: AppColors.onGlass,
               ),
             ),
             const SizedBox(height: 2),
@@ -1583,7 +1633,7 @@ class _SignupScreenState extends State<SignupScreen> {
               subtitle,
               style: GoogleFonts.outfit(
                 fontSize: 12,
-                color: AppColors.textMuted,
+                color: AppColors.onGlassMuted,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -1603,10 +1653,10 @@ class _SignupScreenState extends State<SignupScreen> {
           duration: const Duration(milliseconds: 200),
           height: 48,
           decoration: BoxDecoration(
-            color: isSelected ? AppColors.mintBg : Colors.white,
+            color: isSelected ? AppColors.innerFillSelected : AppColors.innerFill,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: isSelected ? AppColors.primary : AppColors.borderLight,
+              color: isSelected ? AppColors.accentCyan : AppColors.glassBorder,
               width: isSelected ? 1.8 : 1,
             ),
           ),
@@ -1616,7 +1666,7 @@ class _SignupScreenState extends State<SignupScreen> {
               style: GoogleFonts.outfit(
                 fontSize: 14,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-                color: AppColors.textDark,
+                color: AppColors.onGlass,
               ),
             ),
           ),
@@ -1634,10 +1684,10 @@ class _SignupScreenState extends State<SignupScreen> {
         duration: const Duration(milliseconds: 180),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.mintBg : Colors.white,
+          color: isSelected ? AppColors.innerFillSelected : AppColors.innerFill,
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
-            color: isSelected ? AppColors.primary : AppColors.borderLight,
+            color: isSelected ? AppColors.accentCyan : AppColors.glassBorder,
             width: isSelected ? 1.6 : 1,
           ),
         ),
@@ -1646,7 +1696,7 @@ class _SignupScreenState extends State<SignupScreen> {
           style: GoogleFonts.outfit(
             fontSize: 13,
             fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-            color: isSelected ? AppColors.primary : AppColors.textDark,
+            color: isSelected ? AppColors.accentCyan : AppColors.onGlass,
           ),
         ),
       ),
@@ -1675,10 +1725,10 @@ class _SignupScreenState extends State<SignupScreen> {
         duration: const Duration(milliseconds: 180),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.mintBg : Colors.white,
+          color: isSelected ? AppColors.innerFillSelected : AppColors.innerFill,
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
-            color: isSelected ? AppColors.primary : AppColors.borderLight,
+            color: isSelected ? AppColors.accentCyan : AppColors.glassBorder,
             width: isSelected ? 1.6 : 1,
           ),
         ),
@@ -1687,7 +1737,7 @@ class _SignupScreenState extends State<SignupScreen> {
           style: GoogleFonts.outfit(
             fontSize: 13,
             fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-            color: isSelected ? AppColors.primary : AppColors.textDark,
+            color: isSelected ? AppColors.accentCyan : AppColors.onGlass,
           ),
         ),
       ),

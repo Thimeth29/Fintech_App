@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/widgets/glass_card.dart';
 
 import 'investing/cse_investments_screen.dart';
 import 'investing/fd_investments_screen.dart';
@@ -14,6 +15,7 @@ class InvestingOptionsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return InvestPage(
       title: 'Investing options',
+      isSectionRoot: true,
       children: [
         Text('Choose where to grow your money',
             style: investText(14, color: InvestColors.muted)),
@@ -78,25 +80,23 @@ class _OptionBlock extends StatelessWidget {
     Widget chip(String text) => Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
           decoration: BoxDecoration(
-            color: const Color(0xFFF1F5F9),
+            color: InvestColors.tile,
             borderRadius: BorderRadius.circular(10),
           ),
           child: Text(text,
               style: investText(11, weight: FontWeight.w600, color: InvestColors.muted)),
         );
 
-    return Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(20),
+    return GlassCard(
+      padding: EdgeInsets.zero,
+      borderRadius: 20,
+      child: Material(
+      type: MaterialType.transparency,
       child: InkWell(
         borderRadius: BorderRadius.circular(20),
         onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: builder)),
         child: Container(
           padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: InvestColors.border),
-          ),
           child: Row(
             children: [
               Container(
@@ -125,6 +125,7 @@ class _OptionBlock extends StatelessWidget {
             ],
           ),
         ),
+      ),
       ),
     );
   }

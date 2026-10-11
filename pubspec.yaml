@@ -19,6 +19,7 @@ dependencies:
   url_launcher: ^6.3.0
   google_generative_ai: ^0.4.7
   tflite_flutter: ^0.12.1
+  flutter_animate: ^4.5.2
 
 dev_dependencies:
   flutter_test:
@@ -33,11 +34,12 @@ flutter:
     - assets/models/
     - assets/icons/
     - assets/branding/
+    - assets/sandbox/lessons/
 
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: "assets/branding/logo.jpg"
+  image_path: "assets/branding/logo.png"
   min_sdk_android: 21
   adaptive_icon_background: "#FFFFFF"
-  adaptive_icon_foreground: "assets/branding/logo.jpg"
+  adaptive_icon_foreground: "assets/branding/logo.png"

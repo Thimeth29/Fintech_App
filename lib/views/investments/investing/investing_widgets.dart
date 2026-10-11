@@ -5,16 +5,28 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/theme/app_backgrounds.dart';
+import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/glass_card.dart';
+import '../../../core/widgets/top_nav_bar.dart';
+
+/// Investing-page palette — thin aliases over [AppColors] so the glass
+/// theme is defined in one place. The old field names are kept so the
+/// four investing screens didn't need renaming; [green] is now the cyan
+/// foreground accent (links, emphasised figures, icons).
 class InvestColors {
-  static const green = Color(0xFF0D653E);
-  static const greenTint = Color(0xFFEBF4EE);
-  static const text = Color(0xFF1A1D1E);
-  static const muted = Color(0xFF5A6578);
-  static const border = Color(0xFFE2E8F0);
-  static const background = Color(0xFFF7F9F7);
-  static const red = Color(0xFFDC2626);
-  static const amber = Color(0xFFB45309);
-  static const amberTint = Color(0xFFFEF3C7);
+  static const green = AppColors.accentCyan;
+  static const greenTint = AppColors.glassFillStrong;
+  static const text = AppColors.onGlass;
+  static const muted = AppColors.onGlassMuted;
+  static const border = AppColors.glassBorder;
+  static const background = AppColors.deepNavy;
+  static const red = AppColors.loss;
+  static const gain = AppColors.gain;
+  static const amber = AppColors.warning;
+  static const amberTint = AppColors.warningTint;
+  static const liveTint = AppColors.accentCyanTint;
+  static const tile = AppColors.innerFill;
 }
 
 TextStyle investText(double size,
@@ -50,22 +62,28 @@ class InvestPage extends StatelessWidget {
   final List<Widget> children;
   final Future<void> Function()? onRefresh;
 
+  /// True only for Investing options, the page the Investments tab opens.
+  final bool isSectionRoot;
+
   const InvestPage({
     super.key,
     required this.title,
     required this.children,
     this.onRefresh,
+    this.isSectionRoot = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    // Single column of cards; a little wider on tablets/desktops.
+    final maxWidth = MediaQuery.sizeOf(context).width >= 600 ? 720.0 : 520.0;
     final list = ListView(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
       physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
       children: [
         Center(
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 520),
+            constraints: BoxConstraints(maxWidth: maxWidth),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -77,26 +95,30 @@ class InvestPage extends StatelessWidget {
       ],
     );
 
-    return Scaffold(
-      backgroundColor: InvestColors.background,
-      appBar: AppBar(
-        backgroundColor: InvestColors.background,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        foregroundColor: InvestColors.text,
-        title: Text(title, style: investText(18, weight: FontWeight.w700)),
-      ),
-      body: SafeArea(
-        child: onRefresh == null
-            ? list
-            : RefreshIndicator(
-                color: InvestColors.green, onRefresh: onRefresh!, child: list),
+    return AppBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: TopNavBar(
+          current: AppSection.investments,
+          title: title,
+          showBackButton: true,
+          isSectionRoot: isSectionRoot,
+        ),
+        body: SafeArea(
+          child: onRefresh == null
+              ? list
+              : RefreshIndicator(
+                  color: AppColors.onLight,
+                  backgroundColor: Colors.white,
+                  onRefresh: onRefresh!,
+                  child: list),
+        ),
       ),
     );
   }
 }
 
-/// White rounded card with an optional heading and trailing widget.
+/// Glass card with an optional heading and trailing widget.
 class InvestCard extends StatelessWidget {
   final String? title;
   final Widget? trailing;
@@ -113,13 +135,8 @@ class InvestCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return GlassCard(
       padding: padding,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: InvestColors.border),
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -141,7 +158,7 @@ class InvestCard extends StatelessWidget {
   }
 }
 
-/// Green intro banner at the top of each page.
+/// Blue hero banner at the top of each page.
 class InvestIntro extends StatelessWidget {
   final IconData icon;
   final String headline;
@@ -152,12 +169,9 @@ class InvestIntro extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: InvestColors.green,
-        borderRadius: BorderRadius.circular(20),
-      ),
+    return GlassCard(
+      gradient: AppGradients.heroCard,
+      borderColor: AppColors.glassBorderStrong,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -179,7 +193,7 @@ class InvestIntro extends StatelessWidget {
                         weight: FontWeight.w700, color: Colors.white)),
                 const SizedBox(height: 4),
                 Text(body,
-                    style: investText(13, color: Colors.white70)
+                    style: investText(13, color: AppColors.onGlassMuted)
                         .copyWith(height: 1.4)),
               ],
             ),
@@ -199,11 +213,11 @@ class LiveBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = live ? InvestColors.green : InvestColors.amber;
+    final color = live ? AppColors.accentCyan : AppColors.warning;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: live ? InvestColors.greenTint : InvestColors.amberTint,
+        color: live ? InvestColors.liveTint : InvestColors.amberTint,
         borderRadius: BorderRadius.circular(14),
       ),
       child: Row(
@@ -237,7 +251,7 @@ class StatTile extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FAF8),
+        color: InvestColors.tile,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: InvestColors.border),
       ),
@@ -325,7 +339,7 @@ class KnowBeforeCard extends StatelessWidget {
                 leading: Container(
                   padding: const EdgeInsets.all(6),
                   decoration: const BoxDecoration(
-                      color: InvestColors.greenTint, shape: BoxShape.circle),
+                      color: InvestColors.tile, shape: BoxShape.circle),
                   child: Icon(item.icon, size: 16, color: InvestColors.green),
                 ),
                 title: Text(item.title, style: investText(14, weight: FontWeight.w600)),
@@ -404,6 +418,7 @@ class NoticeStrip extends StatelessWidget {
       decoration: BoxDecoration(
         color: InvestColors.amberTint,
         borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.warning.withValues(alpha: 0.35)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -449,7 +464,7 @@ class CalcField extends StatelessWidget {
         suffixText: suffix,
         isDense: true,
         filled: true,
-        fillColor: const Color(0xFFF8FAF8),
+        fillColor: AppColors.glassFillStrong,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: InvestColors.border),

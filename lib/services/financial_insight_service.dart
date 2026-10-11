@@ -12,11 +12,19 @@
 //   2. generateDailyInsight() — a one-shot "what should I know today"
 //      summary shown as an AI Insights card on the Investments hub.
 
+import '../core/utils/money.dart';
 import '../models/expense_model.dart';
+import '../models/expense_priority.dart';
 import '../models/investment_action_model.dart';
 import '../models/market_data_model.dart';
 import 'ai_service.dart';
 import 'cse_service.dart';
+import 'expense_forecast_service.dart';
+import 'expense_service.dart';
+import 'expenditure/goal_math.dart';
+import 'expenditure/safe_to_spend.dart';
+import 'finance_data_services.dart';
+import 'community_service.dart';
 
 class FinancialInsightService {
   final CseService _cse = CseService();
@@ -32,6 +40,8 @@ class FinancialInsightService {
     List<ExpenseModel>? expenses,
     List<InvestmentActionModel>? investmentActions,
     Map<String, dynamic>? profile,
+    String? userId,
+    String? sandboxSummary,
   }) async {
     final buffer = StringBuffer();
 
@@ -120,6 +130,13 @@ class FinancialInsightService {
       );
     }
 
+    if (userId != null && userId.isNotEmpty) {
+      final lines = await _expenditureLines(userId, expenses ?? const []);
+      for (final l in lines) {
+        buffer.writeln(l);
+      }
+    }
+
     if (investmentActions != null && investmentActions.isNotEmpty) {
       buffer.writeln();
       buffer.writeln(
@@ -128,7 +145,131 @@ class FinancialInsightService {
       );
     }
 
+    // Practice-only data from the Investment Trainer, labelled as simulated
+    // so FinBot never treats it as the user's real money.
+    if (sandboxSummary != null && sandboxSummary.isNotEmpty) {
+      buffer.writeln();
+      buffer.writeln(sandboxSummary);
+    }
+
+    // The user's own community groups only (never other members' data).
+    if (userId != null) {
+      final line = await _communityLine();
+      if (line != null) {
+        buffer.writeln();
+        buffer.writeln(line);
+      }
+    }
+
     return buffer.toString();
+  }
+
+  /// "Community: 2 groups; next seettu payment Rs 5,000 due 2026-11-05;
+  /// confirmed group contributions Rs 60,000". Null when the user has no
+  /// groups or Community isn't available.
+  Future<String?> _communityLine() async {
+    try {
+      final s = Map<String, dynamic>.from(await CommunityService().rpc('community_my_snapshot') as Map);
+      final groups = (s['groups'] as num?)?.toInt() ?? 0;
+      if (groups == 0) return null;
+      final parts = <String>['Community: member of $groups group${groups == 1 ? '' : 's'} (records only — members pay each other outside the app)'];
+      final next = s['next_seettu_payment'];
+      if (next is Map) {
+        parts.add('next seettu payment LKR ${(next['amount'] as num).toStringAsFixed(2)} '
+            'for ${next['group']} round ${next['round_no']}, due ${next['due_date']} (${next['status']})');
+      }
+      final contributions = (s['confirmed_contributions'] as num?)?.toDouble() ?? 0;
+      if (contributions > 0) parts.add('confirmed investment-group contributions LKR ${contributions.toStringAsFixed(2)}');
+      return parts.join('; ');
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Compact budget / priority / goals / debts / forecast lines. Each part
+  /// is optional: a missing table (not migrated yet) or a network error
+  /// just leaves that line out.
+  Future<List<String>> _expenditureLines(String userId, List<ExpenseModel> expenses) async {
+    final now = DateTime.now();
+    final lines = <String>[];
+    final month = kMonthNames[now.month - 1];
+    final thisMonth = expenses
+        .where((e) => e.effectiveDate.year == now.year && e.effectiveDate.month == now.month)
+        .toList();
+    final spent = thisMonth.fold<double>(0, (s, e) => s + e.amount);
+
+    Future<T?> safe<T>(Future<T> Function() f) async {
+      try {
+        return await f();
+      } catch (_) {
+        return null;
+      }
+    }
+
+    final expenseService = ExpenseService();
+    final budgets = await safe(() => expenseService.fetchBudgets(userId, monthKey(now))) ?? const [];
+    final recurring = await safe(() => expenseService.fetchRecurring(userId)) ?? const [];
+    final goals = await safe(() => SavingsGoalService().fetchGoals(userId)) ?? const [];
+    final debts = await safe(() => DebtService().fetchDebts(userId)) ?? const [];
+    final settings = await safe(() => FinanceSettingsService().fetch(userId));
+
+    final budget = budgets.fold<double>(0, (s, b) => s + ((b['limit_amount'] as num?)?.toDouble() ?? 0));
+    lines.add(budget > 0
+        ? '$month so far: LKR ${spent.toStringAsFixed(0)} spent of LKR ${budget.toStringAsFixed(0)} budget '
+            '(${(spent / budget * 100).round()}%).'
+        : '$month so far: LKR ${spent.toStringAsFixed(0)} spent; no monthly budget set.');
+
+    if (spent > 0) {
+      final split = {for (final p in ExpensePriority.values) p: 0.0};
+      for (final e in thisMonth) {
+        split[e.priority] = (split[e.priority] ?? 0) + e.amount;
+      }
+      lines.add('Priority split this month: '
+          '${ExpensePriority.values.map((p) => '${ExpensePriority.label(p).toLowerCase()} ${((split[p]! / spent) * 100).round()}%').join(', ')} '
+          '(guideline 50/30/20).');
+    }
+
+    final sts = computeSafeToSpend(
+      monthlyIncome: settings?.monthlyIncome,
+      expenses: expenses,
+      recurring: recurring,
+      goals: goals,
+      debts: debts,
+      now: now,
+    );
+    if (sts != null) {
+      lines.add('Monthly income LKR ${sts.income.toStringAsFixed(0)}; safe-to-spend left this month '
+          'LKR ${sts.leftToSpend.toStringAsFixed(0)}.');
+    }
+
+    final activeGoals = goals.where((g) => g.isActive).take(3).toList();
+    if (activeGoals.isNotEmpty) {
+      lines.add('Savings goals: ${activeGoals.map((g) {
+        final p = computeGoalProgress(g, now);
+        final pace = g.deadline == null
+            ? ''
+            : (p.isOnTrack
+                ? ', on track for ${shortDate(g.deadline!)}'
+                : ', behind (on pace for ${((p.projectedShareAtDeadline ?? p.share) * 100).round()}% by ${shortDate(g.deadline!)})');
+        return '${g.name} ${(p.share * 100).round()}% of LKR ${g.targetAmount.toStringAsFixed(0)}$pace';
+      }).join('; ')}.');
+    }
+
+    final openDebts = debts.where((d) => d.isOpen).toList();
+    if (openDebts.isNotEmpty) {
+      final owedToMe = openDebts.where((d) => d.isLent).fold<double>(0, (s, d) => s + d.outstanding);
+      final owedByMe = openDebts.where((d) => !d.isLent).fold<double>(0, (s, d) => s + d.outstanding);
+      final overdue = openDebts.where((d) => d.isOverdue(now)).length;
+      lines.add('Debts: others owe the user LKR ${owedToMe.toStringAsFixed(0)}; user owes '
+          'LKR ${owedByMe.toStringAsFixed(0)}${overdue > 0 ? '; $overdue overdue' : ''}.');
+    }
+
+    final f = ExpenseForecastService().forecastNextMonth(expenses: expenses, recurring: recurring, now: now);
+    if (f != null) {
+      lines.add('${kMonthNames[f.month.month - 1]} spending forecast: LKR ${f.total.toStringAsFixed(0)} '
+          '(range ${f.low.toStringAsFixed(0)}–${f.high.toStringAsFixed(0)}, ${f.confidenceLabel.toLowerCase()} confidence).');
+    }
+    return lines;
   }
 
   /// One-shot "here's what to know today" insight, grounded in the same
@@ -137,11 +278,13 @@ class FinancialInsightService {
     List<ExpenseModel>? expenses,
     List<InvestmentActionModel>? investmentActions,
     Map<String, dynamic>? profile,
+    String? userId,
   }) async {
     final snapshot = await buildSnapshot(
       expenses: expenses,
       investmentActions: investmentActions,
       profile: profile,
+      userId: userId,
     );
     final ai = AiService(financialContext: snapshot);
     return ai.ask(

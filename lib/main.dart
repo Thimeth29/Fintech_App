@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'core/config/supabase_config.dart';
+import 'core/responsive.dart';
+import 'core/theme/app_backgrounds.dart';
 import 'core/theme/app_theme.dart';
 import 'viewmodels/auth_viewmodel.dart';
+import 'viewmodels/sandbox_viewmodel.dart';
 import 'views/auth/welcome_screen.dart';
 import 'views/home/home_screen.dart';
 
@@ -20,13 +23,20 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => AuthViewModel(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthViewModel()),
+        // One trainer state for Home's sandbox card and every trainer
+        // screen, so a trade shows up everywhere at once.
+        ChangeNotifierProvider(create: (_) => SandboxViewModel()),
+      ],
       child: MaterialApp(
-        title: 'FinSmart — Personal Finance Management',
+        title: 'Mobile SAP',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme,
         darkTheme: AppTheme.darkTheme,
+        builder: (context, child) =>
+            ClampedTextScale(child: child ?? const SizedBox.shrink()),
         home: const AuthGate(),
       ),
     );
@@ -46,6 +56,19 @@ class AuthGate extends StatefulWidget {
 }
 
 class _AuthGateState extends State<AuthGate> {
+  @override
+  void initState() {
+    super.initState();
+    // Decode both backgrounds once, up front, so the first screen
+    // transition doesn't flash the fallback gradient.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      try {
+        AppBackgrounds.precache(context);
+      } catch (_) {}
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     if (!SupabaseConfig.isConfigured) {

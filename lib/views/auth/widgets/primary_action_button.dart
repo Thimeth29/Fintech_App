@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_theme.dart';
 
-/// Primary action button matching the Forest Green design system.
+/// Primary action: solid white pill with deep-navy text.
 class PrimaryActionButton extends StatelessWidget {
   final String label;
   final VoidCallback? onPressed;
@@ -22,10 +22,12 @@ class PrimaryActionButton extends StatelessWidget {
       height: 52,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
-          foregroundColor: Colors.white,
+          backgroundColor: Colors.white,
+          foregroundColor: AppColors.onLight,
+          disabledBackgroundColor: Colors.white.withValues(alpha: 0.7),
+          disabledForegroundColor: AppColors.onLight,
           elevation: 0,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
         ),
         onPressed: isLoading ? null : onPressed,
         child: isLoading
@@ -34,7 +36,7 @@ class PrimaryActionButton extends StatelessWidget {
                 height: 22,
                 child: CircularProgressIndicator(
                   strokeWidth: 2.5,
-                  color: Colors.white,
+                  color: AppColors.onLight,
                 ),
               )
             : Text(

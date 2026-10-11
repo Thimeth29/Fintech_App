@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../models/investing_models.dart';
 import '../../../services/investing_data_service.dart';
+import '../../../core/theme/app_theme.dart';
 import 'investing_widgets.dart';
 
 class GovSecuritiesScreen extends StatefulWidget {
@@ -87,7 +88,7 @@ class _GovSecuritiesScreenState extends State<GovSecuritiesScreen> {
                           '${y.change! >= 0 ? '▲' : '▼'} ${y.change!.abs().toStringAsFixed(2)}',
                           style: investText(12,
                               weight: FontWeight.w600,
-                              color: y.change! >= 0 ? InvestColors.green : InvestColors.red),
+                              color: y.change! >= 0 ? InvestColors.gain : InvestColors.red),
                         ),
                       ),
                     Text(
@@ -151,7 +152,7 @@ class _GovSecuritiesScreenState extends State<GovSecuritiesScreen> {
           child: Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: const Color(0xFFF8FAF8),
+              color: InvestColors.tile,
               borderRadius: BorderRadius.circular(14),
               border: Border.all(color: InvestColors.border),
             ),
@@ -220,9 +221,9 @@ class _GovSecuritiesScreenState extends State<GovSecuritiesScreen> {
             showSelectedIcon: false,
             style: ButtonStyle(
               backgroundColor: WidgetStateProperty.resolveWith((s) =>
-                  s.contains(WidgetState.selected) ? InvestColors.green : Colors.white),
+                  s.contains(WidgetState.selected) ? Colors.white : InvestColors.greenTint),
               foregroundColor: WidgetStateProperty.resolveWith((s) =>
-                  s.contains(WidgetState.selected) ? Colors.white : InvestColors.text),
+                  s.contains(WidgetState.selected) ? AppColors.onLight : InvestColors.text),
             ),
             onSelectionChanged: (s) => setState(() {
               _days = s.first;
