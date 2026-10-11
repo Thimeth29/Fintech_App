@@ -162,3 +162,94 @@ DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+-- ============================================================
+-- INVESTING OPTIONS: MARKET RATE TABLES (public, read-only)
+-- Written by a scheduled scraper using the service-role key,
+-- read by the app via Supabase Realtime.
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS public.fd_rates (
+  institution TEXT PRIMARY KEY,
+  institution_type TEXT NOT NULL DEFAULT 'LCB' CHECK (institution_type IN ('LCB', 'LSB', 'LFC')),
+  sldis_member BOOLEAN NOT NULL DEFAULT TRUE,
+  rate_1m NUMERIC(5, 2),
+  rate_3m NUMERIC(5, 2),
+  rate_6m NUMERIC(5, 2),
+  rate_12m NUMERIC(5, 2),
+  rate_24m NUMERIC(5, 2),
+  rate_60m NUMERIC(5, 2),
+  source_url TEXT NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.gov_security_yields (
+  security TEXT PRIMARY KEY,              -- e.g. '91-day T-Bill', '5-year T-Bond'
+  kind TEXT NOT NULL CHECK (kind IN ('bill', 'bond')),
+  sort_order INT NOT NULL DEFAULT 0,
+  yield_rate NUMERIC(6, 3),
+  previous_yield NUMERIC(6, 3),
+  auction_date DATE,
+  source_url TEXT NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE public.fd_rates ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.gov_security_yields ENABLE ROW LEVEL SECURITY;
+
+-- Anyone may read; only the service role (scraper) can write.
+CREATE POLICY "Public can read FD rates" ON public.fd_rates FOR SELECT USING (true);
+CREATE POLICY "Public can read gov security yields" ON public.gov_security_yields FOR SELECT USING (true);
+
+-- Push row changes to the app in real time.
+ALTER PUBLICATION supabase_realtime ADD TABLE public.fd_rates;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.gov_security_yields;
+
+-- ============================================================
+-- DAILY RATE COLLECTOR SCHEDULE
+-- Runs the `collect-rates` edge function every day at 9:00 am
+-- Sri Lanka time (03:30 UTC). The job's password lives in Vault; the
+-- function checks it via verify_cron_secret(). Replace <CRON_SECRET>
+-- with a random value when setting up a new project — never commit it.
+-- ============================================================
+
+SELECT vault.create_secret(
+  '<CRON_SECRET>',
+  'collect_rates_cron_secret',
+  'x-cron-secret header for the collect-rates edge function'
+);
+
+-- Lets the edge function (service role only) check a candidate password
+-- without being able to read it.
+CREATE OR REPLACE FUNCTION public.verify_cron_secret(candidate text)
+RETURNS boolean
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM vault.decrypted_secrets
+    WHERE name = 'collect_rates_cron_secret' AND decrypted_secret = candidate
+  );
+$$;
+
+REVOKE EXECUTE ON FUNCTION public.verify_cron_secret(text) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.verify_cron_secret(text) TO service_role;
+
+CREATE EXTENSION IF NOT EXISTS pg_cron;
+CREATE EXTENSION IF NOT EXISTS pg_net WITH SCHEMA extensions;
+
+SELECT cron.schedule(
+  'collect-rates-daily',
+  '30 3 * * *',
+  $$
+  SELECT net.http_post(
+    url := 'https://uttemjtuxeasyccxhhlz.supabase.co/functions/v1/collect-rates',
+    headers := jsonb_build_object(
+      'x-cron-secret',
+      (SELECT decrypted_secret FROM vault.decrypted_secrets WHERE name = 'collect_rates_cron_secret')
+    ),
+    timeout_milliseconds := 60000
+  );
+  $$
+);

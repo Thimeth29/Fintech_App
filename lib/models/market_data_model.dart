@@ -73,7 +73,7 @@ class MarketIndex {
       value: asDouble(json['value'] ?? json['indexValue']),
       change: asDouble(json['change']),
       changePercentage: asDouble(
-        json['changePercentage'] ?? json['percentageChange'],
+        json['changePercentage'] ?? json['percentageChange'] ?? json['percentage'],
       ),
     );
   }

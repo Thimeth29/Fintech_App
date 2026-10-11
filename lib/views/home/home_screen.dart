@@ -7,6 +7,7 @@ import '../sandbox/sandbox_screen.dart';
 import '../expenditure/expenditure_screen.dart';
 import '../expenditure/explore_plans_screen.dart';
 import '../investments/asset_analytics_screen.dart';
+import '../investments/investing_options_screen.dart';
 import '../profile/profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -88,6 +89,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   // 3b. AI Coach Quick Shortcut Banner
                   _buildAiAssistantBanner(context),
+                  const SizedBox(height: 16),
+
+                  // 3c. Investing Options Card
+                  _buildInvestingOptionsCard(context),
                   const SizedBox(height: 20),
 
                   // 4. November Forecast Card
@@ -478,6 +483,66 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               child: const Icon(Icons.arrow_forward_rounded, color: Color(0xFF0D653E), size: 18),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ==========================================
+  // 3c. INVESTING OPTIONS CARD
+  // ==========================================
+  Widget _buildInvestingOptionsCard(BuildContext context) {
+    return GestureDetector(
+      onTap: () => Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const InvestingOptionsScreen()),
+      ),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: const Color(0xFFE2E8F0)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: const BoxDecoration(
+                color: Color(0xFFEBF4EE),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.account_balance_wallet_rounded,
+                  color: Color(0xFF0D653E), size: 22),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Investing options',
+                    style: GoogleFonts.outfit(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: const Color(0xFF1A1D1E),
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'Explore ways to grow your money',
+                    style: GoogleFonts.outfit(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: const Color(0xFF5A6578),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.chevron_right_rounded,
+                color: Color(0xFF0D653E), size: 24),
           ],
         ),
       ),
