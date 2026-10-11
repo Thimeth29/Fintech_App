@@ -10,8 +10,11 @@ class GeminiConfig {
   static String get apiKey =>
       const String.fromEnvironment('GEMINI_API_KEY', defaultValue: '');
 
-  /// Supported Gemini API models: gemini-1.5-flash, gemini-2.0-flash, gemini-1.5-pro
-  static const String model = 'gemini-1.5-flash';
+  /// gemini-1.5-flash/-pro, gemini-pro and gemini-2.0-flash are all retired
+  /// (confirmed 404 from the API) — gemini-flash-lite-latest is the model
+  /// actually used (see AiService._candidateModels), kept fast and reliable
+  /// as of this writing.
+  static const String model = 'gemini-flash-lite-latest';
 
   static bool get isConfigured => apiKey.isNotEmpty;
 }

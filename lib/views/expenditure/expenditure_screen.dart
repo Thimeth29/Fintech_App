@@ -119,7 +119,7 @@ class ExpenditureScreen extends StatelessWidget {
                   label: 'Explore Budgeting',
                   subtitle: '50/30/20 & Zero-Based',
                   icon: Icons.lightbulb_outline_rounded,
-                  backgroundColor: Colors.white,
+                  backgroundColor: AppColors.cardBg,
                   entranceDelay: const Duration(milliseconds: 80),
                   onTap: () => Navigator.of(context).push(
                     MaterialPageRoute(builder: (_) => const ExploreExpenditurePlansScreen()),

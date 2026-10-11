@@ -14,8 +14,8 @@ class WelcomeScreen extends StatefulWidget {
 class _WelcomeScreenState extends State<WelcomeScreen> {
   String _selectedLanguage = 'English';
 
-  static const Color _bg = AppColors.bgLight;
-  static const Color _muted = AppColors.textMuted;
+  static Color get _bg => AppColors.bgLight;
+  static Color get _muted => AppColors.textMuted;
 
   @override
   Widget build(BuildContext context) {
@@ -120,7 +120,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                const Icon(Icons.shield_outlined,
+                                Icon(Icons.shield_outlined,
                                     size: 13, color: _muted),
                                 const SizedBox(width: 6),
                                 Flexible(

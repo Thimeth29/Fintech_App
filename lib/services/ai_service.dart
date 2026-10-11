@@ -12,13 +12,15 @@ import '../models/chat_message_model.dart';
 class AiService {
   final String? _financialContext;
 
-  static String _workingModel = 'gemini-1.5-flash';
+  // gemini-1.5-flash/-pro, gemini-pro and gemini-2.0-flash are all retired
+  // (404 from the API as of this writing) — gemini-flash-lite-latest is the
+  // fast, reliable one; gemini-flash-latest works too but is slower and
+  // prone to 503 "high demand" errors, so it's kept only as a fallback.
+  static String _workingModel = 'gemini-flash-lite-latest';
 
   static const List<String> _candidateModels = [
-    'gemini-1.5-flash',
-    'gemini-2.0-flash',
-    'gemini-1.5-pro',
-    'gemini-pro',
+    'gemini-flash-lite-latest',
+    'gemini-flash-latest',
   ];
 
   AiService({String? financialContext}) : _financialContext = financialContext;
@@ -50,10 +52,11 @@ class AiService {
         '4. **Retirement & Welfare**:\n'
         '   - Explain EPF (8% employee + 12% employer = 20%) and ETF (3% employer).\n\n'
         '### RESPONSE FORMATTING:\n'
+        '- Do NOT open your reply with a greeting word (no "Ayubowan", "Namaste", "Hello", etc.) — the user is already mid-conversation with you, so answer their question directly from the first word.\n'
         '- Always format currency as LKR (e.g. LKR 25,000).\n'
-        '- Use clear headings, bullet points, and helpful Sri Lanka emojis (🇱🇰, 📈, 📊, 💡).\n'
-        '- Keep answers practical, structured, and easy to read on mobile screens.\n'
-        '- Always append a 1-line financial disclaimer note.',
+        '- Use clear headings and bullet points. Use at most 1-2 emojis total in a reply, only where they add meaning — never one per line or per bullet.\n'
+        '- Lead with the direct answer first, then supporting detail. Keep answers concise and scannable on a small mobile screen — avoid padding with extra framing, filler sentences, or repeated context.\n'
+        '- Always append a 1-line financial disclaimer note at the end.',
       );
     if (financialContext != null && financialContext.trim().isNotEmpty) {
       buffer
@@ -120,7 +123,7 @@ class AiService {
           "1. Go to [Google AI Studio](https://aistudio.google.com/app/apikey).\n"
           "2. Click **Create API Key**.\n"
           "3. Copy the key (it starts with `AIzaSy...`).\n"
-          "4. Replace `_customApiKey` in [`gemini_config.dart`](file:///c:/Users/thime/OneDrive/Desktop/My%20projects/FYP_demo/EXP-MGT-SYS/lib/core/config/gemini_config.dart).\n\n"
+          "4. Run the app with `--dart-define=GEMINI_API_KEY=your_key_here`.\n\n"
           "---\n"
           "🇱🇰 **FinBot Sri Lanka Financial Literacy Insight**:\n"
           "${_generateFallbackResponse(prompt)}";
@@ -131,7 +134,7 @@ class AiService {
 
   Future<String?> _askViaRestHttp(String prompt, List<ChatMessageModel> history) async {
     final apiKey = GeminiConfig.apiKey;
-    final models = ['gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-1.5-pro', 'gemini-pro'];
+    const models = _candidateModels;
 
     final contentsList = <Map<String, dynamic>>[];
     for (final m in history) {

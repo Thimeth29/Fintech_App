@@ -1,9 +1,11 @@
 // lib/views/auth/reset_password_screen.dart
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/widgets/gradient_scaffold.dart';
 import '../../core/widgets/glass_card.dart';
 import '../../core/theme/app_theme.dart';
+import '../../services/auth_service.dart';
 import 'login_screen.dart';
 import 'widgets/auth_back_button.dart';
 import 'widgets/labeled_text_field.dart';
@@ -23,22 +25,46 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   bool _isSubmitting = false;
 
   Future<void> _confirm() async {
-    if (_passwordController.text.isEmpty ||
-        _passwordController.text != _confirmController.text) {
+    final password = _passwordController.text;
+    if (password.isEmpty || password != _confirmController.text) {
       setState(() => _errorMessage = 'Passwords do not match');
       return;
     }
+    if (password.length < 8) {
+      setState(() => _errorMessage = 'Password must be at least 8 characters.');
+      return;
+    }
+
     setState(() {
       _errorMessage = null;
       _isSubmitting = true;
     });
-    await Future.delayed(const Duration(milliseconds: 400));
-    if (!mounted) return;
-    setState(() => _isSubmitting = false);
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const LoginScreen()),
-      (route) => false,
-    );
+    try {
+      final authService = AuthService();
+      await authService.setPassword(password);
+      // The recovery session from the OTP step is done its job — sign out
+      // so the user logs back in fresh with their new password, confirming
+      // it actually works rather than silently staying logged in.
+      await authService.signOut();
+      if (!mounted) return;
+      setState(() => _isSubmitting = false);
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+        (route) => false,
+      );
+    } on AuthException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isSubmitting = false;
+        _errorMessage = e.message;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isSubmitting = false;
+        _errorMessage = 'Could not reset password: ${e.toString()}';
+      });
+    }
   }
 
   @override

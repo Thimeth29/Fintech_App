@@ -249,7 +249,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     Divider(height: 1, color: AppColors.borderLight),
                     _SettingsRow(icon: Icons.auto_awesome_outlined, label: 'AI Advisor Customizations'),
                     Divider(height: 1, color: AppColors.borderLight),
-                    _SettingsRow(icon: Icons.privacy_tip_outlined, label: 'Privacy & Data Governance'),
+                    _SettingsRow(icon: Icons.privacy_tip_outlined, label: 'Privacy & Data Governance')
                   ],
                 ),
               ),

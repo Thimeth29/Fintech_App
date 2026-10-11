@@ -33,8 +33,11 @@ class MyApp extends StatelessWidget {
   }
 }
 
-/// Decides where the app opens: straight to the dashboard for a returning
-/// logged-in user, otherwise the Welcome screen.
+/// Decides where the app opens. In practice this now always lands on the
+/// Welcome screen, since SupabaseConfig disables session persistence
+/// (see supabase_config.dart) — there's never a session to resume. Kept as
+/// a real check (not hardcoded) so persistence can be turned back on later
+/// without touching this gate at all.
 class AuthGate extends StatefulWidget {
   const AuthGate({super.key});
 

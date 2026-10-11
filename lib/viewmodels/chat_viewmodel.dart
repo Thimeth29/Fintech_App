@@ -4,6 +4,7 @@ import '../models/chat_message_model.dart';
 import '../models/expense_model.dart';
 import '../models/investment_action_model.dart';
 import '../services/ai_service.dart';
+import '../services/auth_service.dart';
 import '../services/expense_service.dart';
 import '../services/financial_insight_service.dart';
 import '../services/investment_service.dart';
@@ -66,6 +67,7 @@ class ChatViewModel extends ChangeNotifier {
     try {
       List<ExpenseModel>? expenses;
       List<InvestmentActionModel>? actions;
+      Map<String, dynamic>? profile;
       if (userId != null) {
         try {
           expenses = await ExpenseService().fetchExpenses(userId);
@@ -77,12 +79,18 @@ class ChatViewModel extends ChangeNotifier {
         } catch (_) {
           actions = null;
         }
+        try {
+          profile = await AuthService().fetchProfile();
+        } catch (_) {
+          profile = null;
+        }
         // Also load past chat history
         await loadChatHistory(userId);
       }
       final snapshot = await FinancialInsightService().buildSnapshot(
         expenses: expenses,
         investmentActions: actions,
+        profile: profile,
       );
       _aiService = AiService(financialContext: snapshot);
       _contextReady = true;

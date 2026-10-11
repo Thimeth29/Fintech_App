@@ -1,9 +1,11 @@
 // lib/views/auth/forgot_password_screen.dart
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/widgets/gradient_scaffold.dart';
 import '../../core/widgets/glass_card.dart';
 import '../../core/theme/app_theme.dart';
+import '../../services/auth_service.dart';
 import 'verification_code_screen.dart';
 import 'widgets/auth_back_button.dart';
 import 'widgets/labeled_text_field.dart';
@@ -19,18 +21,45 @@ class ForgotPasswordScreen extends StatefulWidget {
 class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final _emailController = TextEditingController();
   bool _isSending = false;
+  String? _errorMessage;
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    super.dispose();
+  }
 
   Future<void> _sendCode() async {
-    setState(() => _isSending = true);
-    await Future.delayed(const Duration(milliseconds: 400));
-    if (!mounted) return;
-    setState(() => _isSending = false);
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) =>
-            VerificationCodeScreen(email: _emailController.text.trim()),
-      ),
-    );
+    final email = _emailController.text.trim();
+    if (!AuthService.looksLikeEmail(email)) {
+      setState(() => _errorMessage = 'Enter a valid email address.');
+      return;
+    }
+
+    setState(() {
+      _isSending = true;
+      _errorMessage = null;
+    });
+    try {
+      await AuthService().sendPasswordResetOtp(email);
+      if (!mounted) return;
+      setState(() => _isSending = false);
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => VerificationCodeScreen(email: email)),
+      );
+    } on AuthException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isSending = false;
+        _errorMessage = e.message;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isSending = false;
+        _errorMessage = 'Could not send a code: ${e.toString()}';
+      });
+    }
   }
 
   @override
@@ -92,6 +121,17 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                             keyboardType: TextInputType.emailAddress,
                             hintText: 'name@example.com',
                           ),
+                          if (_errorMessage != null) ...[
+                            const SizedBox(height: 12),
+                            Text(
+                              _errorMessage!,
+                              style: GoogleFonts.outfit(
+                                color: AppColors.rose,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
                           const SizedBox(height: 24),
                           PrimaryActionButton(
                             label: 'Send Code',

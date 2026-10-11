@@ -4,9 +4,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/widgets/gradient_scaffold.dart';
 import '../../core/widgets/glass_card.dart';
 import '../../core/theme/app_theme.dart';
+import '../../services/auth_service.dart';
 import 'reset_password_screen.dart';
 import 'widgets/auth_back_button.dart';
 import 'widgets/primary_action_button.dart';
@@ -29,6 +31,9 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
   final _focusNodes = List.generate(_codeLength, (_) => FocusNode());
   Timer? _timer;
   int _secondsLeft = _resendSeconds;
+  bool _isVerifying = false;
+  bool _isResending = false;
+  String? _errorMessage;
 
   @override
   void initState() {
@@ -74,10 +79,61 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
     }
   }
 
-  void _confirm() {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const ResetPasswordScreen()),
-    );
+  Future<void> _confirm() async {
+    final code = _controllers.map((c) => c.text).join();
+    if (code.length != _codeLength) {
+      setState(() => _errorMessage = 'Enter the 6-digit code we sent you.');
+      return;
+    }
+
+    setState(() {
+      _isVerifying = true;
+      _errorMessage = null;
+    });
+    try {
+      final response = await AuthService().verifyPasswordResetOtp(
+        email: widget.email,
+        token: code,
+      );
+      if (response?.session == null) {
+        throw const AuthException('That code did not work — please try again.');
+      }
+      if (!mounted) return;
+      setState(() => _isVerifying = false);
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const ResetPasswordScreen()),
+      );
+    } on AuthException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isVerifying = false;
+        _errorMessage = e.message;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isVerifying = false;
+        _errorMessage = 'Verification failed: ${e.toString()}';
+      });
+    }
+  }
+
+  Future<void> _resendCode() async {
+    if (_secondsLeft > 0 || _isResending) return;
+    setState(() => _isResending = true);
+    try {
+      await AuthService().sendPasswordResetOtp(widget.email);
+      if (!mounted) return;
+      _startTimer();
+    } on AuthException catch (e) {
+      if (!mounted) return;
+      setState(() => _errorMessage = e.message);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _errorMessage = 'Could not resend the code: ${e.toString()}');
+    } finally {
+      if (mounted) setState(() => _isResending = false);
+    }
   }
 
   @override
@@ -207,8 +263,24 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
                               );
                             }),
                           ),
+                          if (_errorMessage != null) ...[
+                            const SizedBox(height: 16),
+                            Text(
+                              _errorMessage!,
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.outfit(
+                                color: AppColors.rose,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
                           const SizedBox(height: 24),
-                          PrimaryActionButton(label: 'Verify & Proceed', onPressed: _confirm),
+                          PrimaryActionButton(
+                            label: 'Verify & Proceed',
+                            isLoading: _isVerifying,
+                            onPressed: _confirm,
+                          ),
                           const SizedBox(height: 16),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -221,9 +293,9 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
                                 ),
                               ),
                               GestureDetector(
-                                onTap: _secondsLeft == 0 ? _startTimer : null,
+                                onTap: _secondsLeft == 0 && !_isResending ? _resendCode : null,
                                 child: Text(
-                                  'Resend Code',
+                                  _isResending ? 'Sending…' : 'Resend Code',
                                   style: GoogleFonts.outfit(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w700,

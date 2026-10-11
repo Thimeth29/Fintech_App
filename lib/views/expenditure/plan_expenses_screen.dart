@@ -28,7 +28,7 @@ class PlanExpensesScreen extends StatelessWidget {
           leading: Container(
             margin: const EdgeInsets.only(left: 12, top: 8, bottom: 8),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.cardBg,
               shape: BoxShape.circle,
               border: Border.all(color: AppColors.borderLight),
             ),
@@ -116,7 +116,7 @@ class PlanExpensesScreen extends StatelessWidget {
                   if (vm.byCategory.isNotEmpty)
                     GlassCard(
                       padding: const EdgeInsets.all(20),
-                      backgroundColor: Colors.white,
+                      backgroundColor: AppColors.cardBg,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -148,7 +148,7 @@ class PlanExpensesScreen extends StatelessWidget {
                       margin: const EdgeInsets.only(bottom: 10),
                       child: GlassCard(
                         padding: const EdgeInsets.all(14),
-                        backgroundColor: Colors.white,
+                        backgroundColor: AppColors.cardBg,
                         child: Row(
                           children: [
                             Container(
@@ -227,7 +227,7 @@ class PlanExpensesScreen extends StatelessWidget {
       context: context,
       builder: (dialogContext) => StatefulBuilder(
         builder: (dialogContext, setDialogState) => AlertDialog(
-          backgroundColor: Colors.white,
+          backgroundColor: AppColors.cardBg,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
           title: Text('Add Expense', style: GoogleFonts.outfit(fontWeight: FontWeight.w700, color: AppColors.textDark)),
           content: Column(
@@ -345,8 +345,8 @@ class _PredictionCard extends StatelessWidget {
 class _CategoryPie extends StatelessWidget {
   final Map<String, double> byCategory;
   const _CategoryPie({required this.byCategory});
-  static const _colors = [
-    AppColors.primary, Color(0xFF16A34A), Color(0xFFF3C06B), Color(0xFF0284C7), Color(0xFF9333EA), Color(0xFFEA580C),
+  static List<Color> get _colors => [
+    AppColors.primary, const Color(0xFF16A34A), const Color(0xFFF3C06B), const Color(0xFF0284C7), const Color(0xFF9333EA), const Color(0xFFEA580C),
   ];
 
   @override

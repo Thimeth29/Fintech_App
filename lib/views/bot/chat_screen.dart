@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import '../../core/widgets/gradient_scaffold.dart';
 import '../../core/widgets/top_nav_bar.dart';
 import '../../core/widgets/glass_card.dart';
 import '../../core/theme/app_theme.dart';
 import '../../models/chat_message_model.dart';
-import '../../services/ai_service.dart';
+import '../../services/auth_service.dart';
 import '../../core/config/gemini_config.dart';
+import '../../viewmodels/chat_viewmodel.dart';
 
 const List<String> _suggestedPrompts = [
   "🇱🇰 Current CSE Stock Trends",
@@ -28,22 +30,25 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final _controller = TextEditingController();
   final _scrollController = ScrollController();
-  late final List<ChatMessageModel> _messages;
-  late final AiService _aiService;
-  bool _isGenerating = false;
+  late final ChatViewModel _chatViewModel;
 
   @override
   void initState() {
     super.initState();
-    _aiService = AiService(financialContext: widget.seedContext);
-    _messages = [
-      ChatMessageModel(
-        role: ChatRole.bot,
-        content: widget.seedContext == null || widget.seedContext!.isEmpty
-            ? "Hello! I'm FinBot, your Gemini-powered AI financial advisor for Sri Lanka. Ask me about investments, CSE stocks, fixed deposits, or budgeting!"
-            : "Hello! I see you are exploring: ${widget.seedContext}. What financial insights can I generate for you?",
-      ),
-    ];
+    _chatViewModel = ChatViewModel();
+    final contextNote = widget.seedContext == null || widget.seedContext!.isEmpty
+        ? ''
+        : "I see you're exploring: ${widget.seedContext}.";
+    _chatViewModel.seed(contextNote);
+    _chatViewModel.loadFinancialContext(userId: AuthService().currentUser?.id);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _scrollController.dispose();
+    _chatViewModel.dispose();
+    super.dispose();
   }
 
   void _scrollToBottom() {
@@ -60,28 +65,25 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Future<void> _send(String text) async {
     final query = text.trim();
-    if (query.isEmpty || _isGenerating) return;
+    if (query.isEmpty || _chatViewModel.isSending) return;
 
     _controller.clear();
-    setState(() {
-      _messages.add(ChatMessageModel(role: ChatRole.user, content: query));
-      _isGenerating = true;
-    });
     _scrollToBottom();
-
-    final response = await _aiService.ask(query, history: _messages);
-
-    if (mounted) {
-      setState(() {
-        _messages.add(ChatMessageModel(role: ChatRole.bot, content: response));
-        _isGenerating = false;
-      });
-      _scrollToBottom();
-    }
+    await _chatViewModel.send(query);
+    _scrollToBottom();
   }
 
   @override
   Widget build(BuildContext context) {
+    return ChangeNotifierProvider.value(
+      value: _chatViewModel,
+      child: Consumer<ChatViewModel>(
+        builder: (context, vm, _) => _buildScaffold(context, vm),
+      ),
+    );
+  }
+
+  Widget _buildScaffold(BuildContext context, ChatViewModel vm) {
     _scrollToBottom();
     final isConfigured = GeminiConfig.isConfigured;
 
@@ -160,10 +162,10 @@ class _ChatScreenState extends State<ChatScreen> {
             child: ListView.builder(
               controller: _scrollController,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              itemCount: _messages.length + (_isGenerating ? 1 : 0),
+              itemCount: vm.messages.length + (vm.isSending ? 1 : 0),
               itemBuilder: (context, i) {
-                if (i < _messages.length) {
-                  return _Bubble(message: _messages[i]);
+                if (i < vm.messages.length) {
+                  return _Bubble(message: vm.messages[i]);
                 }
                 return const _TypingBubble();
               },
@@ -185,7 +187,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: AppColors.cardBg,
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(color: AppColors.borderLight),
                             boxShadow: [
@@ -219,7 +221,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.cardBg,
                       borderRadius: BorderRadius.circular(24),
                       border: Border.all(color: AppColors.borderLight),
                       boxShadow: [
@@ -232,7 +234,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     ),
                     child: TextField(
                       controller: _controller,
-                      enabled: !_isGenerating,
+                      enabled: !vm.isSending,
                       style: GoogleFonts.outfit(color: AppColors.textDark, fontSize: 14),
                       decoration: InputDecoration(
                         hintText: 'Ask FinBot about stocks, budget, or taxes...',
@@ -249,12 +251,12 @@ class _ChatScreenState extends State<ChatScreen> {
                 ),
                 const SizedBox(width: 10),
                 GestureDetector(
-                  onTap: _isGenerating ? null : () => _send(_controller.text),
+                  onTap: vm.isSending ? null : () => _send(_controller.text),
                   child: Container(
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
-                      color: _isGenerating ? AppColors.textMuted : AppColors.primary,
+                      color: vm.isSending ? AppColors.textMuted : AppColors.primary,
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
@@ -264,7 +266,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         ),
                       ],
                     ),
-                    child: _isGenerating
+                    child: vm.isSending
                         ? const Padding(
                             padding: EdgeInsets.all(14.0),
                             child: CircularProgressIndicator(
@@ -316,7 +318,7 @@ class _Bubble extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 decoration: BoxDecoration(
-                  color: isUser ? AppColors.primary : Colors.white,
+                  color: isUser ? AppColors.primary : AppColors.cardBg,
                   borderRadius: BorderRadius.only(
                     topLeft: const Radius.circular(20),
                     topRight: const Radius.circular(20),
@@ -363,7 +365,7 @@ class _TypingBubble extends StatelessWidget {
         margin: const EdgeInsets.symmetric(vertical: 6),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.cardBg,
           borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(20),
             topRight: Radius.circular(20),

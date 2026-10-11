@@ -22,7 +22,15 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   is_under_18 BOOLEAN DEFAULT FALSE,
   guardian_name TEXT,
   guardian_mobile TEXT,
+  guardian_relation TEXT,
   guardian_status TEXT DEFAULT 'pending',
+  -- Signup Step 4 "Your money today" answers — used to personalize FinBot
+  -- (see FinancialInsightService.buildSnapshot), not just to record history.
+  monthly_income TEXT,
+  income_source TEXT,
+  typical_monthly_spending TEXT,
+  emergency_savings TEXT,
+  dependents TEXT,
   financial_literacy_rank TEXT DEFAULT 'Bronze Investor',
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()

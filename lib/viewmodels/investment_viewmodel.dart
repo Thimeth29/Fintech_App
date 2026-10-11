@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../models/expense_model.dart';
 import '../models/investment_action_model.dart';
 import '../models/market_data_model.dart';
+import '../services/auth_service.dart';
 import '../services/cse_service.dart';
 import '../services/expense_service.dart';
 import '../services/financial_insight_service.dart';
@@ -76,16 +77,23 @@ class InvestmentViewModel extends ChangeNotifier {
     notifyListeners();
     try {
       List<ExpenseModel>? expenses;
+      Map<String, dynamic>? profile;
       if (userId != null) {
         try {
           expenses = await ExpenseService().fetchExpenses(userId);
         } catch (_) {
           expenses = null;
         }
+        try {
+          profile = await AuthService().fetchProfile();
+        } catch (_) {
+          profile = null;
+        }
       }
       aiInsight = await _insightService.generateDailyInsight(
         expenses: expenses,
         investmentActions: recentActions,
+        profile: profile,
       );
     } catch (_) {
       aiInsight = "FinBot couldn't generate an insight right now — try again in a moment.";

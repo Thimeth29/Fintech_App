@@ -17,7 +17,7 @@ class ExploreExpenditurePlansScreen extends StatelessWidget {
         leading: Container(
           margin: const EdgeInsets.only(left: 12, top: 8, bottom: 8),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.cardBg,
             shape: BoxShape.circle,
             border: Border.all(color: AppColors.borderLight),
           ),
@@ -46,7 +46,7 @@ class ExploreExpenditurePlansScreen extends StatelessWidget {
             const SizedBox(height: 16),
             GlassCard(
               padding: const EdgeInsets.all(20),
-              backgroundColor: Colors.white,
+              backgroundColor: AppColors.cardBg,
               child: SizedBox(
                 height: 190,
                 child: PieChart(
@@ -120,7 +120,7 @@ class ExploreExpenditurePlansScreen extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       child: GlassCard(
         padding: const EdgeInsets.all(16),
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.cardBg,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

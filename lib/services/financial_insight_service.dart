@@ -22,13 +22,48 @@ class FinancialInsightService {
   final CseService _cse = CseService();
 
   /// Builds a plain-text snapshot of live market data plus (when supplied)
-  /// the user's own expenses/investment actions, for use as an AiService
-  /// [AiService.new] `financialContext`.
+  /// the user's own profile, expenses and investment actions, for use as
+  /// an AiService [AiService.new] `financialContext`. [profile] is the raw
+  /// row from `profiles` (via AuthService.fetchProfile()) — this is what
+  /// makes FinBot's advice reflect *who* the user is (a student with no
+  /// income vs. a working adult with dependents and no emergency fund),
+  /// not just what they've spent or traded.
   Future<String> buildSnapshot({
     List<ExpenseModel>? expenses,
     List<InvestmentActionModel>? investmentActions,
+    Map<String, dynamic>? profile,
   }) async {
     final buffer = StringBuffer();
+
+    if (profile != null) {
+      final lines = <String>[];
+      void addIfPresent(String label, dynamic value) {
+        if (value == null) return;
+        final text = value is List ? value.join(', ') : value.toString();
+        if (text.trim().isEmpty) return;
+        lines.add('$label: $text');
+      }
+
+      addIfPresent('Name', profile['full_name']);
+      addIfPresent('Role', profile['user_role']);
+      addIfPresent('Occupation', profile['occupation']);
+      addIfPresent('District', profile['district']);
+      if (profile['is_under_18'] == true) lines.add('Under 18 (use simpler language, avoid suggesting real-money trading)');
+      addIfPresent('Monthly income bracket (LKR)', profile['monthly_income']);
+      addIfPresent('Main income source', profile['income_source']);
+      addIfPresent('Typical monthly spending (LKR)', profile['typical_monthly_spending']);
+      addIfPresent('Emergency savings', profile['emergency_savings']);
+      addIfPresent('Dependents', profile['dependents']);
+      addIfPresent('Assets already held', profile['selected_assets']);
+
+      if (lines.isNotEmpty) {
+        buffer.writeln('User profile:');
+        for (final line in lines) {
+          buffer.writeln('- $line');
+        }
+        buffer.writeln();
+      }
+    }
 
     try {
       final results = await Future.wait([
@@ -101,10 +136,12 @@ class FinancialInsightService {
   Future<String> generateDailyInsight({
     List<ExpenseModel>? expenses,
     List<InvestmentActionModel>? investmentActions,
+    Map<String, dynamic>? profile,
   }) async {
     final snapshot = await buildSnapshot(
       expenses: expenses,
       investmentActions: investmentActions,
+      profile: profile,
     );
     final ai = AiService(financialContext: snapshot);
     return ai.ask(

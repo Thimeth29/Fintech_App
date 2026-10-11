@@ -17,7 +17,7 @@ class SandboxScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.cardBg,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: Text(
           '${isBuy ? "Buy" : "Sell"} ${instrument.name}',
@@ -84,7 +84,7 @@ class SandboxScreen extends StatelessWidget {
           leading: Container(
             margin: const EdgeInsets.only(left: 12, top: 8, bottom: 8),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.cardBg,
               shape: BoxShape.circle,
               border: Border.all(color: AppColors.borderLight),
             ),
@@ -188,7 +188,7 @@ class SandboxScreen extends StatelessWidget {
                         margin: const EdgeInsets.only(bottom: 12),
                         child: GlassCard(
                           padding: const EdgeInsets.all(16),
-                          backgroundColor: Colors.white,
+                          backgroundColor: AppColors.cardBg,
                           child: Row(
                             children: [
                               Container(

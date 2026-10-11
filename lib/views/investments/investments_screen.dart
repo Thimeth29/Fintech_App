@@ -22,11 +22,14 @@ class _AssetCategory {
   const _AssetCategory(this.code, this.label, this.subtitle, this.icon, this.backgroundColor, this.textColor);
 }
 
-const List<_AssetCategory> _categories = [
-  _AssetCategory('CSE', 'CSE Equities', 'Colombo Stock Exchange', Icons.show_chart_rounded, AppColors.primary, Colors.white),
-  _AssetCategory('SEC', 'Govt Treasury', 'T-Bills & Bonds', Icons.account_balance_outlined, Colors.white, AppColors.textDark),
-  _AssetCategory('FD', 'Fixed Deposits', 'Sri Lanka Bank FDs', Icons.savings_outlined, Colors.white, AppColors.textDark),
-  _AssetCategory('GOLD', 'Gold & Metals', 'Asset Protection', Icons.monetization_on_outlined, Colors.white, AppColors.textDark),
+// A getter, not a const list — AppColors.primary/textDark now depend on
+// the active theme, so this needs to be rebuilt fresh on each access
+// rather than frozen at whatever they were on first use.
+List<_AssetCategory> get _categories => [
+  const _AssetCategory('CSE', 'CSE Equities', 'Colombo Stock Exchange', Icons.show_chart_rounded, AppColors.primary, Colors.white),
+  const _AssetCategory('SEC', 'Govt Treasury', 'T-Bills & Bonds', Icons.account_balance_outlined, Colors.white, AppColors.textDark),
+  const _AssetCategory('FD', 'Fixed Deposits', 'Sri Lanka Bank FDs', Icons.savings_outlined, Colors.white, AppColors.textDark),
+  const _AssetCategory('GOLD', 'Gold & Metals', 'Asset Protection', Icons.monetization_on_outlined, Colors.white, AppColors.textDark),
 ];
 
 String _categoryLabel(String code) =>

@@ -36,6 +36,14 @@ class SupabaseConfig {
         url: _url,
         publishableKey: _anonKey,
         debug: true,
+        // Require a fresh login every app launch: with persistSession left
+        // at its default (true), supabase_flutter writes the session to
+        // SharedPreferences, and that write happens on a fire-and-forget
+        // background listener — closing the app quickly enough can kill it
+        // before the write lands, so an explicit signOut() call in main()
+        // raced it unreliably. Not persisting at all removes the race
+        // entirely: there's nothing on disk to restore, ever.
+        authOptions: const FlutterAuthClientOptions(persistSession: false),
       );
     } catch (e) {
       // Supabase initialization fallback

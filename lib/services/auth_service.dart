@@ -101,6 +101,32 @@ class AuthService {
         .timeout(_networkTimeout, onTimeout: _throwTimeout);
   }
 
+  /// Send a real 6-digit password-recovery code to an email address. Unlike
+  /// [sendEmailOtp], this only works for an email that already has an
+  /// account — Supabase won't reveal whether the account exists via this
+  /// call's success/failure, by design.
+  Future<void> sendPasswordResetOtp(String email) async {
+    final client = _client;
+    if (client == null) return;
+    await client.auth
+        .resetPasswordForEmail(email.trim())
+        .timeout(_networkTimeout, onTimeout: _throwTimeout);
+  }
+
+  /// Verify a 6-digit password-recovery code. On success this starts a real
+  /// (recovery) session, which [setPassword] can then use to set the new
+  /// password.
+  Future<AuthResponse?> verifyPasswordResetOtp({
+    required String email,
+    required String token,
+  }) async {
+    final client = _client;
+    if (client == null) return null;
+    return client.auth
+        .verifyOTP(type: OtpType.recovery, email: email.trim(), token: token)
+        .timeout(_networkTimeout, onTimeout: _throwTimeout);
+  }
+
   /// Set the password on the current session's account — used right after
   /// email OTP verification, since that sign-in path has no password yet.
   Future<void> setPassword(String password) async {
