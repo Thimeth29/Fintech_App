@@ -40,7 +40,9 @@ Future<void> _loadFonts() async {
   for (final e in faces.entries) {
     final f = File('${dir.path}${Platform.pathSeparator}roboto-${e.value}.ttf');
     if (!f.existsSync()) continue;
-    await (FontLoader('Outfit_${e.key}')..addFont(Future.value(ByteData.sublistView(f.readAsBytesSync())))).load();
+    for (final family in const ['Poppins', 'Inter']) {
+      await (FontLoader('${family}_${e.key}')..addFont(Future.value(ByteData.sublistView(f.readAsBytesSync())))).load();
+    }
   }
 }
 

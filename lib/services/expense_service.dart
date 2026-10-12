@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../core/config/supabase_config.dart';
 import '../core/utils/money.dart';
@@ -36,11 +37,44 @@ class ExpenseService {
     return (rows as List).fold<double>(0, (s, r) => s + ((r['amount'] as num?)?.toDouble() ?? 0));
   }
 
+  /// Columns added by the expenditure-upgrade migration. A database that
+  /// hasn't run it rejects any write naming them, so writes retry without.
+  static const _upgradeColumns = ['priority', 'recurring_id'];
+
+  /// PostgREST's "column not in schema cache" error (PGRST204), or the
+  /// Postgres "undefined column" error (42703).
+  static bool _isMissingUpgradeColumn(Object e) =>
+      e is PostgrestException &&
+      (e.code == 'PGRST204' || e.code == '42703') &&
+      _upgradeColumns.any((c) => e.message.contains(c));
+
+  static Map<String, dynamic> _withoutUpgradeColumns(Map<String, dynamic> json) =>
+      Map.of(json)..removeWhere((k, _) => _upgradeColumns.contains(k));
+
+  /// Runs [write] with [json]; if the database predates the upgrade
+  /// columns, runs it again without them so the expense still saves.
+  Future<Map<String, dynamic>> _writeWithFallback(
+    Map<String, dynamic> json,
+    Future<Map<String, dynamic>> Function(Map<String, dynamic>) write,
+  ) async {
+    try {
+      return await write(json);
+    } catch (e) {
+      if (!_isMissingUpgradeColumn(e)) rethrow;
+      debugPrint('expenses: database is missing the expenditure upgrade '
+          '(${(e as PostgrestException).message}); saving without priority.');
+      return write(_withoutUpgradeColumns(json));
+    }
+  }
+
   /// Insert a new expense and return the stored row (with its id).
   Future<ExpenseModel?> addExpense(ExpenseModel expense) async {
     final client = _client;
     if (client == null) return null;
-    final row = await client.from('expenses').insert(expense.toInsertJson()).select().single();
+    final row = await _writeWithFallback(
+      expense.toInsertJson(),
+      (json) => client.from('expenses').insert(json).select().single(),
+    );
     return ExpenseModel.fromJson(row);
   }
 
@@ -48,12 +82,10 @@ class ExpenseService {
   Future<ExpenseModel?> updateExpense(ExpenseModel expense) async {
     final client = _client;
     if (client == null || expense.id == null) return null;
-    final row = await client
-        .from('expenses')
-        .update(expense.toUpdateJson())
-        .eq('id', expense.id!)
-        .select()
-        .single();
+    final row = await _writeWithFallback(
+      expense.toUpdateJson(),
+      (json) => client.from('expenses').update(json).eq('id', expense.id!).select().single(),
+    );
     return ExpenseModel.fromJson(row);
   }
 

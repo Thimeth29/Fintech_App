@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart' show ChangeNotifier, kIsWeb, visibleForTesting;
+import 'package:flutter/foundation.dart' show ChangeNotifier, debugPrint, kIsWeb, visibleForTesting;
 import '../core/utils/money.dart';
 import '../models/expense_model.dart';
 import '../models/expense_priority.dart';
@@ -357,6 +357,7 @@ class ExpenseViewModel extends ChangeNotifier {
       notifyListeners();
       return saved != null;
     } catch (e) {
+      debugPrint('addExpense failed: $e');
       errorMessage = 'Could not save expense.';
       notifyListeners();
       return false;
@@ -377,6 +378,7 @@ class ExpenseViewModel extends ChangeNotifier {
       notifyListeners();
       return true;
     } catch (e) {
+      debugPrint('updateExpense failed: $e');
       errorMessage = 'Could not update expense.';
       notifyListeners();
       return false;
