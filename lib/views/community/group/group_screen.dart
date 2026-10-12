@@ -42,12 +42,14 @@ class _GroupShell extends StatelessWidget {
     if (vm.isLoading && g == null) {
       return const GradientScaffold(
         appBar: TopNavBar(current: AppSection.community, title: 'Group', showBackButton: true, isSectionRoot: false),
+        bottomNavigationBar: AppBottomNav(current: AppSection.community, isSectionRoot: false),
         body: Center(child: CircularProgressIndicator(color: AppColors.accentCyan, strokeWidth: 2)),
       );
     }
     if (g == null) {
       return GradientScaffold(
         appBar: const TopNavBar(current: AppSection.community, title: 'Group', showBackButton: true, isSectionRoot: false),
+        bottomNavigationBar: const AppBottomNav(current: AppSection.community, isSectionRoot: false),
         body: ListView(padding: const EdgeInsets.all(20), children: [
           EmptyState(
             icon: Icons.group_off_rounded,
@@ -74,6 +76,7 @@ class _GroupShell extends StatelessWidget {
       child: GradientScaffold(
         maxContentWidth: 820,
         appBar: TopNavBar(current: AppSection.community, title: g.name, showBackButton: true, isSectionRoot: false),
+        bottomNavigationBar: const AppBottomNav(current: AppSection.community, isSectionRoot: false),
         body: Column(
           children: [
             Padding(

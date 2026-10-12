@@ -3,7 +3,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/widgets/gradient_scaffold.dart';
 import '../../core/widgets/glass_card.dart';
@@ -13,6 +12,7 @@ import '../../services/auth_service.dart';
 import 'reset_password_screen.dart';
 import 'widgets/auth_back_button.dart';
 import 'widgets/primary_action_button.dart';
+import '../../core/theme/app_fonts.dart';
 
 const _codeLength = 6;
 const _resendSeconds = 59;
@@ -169,7 +169,7 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
                     Text(
                       'Verification Code',
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.outfit(
+                      style: AppFonts.text(
                         fontSize: 28,
                         fontWeight: FontWeight.w800,
                         color: AppColors.onGlass,
@@ -179,7 +179,7 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
                     Text(
                       'Please enter the 6-digit security code sent to ${widget.email.isEmpty ? "your registered email" : widget.email}.',
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.outfit(
+                      style: AppFonts.text(
                         fontSize: 13,
                         color: AppColors.onGlass,
                         height: 1.5,
@@ -197,7 +197,7 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
                         ),
                         child: Text(
                           'Expires in: $_timerLabel',
-                          style: GoogleFonts.outfit(
+                          style: AppFonts.text(
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
                             color: AppColors.accentCyan,
@@ -224,7 +224,7 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
                                       textAlign: TextAlign.center,
                                       keyboardType: TextInputType.number,
                                       maxLength: 1,
-                                      style: GoogleFonts.outfit(
+                                      style: AppFonts.text(
                                         fontSize: 20,
                                         fontWeight: FontWeight.w700,
                                         color: AppColors.onGlass,
@@ -270,7 +270,7 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
                             Text(
                               _errorMessage!,
                               textAlign: TextAlign.center,
-                              style: GoogleFonts.outfit(
+                              style: AppFonts.text(
                                 color: AppColors.loss,
                                 fontSize: 13,
                                 fontWeight: FontWeight.w500,
@@ -290,7 +290,7 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
                             children: [
                               Text(
                                 "Didn't receive the code? ",
-                                style: GoogleFonts.outfit(
+                                style: AppFonts.text(
                                   fontSize: 13,
                                   color: AppColors.onGlassMuted,
                                 ),
@@ -299,7 +299,7 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
                                 onTap: _secondsLeft == 0 && !_isResending ? _resendCode : null,
                                 child: Text(
                                   _isResending ? 'Sending…' : 'Resend Code',
-                                  style: GoogleFonts.outfit(
+                                  style: AppFonts.text(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w700,
                                     color: _secondsLeft == 0

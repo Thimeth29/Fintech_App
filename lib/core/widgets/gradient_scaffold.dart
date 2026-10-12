@@ -10,6 +10,7 @@ class GradientScaffold extends StatelessWidget {
   final PreferredSizeWidget? appBar;
   final Widget body;
   final Widget? floatingActionButton;
+  final Widget? bottomNavigationBar;
   final double maxContentWidth;
   final AppBackgroundKind background;
   final bool? resizeToAvoidBottomInset;
@@ -19,6 +20,7 @@ class GradientScaffold extends StatelessWidget {
     this.appBar,
     required this.body,
     this.floatingActionButton,
+    this.bottomNavigationBar,
     this.maxContentWidth = 640,
     this.background = AppBackgroundKind.main,
     this.resizeToAvoidBottomInset,
@@ -33,6 +35,7 @@ class GradientScaffold extends StatelessWidget {
         resizeToAvoidBottomInset: resizeToAvoidBottomInset,
         appBar: appBar,
         floatingActionButton: floatingActionButton,
+        bottomNavigationBar: bottomNavigationBar,
         body: SafeArea(
           child: ResponsiveCenter(maxWidth: maxContentWidth, child: body),
         ),

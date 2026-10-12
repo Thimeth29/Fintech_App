@@ -20,6 +20,9 @@ class GlassCard extends StatelessWidget {
   final VoidCallback? onTap;
   final double? width;
 
+  /// Light streak drawn over the pane; defaults to [AppGradients.glassHighlight].
+  final Gradient? sheen;
+
   const GlassCard({
     super.key,
     required this.child,
@@ -32,6 +35,7 @@ class GlassCard extends StatelessWidget {
     this.borderColor,
     this.onTap,
     this.width,
+    this.sheen,
   });
 
   @override
@@ -58,10 +62,10 @@ class GlassCard extends StatelessWidget {
         // plain-Container card, so existing layouts don't shift.
         fit: StackFit.passthrough,
         children: [
-          const Positioned.fill(
+          Positioned.fill(
             child: IgnorePointer(
               child: DecoratedBox(
-                decoration: BoxDecoration(gradient: AppGradients.glassHighlight),
+                decoration: BoxDecoration(gradient: sheen ?? AppGradients.glassHighlight),
               ),
             ),
           ),

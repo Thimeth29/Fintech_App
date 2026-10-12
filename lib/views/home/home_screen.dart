@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../core/responsive.dart';
 import '../../core/widgets/glass_card.dart';
@@ -23,6 +22,7 @@ import '../investments/investing/gold_investments_screen.dart';
 import '../investments/investing/gov_securities_screen.dart';
 import '../investments/investing_options_screen.dart';
 import '../profile/profile_screen.dart';
+import '../../core/theme/app_fonts.dart';
 
 const List<String> _monthNames = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -172,25 +172,7 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Scaffold(
       backgroundColor: Colors.transparent,
       appBar: const TopNavBar(current: AppSection.home, title: ''),
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.onLight,
-        elevation: 6,
-        shape: const StadiumBorder(),
-        icon: const Icon(Icons.smart_toy_rounded, color: AppColors.onLight, size: 22),
-        label: Text(
-          'Ask FinBot AI',
-          style: GoogleFonts.outfit(
-            fontSize: 14,
-            fontWeight: FontWeight.w700,
-            color: AppColors.onLight,
-            letterSpacing: 0.3,
-          ),
-        ),
-        onPressed: () => Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => const ChatScreen()),
-        ),
-      ),
+      bottomNavigationBar: const AppBottomNav(current: AppSection.home),
       body: SafeArea(
         child: ListenableBuilder(
           listenable: Listenable.merge([_expenseViewModel, _debtsViewModel]),
@@ -284,7 +266,7 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             Text(
               _greeting(),
-              style: GoogleFonts.outfit(
+              style: AppFonts.text(
                 fontSize: 13,
                 color: AppColors.onGlass,
                 shadows: kTitleShadow,
@@ -292,7 +274,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             Text(
               displayName,
-              style: GoogleFonts.outfit(
+              style: AppFonts.text(
                 fontSize: 26,
                 fontWeight: FontWeight.w800,
                 color: AppColors.onGlass,
@@ -353,7 +335,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Center(
                   child: Text(
                     initials,
-                    style: GoogleFonts.outfit(
+                    style: AppFonts.text(
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
                       color: Colors.white,
@@ -384,11 +366,15 @@ class _HomeScreenState extends State<HomeScreen> {
     final ratio = hasBudget ? (budgetedSpent / budget).clamp(0.0, 1.0) : 0.0;
     final remaining = hasBudget ? (budget - budgetedSpent) : 0.0;
 
+    final frosted = AppGlass.useBlur(context);
     return GlassCard(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
-      gradient: AppGradients.heroCard,
-      borderColor: AppColors.glassBorderStrong,
+      gradient: frosted ? AppGradients.heroGlass : AppGradients.heroCard,
+      sheen: frosted ? AppGradients.heroSheen : null,
+      blur: 28,
+      borderRadius: 28,
+      borderColor: Colors.white.withValues(alpha: 0.55),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -397,7 +383,7 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               Text(
                 '$monthName spending',
-                style: GoogleFonts.outfit(
+                style: AppFonts.text(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
                   color: AppColors.onGlassMuted,
@@ -405,7 +391,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               Text(
                 daysLeft > 0 ? '$daysLeft days left' : 'Last day of the month',
-                style: GoogleFonts.outfit(
+                style: AppFonts.text(
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
                   color: AppColors.onGlassMuted,
@@ -420,7 +406,7 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               Text(
                 'Rs ${_formatMoney(spent)}',
-                style: GoogleFonts.outfit(
+                style: AppFonts.text(
                   fontSize: 32,
                   fontWeight: FontWeight.w800,
                   color: Colors.white,
@@ -430,7 +416,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(width: 8),
                 Text(
                   'of Rs ${_formatMoney(budget)}',
-                  style: GoogleFonts.outfit(
+                  style: AppFonts.text(
                     fontSize: 15,
                     fontWeight: FontWeight.w500,
                     color: AppColors.onGlassMuted,
@@ -465,7 +451,7 @@ class _HomeScreenState extends State<HomeScreen> {
           else
             Text(
               'No monthly budget set yet — set one in Plan My Expenses to track against a goal.',
-              style: GoogleFonts.outfit(fontSize: 12.5, color: AppColors.onGlassMuted, height: 1.4),
+              style: AppFonts.text(fontSize: 12.5, color: AppColors.onGlassMuted, height: 1.4),
             ),
           const SizedBox(height: 20),
 
@@ -488,12 +474,12 @@ class _HomeScreenState extends State<HomeScreen> {
       children: [
         Text(
           label,
-          style: GoogleFonts.outfit(fontSize: 12, color: AppColors.onGlassMuted),
+          style: AppFonts.text(fontSize: 12, color: AppColors.onGlassMuted),
         ),
         const SizedBox(height: 2),
         Text(
           value,
-          style: GoogleFonts.outfit(
+          style: AppFonts.text(
             fontSize: 15,
             fontWeight: FontWeight.w700,
             color: Colors.white,
@@ -522,7 +508,7 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           Text(
             '$nextMonthName forecast',
-            style: GoogleFonts.outfit(
+            style: AppFonts.text(
               fontSize: 18,
               fontWeight: FontWeight.w700,
               color: AppColors.onGlass,
@@ -531,7 +517,7 @@ class _HomeScreenState extends State<HomeScreen> {
           const SizedBox(height: 2),
           Text(
             'Predicted from your own spending history',
-            style: GoogleFonts.outfit(
+            style: AppFonts.text(
               fontSize: 13,
               color: AppColors.onGlassMuted,
             ),
@@ -548,13 +534,13 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: const EdgeInsets.symmetric(vertical: 12),
               child: Text(
                 vm.predictionMessage ?? 'Log a few expenses to unlock a spending forecast.',
-                style: GoogleFonts.outfit(fontSize: 13, color: AppColors.onGlassMuted, height: 1.4),
+                style: AppFonts.text(fontSize: 13, color: AppColors.onGlassMuted, height: 1.4),
               ),
             )
           else ...[
             Text(
               'Rs ${_formatMoney(vm.predictedNextMonthTotal!)}',
-              style: GoogleFonts.outfit(
+              style: AppFonts.text(
                 fontSize: 26,
                 fontWeight: FontWeight.w800,
                 color: AppColors.onGlass,
@@ -564,7 +550,7 @@ class _HomeScreenState extends State<HomeScreen> {
               Text(
                 'Range Rs ${_formatMoney(forecast.low)} – ${_formatMoney(forecast.high)} · '
                 '${forecast.confidenceLabel} confidence',
-                style: GoogleFonts.outfit(fontSize: 12.5, color: AppColors.onGlassMuted),
+                style: AppFonts.text(fontSize: 12.5, color: AppColors.onGlassMuted),
               ),
             const SizedBox(height: 20),
             SizedBox(
@@ -582,7 +568,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   : forecast.usedPartialMonth
                       ? 'Based on this month so far, scaled to a full month, plus upcoming bills.'
                       : 'Based on your last ${forecast.monthsUsed} month${forecast.monthsUsed == 1 ? '' : 's'} of spending, plus upcoming bills.',
-              style: GoogleFonts.outfit(fontSize: 12.5, color: AppColors.onGlassMuted, height: 1.4),
+              style: AppFonts.text(fontSize: 12.5, color: AppColors.onGlassMuted, height: 1.4),
             ),
           ],
         ],
@@ -630,7 +616,7 @@ class _HomeScreenState extends State<HomeScreen> {
         const SizedBox(height: 8),
         Text(
           label,
-          style: GoogleFonts.outfit(
+          style: AppFonts.text(
             fontSize: 12,
             fontWeight: FontWeight.w600,
             color: AppColors.onGlassMuted,
@@ -657,7 +643,7 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           Text(
             'SUGGESTED FOR YOU',
-            style: GoogleFonts.outfit(
+            style: AppFonts.text(
               fontSize: 12,
               fontWeight: FontWeight.w800,
               color: AppColors.accentCyan,
@@ -667,7 +653,7 @@ class _HomeScreenState extends State<HomeScreen> {
           const SizedBox(height: 8),
           Text(
             _suggestion(vm),
-            style: GoogleFonts.outfit(
+            style: AppFonts.text(
               fontSize: 16,
               fontWeight: FontWeight.w700,
               color: AppColors.onGlass,
@@ -695,7 +681,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Text(
                       'Plan my expenses',
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.outfit(
+                      style: AppFonts.text(
                           fontSize: 14, fontWeight: FontWeight.w700),
                     ),
                   ),
@@ -719,7 +705,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Text(
                       'Ask FinBot about this',
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.outfit(
+                      style: AppFonts.text(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
                         color: AppColors.onGlass,
@@ -766,7 +752,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 Flexible(
                   child: Text(
                     'Sandbox portfolio',
-                    style: GoogleFonts.outfit(
+                    style: AppFonts.text(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
                       color: AppColors.onGlass,
@@ -783,7 +769,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     child: Text(
                       'Lv ${svm.progress.level}',
-                      style: GoogleFonts.outfit(
+                      style: AppFonts.text(
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
                         color: AppColors.onGlass,
@@ -801,7 +787,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   child: Text(
                     'Virtual',
-                    style: GoogleFonts.outfit(
+                    style: AppFonts.text(
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
                       color: AppColors.onGlass,
@@ -816,7 +802,7 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 Text(
                   'Rs ${_formatMoney(portfolioValue)}',
-                  style: GoogleFonts.outfit(
+                  style: AppFonts.text(
                     fontSize: 26,
                     fontWeight: FontWeight.w800,
                     color: AppColors.onGlass,
@@ -827,7 +813,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   svm.wallets.isEmpty
                       ? 'Start the Investment Trainer'
                       : '${isUp ? "+" : ""}${returnPct.toStringAsFixed(1)}% since start',
-                  style: GoogleFonts.outfit(
+                  style: AppFonts.text(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
                     color: svm.wallets.isEmpty
@@ -886,7 +872,7 @@ class _HomeScreenState extends State<HomeScreen> {
         const SizedBox(width: 6),
         Text(
           label,
-          style: GoogleFonts.outfit(
+          style: AppFonts.text(
             fontSize: 12,
             fontWeight: FontWeight.w600,
             color: AppColors.onGlassMuted,
@@ -906,37 +892,27 @@ class _HomeScreenState extends State<HomeScreen> {
     final actions = [
       _QuickAction(
         icon: Icons.receipt_long_rounded,
-        color: const Color(0xFF34D399),
         title: 'Manage Personal Expenses',
-        subtitle: 'Add and track spending',
         onTap: () => open(const ExpenditureScreen()),
       ),
       _QuickAction(
         icon: Icons.candlestick_chart_rounded,
-        color: const Color(0xFFFBBF24),
         title: 'SandBox Environment',
-        subtitle: 'Practise trading risk-free',
         onTap: () => open(const SandboxScreen()),
       ),
       _QuickAction(
         icon: Icons.smart_toy_rounded,
-        color: const Color(0xFF60A5FA),
         title: 'Financial AI Coach',
-        subtitle: 'Ask about stocks, budgets, taxes',
         onTap: () => open(const ChatScreen()),
       ),
       _QuickAction(
         icon: Icons.account_balance_rounded,
-        color: const Color(0xFFA78BFA),
         title: 'My Investing',
-        subtitle: 'FD, gold, CSE & securities',
         onTap: () => open(const InvestingOptionsScreen()),
       ),
       _QuickAction(
         icon: Icons.menu_book_rounded,
-        color: const Color(0xFFF472B6),
         title: 'Get Knowledge',
-        subtitle: 'Learn budgeting models',
         onTap: () => open(const ExploreExpenditurePlansScreen()),
       ),
     ];
@@ -980,12 +956,12 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           Row(
             children: [
-              const Icon(Icons.show_chart_rounded, color: AppColors.accentCyan, size: 22),
-              const SizedBox(width: 8),
+              const _GlassIcon(icon: Icons.show_chart_rounded, size: 34, iconSize: 18),
+              const SizedBox(width: 10),
               Expanded(
                 child: Text(
                   'Market today',
-                  style: GoogleFonts.outfit(
+                  style: AppFonts.text(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
                     color: AppColors.onGlass,
@@ -1054,11 +1030,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ],
             ),
-          const SizedBox(height: 14),
-          Text(
-            'Tap a rate for details. USD/LKR updates live; gold, FD and T-bill are reference rates.',
-            style: GoogleFonts.outfit(fontSize: 12, color: AppColors.onGlassMuted),
-          ),
         ],
       ),
     );
@@ -1084,19 +1055,12 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             Row(
               children: [
-                Container(
-                  padding: const EdgeInsets.all(5),
-                  decoration: BoxDecoration(
-                    color: color.withValues(alpha: 0.2),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(icon, color: color, size: 15),
-                ),
+                _GlassIcon(icon: icon, size: 26, iconSize: 14, circle: true),
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
                     label,
-                    style: GoogleFonts.outfit(
+                    style: AppFonts.text(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
                       color: AppColors.onGlassMuted,
@@ -1110,7 +1074,7 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 6),
             Text(
               value,
-              style: GoogleFonts.outfit(
+              style: AppFonts.text(
                 fontSize: 15,
                 fontWeight: FontWeight.w800,
                 color: AppColors.onGlass,
@@ -1127,18 +1091,58 @@ class _HomeScreenState extends State<HomeScreen> {
 
 class _QuickAction {
   final IconData icon;
-  final Color color;
   final String title;
-  final String subtitle;
   final VoidCallback onTap;
 
   const _QuickAction({
     required this.icon,
-    required this.color,
     required this.title,
-    required this.subtitle,
     required this.onTap,
   });
+}
+
+/// Frosted-glass icon chip: white icon on a translucent white pane with a
+/// bright rim and a faint cyan glow, so every tile matches the glass theme
+/// instead of carrying its own color.
+class _GlassIcon extends StatelessWidget {
+  final IconData icon;
+  final double size;
+  final double iconSize;
+  final bool circle;
+
+  const _GlassIcon({
+    required this.icon,
+    this.size = 50,
+    this.iconSize = 26,
+    this.circle = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        gradient: AppGradients.glassIcon,
+        shape: circle ? BoxShape.circle : BoxShape.rectangle,
+        borderRadius: circle ? null : BorderRadius.circular(size * 0.32),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.45), width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.accentCyan.withValues(alpha: 0.22),
+            blurRadius: size * 0.3,
+            offset: Offset(0, size * 0.06),
+          ),
+        ],
+      ),
+      child: Icon(
+        icon,
+        color: Colors.white,
+        size: iconSize,
+        shadows: const [Shadow(color: Color(0x660B1F4D), blurRadius: 6, offset: Offset(0, 1))],
+      ),
+    );
+  }
 }
 
 class _QuickActionTile extends StatelessWidget {
@@ -1147,12 +1151,10 @@ class _QuickActionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = action.color;
     return _Pressable(
       onTap: action.onTap,
       borderRadius: 22,
       fill: AppColors.glassFill,
-      accent: color,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -1161,46 +1163,20 @@ class _QuickActionTile extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  width: 50,
-                  height: 50,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [color, Color.lerp(color, Colors.black, 0.35)!],
-                    ),
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: color.withValues(alpha: 0.45),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Icon(action.icon, color: Colors.white, size: 26),
-                ),
+                _GlassIcon(icon: action.icon),
                 const Spacer(),
-                Icon(Icons.arrow_outward_rounded, color: color, size: 20),
+                const Icon(Icons.arrow_outward_rounded, color: AppColors.onGlassMuted, size: 20),
               ],
             ),
             const SizedBox(height: 14),
             Text(
               action.title,
-              style: GoogleFonts.outfit(
+              style: AppFonts.text(
                 fontSize: 15,
                 fontWeight: FontWeight.w700,
                 color: AppColors.onGlass,
                 height: 1.2,
               ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              action.subtitle,
-              style: GoogleFonts.outfit(fontSize: 12, color: AppColors.onGlassMuted),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),

@@ -238,13 +238,6 @@ class _FdInvestmentsScreenState extends State<FdInvestmentsScreen> {
                 ),
               ),
             ),
-          const SizedBox(height: 10),
-          Text(
-            'Collected every morning from each institution\'s official website. '
-            'Rows showing "—" are institutions whose sites can\'t be read automatically: tap them to see their rates. '
-            'Always confirm with the bank before you deposit.',
-            style: investText(11, color: InvestColors.muted),
-          ),
         ],
       ),
     );

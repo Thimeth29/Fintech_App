@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_fonts.dart';
 
 class LabeledTextField extends StatefulWidget {
   final String label;
@@ -36,7 +36,7 @@ class _LabeledTextFieldState extends State<LabeledTextField> {
       children: [
         Text(
           widget.label,
-          style: GoogleFonts.outfit(
+          style: AppFonts.text(
             fontSize: 13,
             fontWeight: FontWeight.w600,
             color: AppColors.onGlass,
@@ -48,7 +48,7 @@ class _LabeledTextFieldState extends State<LabeledTextField> {
           controller: widget.controller,
           keyboardType: widget.keyboardType,
           obscureText: widget.isPassword && _obscure,
-          style: GoogleFonts.outfit(fontSize: 15, color: AppColors.onGlass),
+          style: AppFonts.text(fontSize: 15, color: AppColors.onGlass),
           cursorColor: AppColors.accentCyan,
           decoration: InputDecoration(
             isDense: true,
@@ -56,7 +56,7 @@ class _LabeledTextFieldState extends State<LabeledTextField> {
             fillColor: AppColors.glassFillStrong,
             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             hintText: widget.hintText ?? 'Enter your ${widget.label.toLowerCase()}...',
-            hintStyle: GoogleFonts.outfit(fontSize: 14, color: AppColors.onGlassMuted),
+            hintStyle: AppFonts.text(fontSize: 14, color: AppColors.onGlassMuted),
             prefixIcon: Icon(
               widget.prefixIcon ??
                   (widget.isPassword

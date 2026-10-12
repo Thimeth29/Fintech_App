@@ -80,6 +80,7 @@ class _QuizScreenState extends State<QuizScreen> {
         maxContentWidth: 640,
         appBar: TopNavBar(
             current: AppSection.sandbox, title: 'Quiz: ${widget.lesson.title}', showBackButton: true, isSectionRoot: false),
+        bottomNavigationBar: const AppBottomNav(current: AppSection.sandbox, isSectionRoot: false),
         body: ListView(
           padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
           children: [if (_done) _result(context) else _question(context)],

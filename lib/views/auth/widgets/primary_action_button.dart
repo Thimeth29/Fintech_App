@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_fonts.dart';
 
 /// Primary action: solid white pill with deep-navy text.
 class PrimaryActionButton extends StatelessWidget {
@@ -41,7 +41,7 @@ class PrimaryActionButton extends StatelessWidget {
               )
             : Text(
                 label,
-                style: GoogleFonts.outfit(
+                style: AppFonts.text(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                 ),

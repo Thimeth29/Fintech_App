@@ -52,6 +52,7 @@ class _SandboxScreenState extends State<SandboxScreen> {
           title: 'Investment Trainer',
           showBackButton: true,
         ),
+        bottomNavigationBar: const AppBottomNav(current: AppSection.sandbox),
         body: RefreshIndicator(
           onRefresh: () => vm.load(force: true),
           child: ListView(

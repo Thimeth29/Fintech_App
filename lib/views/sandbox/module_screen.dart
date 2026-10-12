@@ -77,6 +77,7 @@ class _ModuleScreenState extends State<ModuleScreen> with SingleTickerProviderSt
       child: GradientScaffold(
         maxContentWidth: 980,
         appBar: TopNavBar(current: AppSection.sandbox, title: m.title, showBackButton: true, isSectionRoot: false),
+        bottomNavigationBar: const AppBottomNav(current: AppSection.sandbox, isSectionRoot: false),
         body: Column(
           children: [
             Padding(

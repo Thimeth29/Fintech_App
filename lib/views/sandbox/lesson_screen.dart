@@ -60,6 +60,7 @@ class _LessonScreenState extends State<LessonScreen> {
     return GradientScaffold(
       maxContentWidth: 640,
       appBar: TopNavBar(current: AppSection.sandbox, title: lesson.title, showBackButton: true, isSectionRoot: false),
+      bottomNavigationBar: const AppBottomNav(current: AppSection.sandbox, isSectionRoot: false),
       body: Column(
         children: [
           const SizedBox(height: 8),

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/theme/app_theme.dart';
@@ -11,6 +10,7 @@ import '../../models/recurring_expense_model.dart';
 import '../../services/auth_service.dart';
 import '../../viewmodels/expense_viewmodel.dart';
 import 'widgets/expenditure_ui.dart';
+import '../../core/theme/app_fonts.dart';
 
 /// Rent, bills and subscriptions that repeat weekly or monthly. Each due
 /// occurrence is logged as an expense automatically when the app loads.
@@ -49,6 +49,7 @@ class _RecurringBody extends StatelessWidget {
       maxContentWidth: 860,
       appBar: const TopNavBar(
           current: AppSection.expenses, title: 'Recurring Bills', showBackButton: true, isSectionRoot: false),
+      bottomNavigationBar: const AppBottomNav(current: AppSection.expenses, isSectionRoot: false),
       floatingActionButton: Consumer<ExpenseViewModel>(
         builder: (context, vm, _) => !vm.isLoggedIn
             ? const SizedBox.shrink()
@@ -57,7 +58,7 @@ class _RecurringBody extends StatelessWidget {
                 foregroundColor: AppColors.onLight,
                 shape: const StadiumBorder(),
                 icon: const Icon(Icons.add_rounded),
-                label: Text('Add recurring', style: GoogleFonts.outfit(fontWeight: FontWeight.w700)),
+                label: Text('Add recurring', style: AppFonts.text(fontWeight: FontWeight.w700)),
                 onPressed: () => _edit(context, vm),
               ),
       ),

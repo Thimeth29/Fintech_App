@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../core/widgets/gradient_scaffold.dart';
 import '../../core/widgets/suggested_action_card.dart';
 import '../../core/widgets/glass_card.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/top_nav_bar.dart';
+import '../../core/theme/app_fonts.dart';
 
 class ExploreExpenditurePlansScreen extends StatelessWidget {
   const ExploreExpenditurePlansScreen({super.key});
@@ -20,6 +20,7 @@ class ExploreExpenditurePlansScreen extends StatelessWidget {
         showBackButton: true,
         isSectionRoot: false,
       ),
+      bottomNavigationBar: const AppBottomNav(current: AppSection.expenses, isSectionRoot: false),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         physics: const BouncingScrollPhysics(),
@@ -28,12 +29,12 @@ class ExploreExpenditurePlansScreen extends StatelessWidget {
           children: [
             Text(
               'The 50 / 30 / 20 Rule',
-              style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.onGlass),
+              style: AppFonts.text(fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.onGlass),
             ),
             const SizedBox(height: 4),
             Text(
               'A standard framework: 50% Needs, 30% Wants, 20% Investments & Savings.',
-              style: GoogleFonts.outfit(fontSize: 13, color: AppColors.onGlassMuted),
+              style: AppFonts.text(fontSize: 13, color: AppColors.onGlassMuted),
             ),
             const SizedBox(height: 16),
             GlassCard(
@@ -50,21 +51,21 @@ class ExploreExpenditurePlansScreen extends StatelessWidget {
                         color: AppColors.chartSeries[0],
                         title: '50%\nNeeds',
                         radius: 56,
-                        titleStyle: GoogleFonts.outfit(fontSize: 11, color: AppColors.onFill(AppColors.chartSeries[0]), fontWeight: FontWeight.bold),
+                        titleStyle: AppFonts.text(fontSize: 11, color: AppColors.onFill(AppColors.chartSeries[0]), fontWeight: FontWeight.bold),
                       ),
                       PieChartSectionData(
                         value: 30,
                         color: AppColors.chartSeries[1],
                         title: '30%\nWants',
                         radius: 56,
-                        titleStyle: GoogleFonts.outfit(fontSize: 11, color: AppColors.onFill(AppColors.chartSeries[1]), fontWeight: FontWeight.bold),
+                        titleStyle: AppFonts.text(fontSize: 11, color: AppColors.onFill(AppColors.chartSeries[1]), fontWeight: FontWeight.bold),
                       ),
                       PieChartSectionData(
                         value: 20,
                         color: AppColors.chartSeries[3],
                         title: '20%\nSavings',
                         radius: 56,
-                        titleStyle: GoogleFonts.outfit(fontSize: 11, color: AppColors.onFill(AppColors.chartSeries[3]), fontWeight: FontWeight.bold),
+                        titleStyle: AppFonts.text(fontSize: 11, color: AppColors.onFill(AppColors.chartSeries[3]), fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
@@ -74,7 +75,7 @@ class ExploreExpenditurePlansScreen extends StatelessWidget {
             const SizedBox(height: 24),
             Text(
               'Alternative Budgeting Strategies',
-              style: GoogleFonts.outfit(fontWeight: FontWeight.w700, fontSize: 16, color: AppColors.onGlass),
+              style: AppFonts.text(fontWeight: FontWeight.w700, fontSize: 16, color: AppColors.onGlass),
             ),
             const SizedBox(height: 12),
             _planCard(
@@ -129,12 +130,12 @@ class ExploreExpenditurePlansScreen extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: GoogleFonts.outfit(fontWeight: FontWeight.w700, fontSize: 15, color: AppColors.onGlass),
+                    style: AppFonts.text(fontWeight: FontWeight.w700, fontSize: 15, color: AppColors.onGlass),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     desc,
-                    style: GoogleFonts.outfit(fontSize: 13, color: AppColors.onGlassMuted, height: 1.35),
+                    style: AppFonts.text(fontSize: 13, color: AppColors.onGlassMuted, height: 1.35),
                   ),
                 ],
               ),

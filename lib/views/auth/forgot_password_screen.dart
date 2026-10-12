@@ -1,6 +1,5 @@
 // lib/views/auth/forgot_password_screen.dart
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/widgets/gradient_scaffold.dart';
 import '../../core/widgets/glass_card.dart';
@@ -11,6 +10,7 @@ import 'verification_code_screen.dart';
 import 'widgets/auth_back_button.dart';
 import 'widgets/labeled_text_field.dart';
 import 'widgets/primary_action_button.dart';
+import '../../core/theme/app_fonts.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -95,7 +95,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     Text(
                       'Forgot Password?',
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.outfit(
+                      style: AppFonts.text(
                         fontSize: 28,
                         fontWeight: FontWeight.w800,
                         color: AppColors.onGlass,
@@ -105,7 +105,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     Text(
                       "Enter the email address associated with your account and we'll send you a verification code to reset your password.",
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.outfit(
+                      style: AppFonts.text(
                         fontSize: 13,
                         color: AppColors.onGlass,
                         height: 1.5,
@@ -127,7 +127,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                             const SizedBox(height: 12),
                             Text(
                               _errorMessage!,
-                              style: GoogleFonts.outfit(
+                              style: AppFonts.text(
                                 color: AppColors.loss,
                                 fontSize: 13,
                                 fontWeight: FontWeight.w500,

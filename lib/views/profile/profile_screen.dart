@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../core/widgets/gradient_scaffold.dart';
 import '../../core/widgets/top_nav_bar.dart';
@@ -8,6 +7,7 @@ import '../../core/theme/app_theme.dart';
 import '../../viewmodels/auth_viewmodel.dart';
 import '../community/community_screen.dart';
 import '../auth/welcome_screen.dart';
+import '../../core/theme/app_fonts.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -39,7 +39,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Text(
           'Edit Profile Details',
-          style: GoogleFonts.outfit(fontWeight: FontWeight.w700, color: AppColors.onGlass),
+          style: AppFonts.text(fontWeight: FontWeight.w700, color: AppColors.onGlass),
         ),
         content: SingleChildScrollView(
           child: Column(
@@ -49,7 +49,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 controller: nameController,
                 decoration: InputDecoration(
                   labelText: 'Full Name',
-                  labelStyle: GoogleFonts.outfit(color: AppColors.onGlassMuted),
+                  labelStyle: AppFonts.text(color: AppColors.onGlassMuted),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 ),
               ),
@@ -58,7 +58,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 controller: occupationController,
                 decoration: InputDecoration(
                   labelText: 'Occupation',
-                  labelStyle: GoogleFonts.outfit(color: AppColors.onGlassMuted),
+                  labelStyle: AppFonts.text(color: AppColors.onGlassMuted),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 ),
               ),
@@ -85,7 +85,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogCtx),
-            child: Text('Cancel', style: GoogleFonts.outfit(color: AppColors.onGlassMuted)),
+            child: Text('Cancel', style: AppFonts.text(color: AppColors.onGlassMuted)),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -104,13 +104,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('Profile updated successfully!', style: GoogleFonts.outfit()),
+                    content: Text('Profile updated successfully!', style: AppFonts.text()),
                     backgroundColor: AppColors.primary,
                   ),
                 );
               }
             },
-            child: Text('Save Changes', style: GoogleFonts.outfit(fontWeight: FontWeight.w700)),
+            child: Text('Save Changes', style: AppFonts.text(fontWeight: FontWeight.w700)),
           ),
         ],
       ),
@@ -138,6 +138,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             title: 'My Profile',
             showBackButton: true,
           ),
+          bottomNavigationBar: const AppBottomNav(current: AppSection.profile),
           body: ListView(
             padding: const EdgeInsets.all(20),
             physics: const BouncingScrollPhysics(),
@@ -169,7 +170,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         backgroundColor: AppColors.primaryDark,
                         child: Text(
                           name.isNotEmpty ? name[0].toUpperCase() : '?',
-                          style: GoogleFonts.outfit(
+                          style: AppFonts.text(
                             fontSize: 36,
                             fontWeight: FontWeight.w800,
                             color: Colors.white,
@@ -180,11 +181,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     const SizedBox(height: 14),
                     Text(
                       name,
-                      style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.onGlass),
+                      style: AppFonts.text(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.onGlass),
                     ),
                     Text(
                       email,
-                      style: GoogleFonts.outfit(fontSize: 13, color: AppColors.onGlassMuted),
+                      style: AppFonts.text(fontSize: 13, color: AppColors.onGlassMuted),
                     ),
                     const SizedBox(height: 10),
                     Container(
@@ -203,7 +204,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             child: Text(
                               'Financial Literacy Rank: $literacyRank',
                               textAlign: TextAlign.center,
-                              style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.accentCyan),
+                              style: AppFonts.text(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.accentCyan),
                             ),
                           ),
                         ],
@@ -220,14 +221,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 children: [
                   Text(
                     'Personal Details',
-                    style: GoogleFonts.outfit(fontWeight: FontWeight.w700, fontSize: 16, color: AppColors.onGlass),
+                    style: AppFonts.text(fontWeight: FontWeight.w700, fontSize: 16, color: AppColors.onGlass),
                   ),
                   TextButton.icon(
                     onPressed: () => _showEditProfileDialog(context, authVm),
                     icon: const Icon(Icons.edit_outlined, size: 16, color: AppColors.accentCyan),
                     label: Text(
                       'Edit',
-                      style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.accentCyan),
+                      style: AppFonts.text(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.accentCyan),
                     ),
                   ),
                 ],
@@ -245,7 +246,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               const SizedBox(height: 24),
               Text(
                 'Preferences & Security',
-                style: GoogleFonts.outfit(fontWeight: FontWeight.w700, fontSize: 16, color: AppColors.onGlass),
+                style: AppFonts.text(fontWeight: FontWeight.w700, fontSize: 16, color: AppColors.onGlass),
               ),
               const SizedBox(height: 10),
 
@@ -278,7 +279,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: TextButton.icon(
                   style: TextButton.styleFrom(foregroundColor: AppColors.loss),
                   icon: const Icon(Icons.logout_rounded, size: 18),
-                  label: Text('Log out of account', style: GoogleFonts.outfit(fontWeight: FontWeight.w700)),
+                  label: Text('Log out of account', style: AppFonts.text(fontWeight: FontWeight.w700)),
                   onPressed: () async {
                     await authVm.signOut();
                     if (context.mounted) {
@@ -326,9 +327,9 @@ class _InfoTile extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(label, style: GoogleFonts.outfit(fontSize: 12, color: AppColors.onGlassMuted)),
+                  Text(label, style: AppFonts.text(fontSize: 12, color: AppColors.onGlassMuted)),
                   const SizedBox(height: 1),
-                  Text(value, style: GoogleFonts.outfit(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.onGlass)),
+                  Text(value, style: AppFonts.text(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.onGlass)),
                 ],
               ),
             ),
@@ -351,7 +352,7 @@ class _SettingsRow extends StatelessWidget {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       leading: Icon(icon, color: AppColors.onGlass, size: 20),
-      title: Text(label, style: GoogleFonts.outfit(fontSize: 14, color: AppColors.onGlass, fontWeight: FontWeight.w500)),
+      title: Text(label, style: AppFonts.text(fontSize: 14, color: AppColors.onGlass, fontWeight: FontWeight.w500)),
       trailing: const Icon(Icons.chevron_right_rounded, size: 20, color: AppColors.onGlassMuted),
       onTap: onTap ?? () {},
     );

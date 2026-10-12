@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../core/responsive.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/money.dart';
@@ -22,6 +21,7 @@ import 'plan_expenses_screen.dart';
 import 'recurring_expenses_screen.dart';
 import 'savings_goals_screen.dart';
 import 'widgets/expenditure_ui.dart';
+import '../../core/theme/app_fonts.dart';
 
 /// "My Expenditures" hub: this month's real numbers, alerts, and the
 /// entry points to every expenditure feature. Owns the view models and
@@ -113,6 +113,7 @@ class _ExpenditureScreenState extends State<ExpenditureScreen> {
         title: 'My Expenditures',
         showBackButton: true,
       ),
+      bottomNavigationBar: const AppBottomNav(current: AppSection.expenses),
       body: ListenableBuilder(
         listenable: Listenable.merge([_expenses, _goals, _debts, _settings]),
         builder: (context, _) {
@@ -159,7 +160,7 @@ class _ExpenditureScreenState extends State<ExpenditureScreen> {
                 const SizedBox(height: 18),
                 Text(
                   'Manage & Plan',
-                  style: GoogleFonts.outfit(
+                  style: AppFonts.text(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
                     color: AppColors.onGlass,
@@ -181,14 +182,13 @@ class _ExpenditureScreenState extends State<ExpenditureScreen> {
     final tiles = <Widget>[
       BlockButton(
         label: 'Plan My Expenses',
-        subtitle: 'Log, edit & forecast',
         icon: Icons.edit_note_rounded,
         backgroundColor: AppColors.primary,
         onTap: () => _open(PlanExpensesScreen(viewModel: _expenses)),
       ),
       BlockButton(
         label: 'Budgets',
-        subtitle: _expenses.budgets.isEmpty ? 'Set monthly limits' : (over > 0 ? '$over over budget' : '${_expenses.budgets.length} set'),
+        subtitle: _expenses.budgets.isEmpty ? null : (over > 0 ? '$over over budget' : '${_expenses.budgets.length} set'),
         icon: Icons.pie_chart_outline_rounded,
         entranceDelay: const Duration(milliseconds: 60),
         onTap: () => _open(BudgetsScreen(viewModel: _expenses)),
@@ -196,7 +196,7 @@ class _ExpenditureScreenState extends State<ExpenditureScreen> {
       BlockButton(
         label: 'Savings Goals',
         subtitle: _goals.activeGoals.isEmpty
-            ? 'e.g. Year-end trip'
+            ? null
             : '${_goals.activeGoals.length} active · ${formatRs(_goals.totalSaved, decimals: 0)}',
         icon: Icons.flag_rounded,
         entranceDelay: const Duration(milliseconds: 120),
@@ -205,7 +205,7 @@ class _ExpenditureScreenState extends State<ExpenditureScreen> {
       BlockButton(
         label: 'Debts & Loans',
         subtitle: _debts.debts.isEmpty
-            ? 'Lent & borrowed'
+            ? null
             : 'Owed ${formatRs(_debts.owedToMe, decimals: 0)} · Owe ${formatRs(_debts.owedByMe, decimals: 0)}',
         icon: Icons.handshake_outlined,
         entranceDelay: const Duration(milliseconds: 180),

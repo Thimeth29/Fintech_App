@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/money.dart';
 import '../../../core/widgets/glass_card.dart';
 import '../../../models/community_models.dart';
 import '../../../viewmodels/community_viewmodel.dart';
+import '../../../core/theme/app_fonts.dart';
 
 TextStyle cText(double size, {FontWeight weight = FontWeight.w500, Color color = AppColors.onGlass, double? height}) =>
-    GoogleFonts.outfit(fontSize: size, fontWeight: weight, color: color, height: height);
+    AppFonts.text(fontSize: size, fontWeight: weight, color: color, height: height);
 
 /// Shows the result of an action: an error, or the success text.
 void showResult(BuildContext context, String? error, [String? success]) {

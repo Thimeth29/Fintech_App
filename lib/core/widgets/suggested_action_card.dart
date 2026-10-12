@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../views/bot/chat_screen.dart';
 import '../theme/app_theme.dart';
 import 'glass_card.dart';
+import '../theme/app_fonts.dart';
 
 /// The "here's what to do next" box every analytics/expenditure page ends with.
 class SuggestedActionCard extends StatelessWidget {
@@ -32,7 +32,7 @@ class SuggestedActionCard extends StatelessWidget {
               children: [
                 Text(
                   'Suggested action',
-                  style: GoogleFonts.outfit(
+                  style: AppFonts.text(
                     fontWeight: FontWeight.w700,
                     fontSize: 14,
                     color: AppColors.accentCyan,
@@ -41,7 +41,7 @@ class SuggestedActionCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   action,
-                  style: GoogleFonts.outfit(
+                  style: AppFonts.text(
                     fontSize: 13,
                     color: AppColors.onGlass,
                     height: 1.35,
@@ -71,7 +71,7 @@ class AskBotButton extends StatelessWidget {
         icon: const Icon(Icons.smart_toy_rounded, size: 20),
         label: Text(
           'ASK FINBOT AI',
-          style: GoogleFonts.outfit(fontSize: 15, fontWeight: FontWeight.w700, letterSpacing: 0.5),
+          style: AppFonts.text(fontSize: 15, fontWeight: FontWeight.w700, letterSpacing: 0.5),
         ),
         // White "Contact me"-style pill: deep-navy text and icon.
         style: ElevatedButton.styleFrom(

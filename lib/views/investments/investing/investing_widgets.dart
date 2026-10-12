@@ -2,13 +2,13 @@
 // CSE and Government Securities all look and read the same way.
 
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/theme/app_backgrounds.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/glass_card.dart';
 import '../../../core/widgets/top_nav_bar.dart';
+import '../../../core/theme/app_fonts.dart';
 
 /// Investing-page palette — thin aliases over [AppColors] so the glass
 /// theme is defined in one place. The old field names are kept so the
@@ -31,7 +31,7 @@ class InvestColors {
 
 TextStyle investText(double size,
         {FontWeight weight = FontWeight.w500, Color color = InvestColors.text}) =>
-    GoogleFonts.outfit(fontSize: size, fontWeight: weight, color: color);
+    AppFonts.text(fontSize: size, fontWeight: weight, color: color);
 
 Future<void> openExternal(String url) async {
   final uri = Uri.tryParse(url);
@@ -104,6 +104,8 @@ class InvestPage extends StatelessWidget {
           showBackButton: true,
           isSectionRoot: isSectionRoot,
         ),
+        bottomNavigationBar:
+            AppBottomNav(current: AppSection.investments, isSectionRoot: isSectionRoot),
         body: SafeArea(
           child: onRefresh == null
               ? list

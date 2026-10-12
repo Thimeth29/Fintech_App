@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../platform/app_platform.dart';
+import 'app_fonts.dart';
 
 class AppGradients {
   static const LinearGradient primary = LinearGradient(
@@ -35,6 +35,42 @@ class AppGradients {
     colors: [
       Color(0xB82563EB), // #2563EB @ 72%
       Color(0xA86366F1), // #6366F1 @ 66%
+    ],
+  );
+
+  /// Frostier take on [heroCard] for Home's spending card: lower alphas so
+  /// more of the (heavily blurred) background shows through. Only used
+  /// when blur is on — without blur it would be too thin behind white text.
+  static const LinearGradient heroGlass = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [
+      Color(0x8C3B82F6), // #3B82F6 @ 55%
+      Color(0x666366F1), // #6366F1 @ 40%
+      Color(0x7A1E3A8A), // #1E3A8A @ 48%
+    ],
+    stops: [0, 0.55, 1],
+  );
+
+  /// Stronger, wider sheen for [heroGlass].
+  static const LinearGradient heroSheen = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment(0.5, 0.6),
+    colors: [
+      Color(0x73FFFFFF), // white @ 45%
+      Color(0x14FFFFFF), // white @ 8%
+      Color(0x00FFFFFF),
+    ],
+    stops: [0, 0.45, 1],
+  );
+
+  /// Frosted fill for the small icon chips on Home's tiles.
+  static const LinearGradient glassIcon = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [
+      Color(0x59FFFFFF), // white @ 35%
+      Color(0x14FFFFFF), // white @ 8%
     ],
   );
 
@@ -202,7 +238,7 @@ class AppTheme {
   static const Color secondaryColor = AppColors.glassFillStrong;
 
   static ThemeData get lightTheme {
-    final baseTextTheme = GoogleFonts.outfitTextTheme(ThemeData.dark().textTheme)
+    final baseTextTheme = AppFonts.textTheme(ThemeData.dark().textTheme)
         .apply(bodyColor: AppColors.onGlass, displayColor: AppColors.onGlass);
 
     final overlayShape = RoundedRectangleBorder(
@@ -218,9 +254,9 @@ class AppTheme {
     final inputTheme = InputDecorationTheme(
       filled: true,
       fillColor: AppColors.glassFillStrong,
-      hintStyle: GoogleFonts.outfit(color: AppColors.onGlassMuted),
-      labelStyle: GoogleFonts.outfit(color: AppColors.onGlassMuted),
-      floatingLabelStyle: GoogleFonts.outfit(color: AppColors.accentCyan),
+      hintStyle: AppFonts.text(color: AppColors.onGlassMuted),
+      labelStyle: AppFonts.text(color: AppColors.onGlassMuted),
+      floatingLabelStyle: AppFonts.text(color: AppColors.accentCyan),
       prefixIconColor: AppColors.onGlassMuted,
       suffixIconColor: AppColors.onGlassMuted,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -229,7 +265,7 @@ class AppTheme {
       focusedBorder: inputBorder(AppColors.accentCyan, 1.5),
       errorBorder: inputBorder(AppColors.loss),
       focusedErrorBorder: inputBorder(AppColors.loss, 1.5),
-      errorStyle: GoogleFonts.outfit(color: AppColors.loss),
+      errorStyle: AppFonts.text(color: AppColors.loss),
     );
 
     return ThemeData(
@@ -262,7 +298,7 @@ class AppTheme {
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         centerTitle: false,
-        titleTextStyle: GoogleFonts.outfit(
+        titleTextStyle: AppFonts.text(
           fontSize: 20,
           fontWeight: FontWeight.w700,
           color: AppColors.onGlass,
@@ -279,7 +315,7 @@ class AppTheme {
           minimumSize: const Size(64, 52),
           shape: const StadiumBorder(),
           padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 24),
-          textStyle: GoogleFonts.outfit(
+          textStyle: AppFonts.text(
             fontSize: 16,
             fontWeight: FontWeight.w700,
           ),
@@ -290,7 +326,7 @@ class AppTheme {
           backgroundColor: Colors.white,
           foregroundColor: AppColors.onLight,
           shape: const StadiumBorder(),
-          textStyle: GoogleFonts.outfit(fontSize: 15, fontWeight: FontWeight.w700),
+          textStyle: AppFonts.text(fontSize: 15, fontWeight: FontWeight.w700),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
@@ -300,13 +336,13 @@ class AppTheme {
           side: const BorderSide(color: AppColors.glassBorderStrong),
           shape: const StadiumBorder(),
           padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
-          textStyle: GoogleFonts.outfit(fontSize: 15, fontWeight: FontWeight.w700),
+          textStyle: AppFonts.text(fontSize: 15, fontWeight: FontWeight.w700),
         ),
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: AppColors.accentCyan,
-          textStyle: GoogleFonts.outfit(fontWeight: FontWeight.w700),
+          textStyle: AppFonts.text(fontWeight: FontWeight.w700),
         ),
       ),
       iconButtonTheme: IconButtonThemeData(
@@ -332,10 +368,10 @@ class AppTheme {
         backgroundColor: AppColors.deepNavy,
         surfaceTintColor: Colors.transparent,
         shape: overlayShape,
-        titleTextStyle: GoogleFonts.outfit(
+        titleTextStyle: AppFonts.text(
             fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.onGlass),
         contentTextStyle:
-            GoogleFonts.outfit(fontSize: 14, color: AppColors.onGlassMuted, height: 1.4),
+            AppFonts.text(fontSize: 14, color: AppColors.onGlassMuted, height: 1.4),
       ),
       bottomSheetTheme: const BottomSheetThemeData(
         backgroundColor: AppColors.deepNavy,
@@ -351,10 +387,10 @@ class AppTheme {
         color: AppColors.deepNavy,
         surfaceTintColor: Colors.transparent,
         shape: overlayShape,
-        textStyle: GoogleFonts.outfit(color: AppColors.onGlass),
+        textStyle: AppFonts.text(color: AppColors.onGlass),
       ),
       dropdownMenuTheme: DropdownMenuThemeData(
-        textStyle: GoogleFonts.outfit(color: AppColors.onGlass),
+        textStyle: AppFonts.text(color: AppColors.onGlass),
         inputDecorationTheme: inputTheme,
         menuStyle: const MenuStyle(
           backgroundColor: WidgetStatePropertyAll(AppColors.deepNavy),
@@ -369,7 +405,7 @@ class AppTheme {
       ),
       snackBarTheme: SnackBarThemeData(
         backgroundColor: AppColors.deepNavy,
-        contentTextStyle: GoogleFonts.outfit(color: AppColors.onGlass, fontSize: 14),
+        contentTextStyle: AppFonts.text(color: AppColors.onGlass, fontSize: 14),
         actionTextColor: AppColors.accentCyan,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
@@ -383,7 +419,7 @@ class AppTheme {
           borderRadius: BorderRadius.circular(10),
           border: Border.all(color: AppColors.glassBorder),
         ),
-        textStyle: GoogleFonts.outfit(color: AppColors.onGlass, fontSize: 12),
+        textStyle: AppFonts.text(color: AppColors.onGlass, fontSize: 12),
       ),
       datePickerTheme: DatePickerThemeData(
         backgroundColor: AppColors.deepNavy,
@@ -432,8 +468,8 @@ class AppTheme {
         backgroundColor: AppColors.glassFill,
         selectedColor: Colors.white,
         side: const BorderSide(color: AppColors.glassBorder),
-        labelStyle: GoogleFonts.outfit(color: AppColors.onGlass),
-        secondaryLabelStyle: GoogleFonts.outfit(color: AppColors.onLight),
+        labelStyle: AppFonts.text(color: AppColors.onGlass),
+        secondaryLabelStyle: AppFonts.text(color: AppColors.onLight),
         shape: const StadiumBorder(),
       ),
       listTileTheme: const ListTileThemeData(

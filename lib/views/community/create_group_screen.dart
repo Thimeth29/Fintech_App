@@ -131,6 +131,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
     return GradientScaffold(
       maxContentWidth: 720,
       appBar: const TopNavBar(current: AppSection.community, title: 'Start a group', showBackButton: true, isSectionRoot: false),
+      bottomNavigationBar: const AppBottomNav(current: AppSection.community, isSectionRoot: false),
       body: Form(
         key: _form,
         child: ListView(

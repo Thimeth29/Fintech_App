@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme/app_backgrounds.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/glass_card.dart';
 import 'signup_screen.dart';
 import 'login_screen.dart';
+import '../../core/theme/app_fonts.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
@@ -89,7 +89,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                       'Secured with row-level data protection',
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
-                                      style: GoogleFonts.outfit(
+                                      style: AppFonts.text(
                                         fontSize: 11.5,
                                         color: _muted,
                                         shadows: kTitleShadow,
@@ -123,11 +123,11 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 96,
-            height: 96,
+            width: 148,
+            height: 148,
             decoration: BoxDecoration(
               color: AppColors.glassFillStrong,
-              borderRadius: BorderRadius.circular(26),
+              borderRadius: BorderRadius.circular(38),
               border: Border.all(color: AppColors.glassBorderStrong, width: 1.5),
               boxShadow: [
                 BoxShadow(
@@ -137,23 +137,23 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 ),
               ],
             ),
-            padding: const EdgeInsets.all(4),
+            padding: const EdgeInsets.all(5),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(22),
+              borderRadius: BorderRadius.circular(33),
               child: Image.asset(
                 'assets/branding/logo.png',
                 fit: BoxFit.cover,
                 errorBuilder: (_, __, ___) => const Icon(Icons.auto_graph_rounded,
-                    color: Colors.white, size: 40),
+                    color: Colors.white, size: 64),
               ),
             ),
           ),
           const SizedBox(height: 26),
           Text(
-            'Welcome\nto Mobile SAP',
+            'Welcome',
             textAlign: TextAlign.center,
-            style: GoogleFonts.outfit(
-              fontSize: 34,
+            style: AppFonts.text(
+              fontSize: 38,
               fontWeight: FontWeight.w800,
               color: AppColors.onGlass,
               height: 1.15,
@@ -164,7 +164,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
           Text(
             'Smart money for Sri Lanka.\nPractise safe, grow confident.',
             textAlign: TextAlign.center,
-            style: GoogleFonts.outfit(
+            style: AppFonts.text(
               fontSize: 14.5,
               fontWeight: FontWeight.w500,
               color: _muted,
@@ -188,7 +188,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
           borderRadius: BorderRadius.circular(16),
           icon: const Icon(Icons.keyboard_arrow_down_rounded,
               size: 18, color: AppColors.onGlass),
-          style: GoogleFonts.outfit(
+          style: AppFonts.text(
             fontSize: 13,
             fontWeight: FontWeight.w600,
             color: AppColors.onGlass,
@@ -224,7 +224,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
           child: Text(
             label,
             overflow: TextOverflow.ellipsis,
-            style: GoogleFonts.outfit(
+            style: AppFonts.text(
               fontSize: 15.5,
               fontWeight: FontWeight.w700,
               color: fg,

@@ -69,6 +69,7 @@ class _CommunityHubState extends State<_CommunityHub> {
     return GradientScaffold(
       maxContentWidth: 760,
       appBar: const TopNavBar(current: AppSection.community, title: 'Community', showBackButton: true),
+      bottomNavigationBar: const AppBottomNav(current: AppSection.community),
       body: vm.isLoading
           ? const Center(child: CircularProgressIndicator(color: AppColors.accentCyan, strokeWidth: 2))
           : vm.errorCode != null

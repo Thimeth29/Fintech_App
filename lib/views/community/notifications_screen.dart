@@ -81,6 +81,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         showBackButton: true,
         isSectionRoot: false,
       ),
+      bottomNavigationBar: const AppBottomNav(current: AppSection.community, isSectionRoot: false),
       body: _loading
           ? const Center(child: CircularProgressIndicator(color: AppColors.accentCyan, strokeWidth: 2))
           : RefreshIndicator(

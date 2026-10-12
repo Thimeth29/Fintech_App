@@ -7,7 +7,6 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/sandbox/sandbox_config.dart';
@@ -19,12 +18,13 @@ import '../../../services/sandbox/price_engine.dart';
 import '../../../viewmodels/sandbox_viewmodel.dart';
 import '../../auth/login_screen.dart';
 import '../../bot/chat_screen.dart';
+import '../../../core/theme/app_fonts.dart';
 
 /// Honour the OS "reduce motion" setting everywhere in the trainer.
 bool reduceMotion(BuildContext context) => MediaQuery.maybeDisableAnimationsOf(context) ?? false;
 
 TextStyle sbText(double size, {FontWeight weight = FontWeight.w500, Color color = AppColors.onGlass, double? height}) =>
-    GoogleFonts.outfit(fontSize: size, fontWeight: weight, color: color, height: height);
+    AppFonts.text(fontSize: size, fontWeight: weight, color: color, height: height);
 
 Color pnlColor(double v) => v >= 0 ? AppColors.gain : AppColors.loss;
 
@@ -36,7 +36,7 @@ void sandboxSnack(BuildContext context, String message, {bool error = false}) {
   ScaffoldMessenger.of(context)
     ..hideCurrentSnackBar()
     ..showSnackBar(SnackBar(
-      content: Text(message, style: GoogleFonts.outfit(color: Colors.white)),
+      content: Text(message, style: AppFonts.text(color: Colors.white)),
       backgroundColor: error ? AppColors.lossStrong : AppColors.gainStrong,
     ));
 }

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/theme/app_theme.dart';
@@ -11,6 +10,7 @@ import '../../models/debt_model.dart';
 import '../../services/auth_service.dart';
 import '../../viewmodels/debts_viewmodel.dart';
 import 'widgets/expenditure_ui.dart';
+import '../../core/theme/app_fonts.dart';
 
 /// Money lent ("They owe me") and borrowed ("I owe"). None of this counts
 /// as spending — the original purchase already did.
@@ -63,6 +63,7 @@ class _DebtsBodyState extends State<_DebtsBody> with SingleTickerProviderStateMi
       maxContentWidth: 860,
       appBar: const TopNavBar(
           current: AppSection.expenses, title: 'Debts & Loans', showBackButton: true, isSectionRoot: false),
+      bottomNavigationBar: const AppBottomNav(current: AppSection.expenses, isSectionRoot: false),
       floatingActionButton: Consumer<DebtsViewModel>(
         builder: (context, vm, _) => !vm.isLoggedIn
             ? const SizedBox.shrink()
@@ -71,7 +72,7 @@ class _DebtsBodyState extends State<_DebtsBody> with SingleTickerProviderStateMi
                 foregroundColor: AppColors.onLight,
                 shape: const StadiumBorder(),
                 icon: const Icon(Icons.add_rounded),
-                label: Text('Add', style: GoogleFonts.outfit(fontWeight: FontWeight.w700)),
+                label: Text('Add', style: AppFonts.text(fontWeight: FontWeight.w700)),
                 onPressed: () => _add(vm),
               ),
       ),
@@ -93,7 +94,7 @@ class _DebtsBodyState extends State<_DebtsBody> with SingleTickerProviderStateMi
                 dividerColor: Colors.transparent,
                 labelColor: AppColors.onLight,
                 unselectedLabelColor: AppColors.onGlass,
-                labelStyle: GoogleFonts.outfit(fontWeight: FontWeight.w700),
+                labelStyle: AppFonts.text(fontWeight: FontWeight.w700),
                 tabs: const [Tab(text: 'They owe me'), Tab(text: 'I owe')],
               ),
             ),

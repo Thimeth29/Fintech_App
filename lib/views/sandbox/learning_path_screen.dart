@@ -26,6 +26,7 @@ class LearningPathScreen extends StatelessWidget {
     return GradientScaffold(
       maxContentWidth: 760,
       appBar: const TopNavBar(current: AppSection.sandbox, title: 'Learning path', showBackButton: true, isSectionRoot: false),
+      bottomNavigationBar: const AppBottomNav(current: AppSection.sandbox, isSectionRoot: false),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
         children: [

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/theme/app_theme.dart';
@@ -12,6 +11,7 @@ import '../../services/auth_service.dart';
 import '../../services/expenditure/goal_math.dart';
 import '../../viewmodels/savings_goals_viewmodel.dart';
 import 'widgets/expenditure_ui.dart';
+import '../../core/theme/app_fonts.dart';
 
 /// Savings goals (e.g. a year-end trip). Contributions move money into a
 /// goal and are never counted as expenses.
@@ -52,6 +52,7 @@ class _GoalsBody extends StatelessWidget {
       maxContentWidth: 860,
       appBar: const TopNavBar(
           current: AppSection.expenses, title: 'Savings Goals', showBackButton: true, isSectionRoot: false),
+      bottomNavigationBar: const AppBottomNav(current: AppSection.expenses, isSectionRoot: false),
       floatingActionButton: Consumer<SavingsGoalsViewModel>(
         builder: (context, vm, _) => !vm.isLoggedIn
             ? const SizedBox.shrink()
@@ -60,7 +61,7 @@ class _GoalsBody extends StatelessWidget {
                 foregroundColor: AppColors.onLight,
                 shape: const StadiumBorder(),
                 icon: const Icon(Icons.flag_rounded),
-                label: Text('New goal', style: GoogleFonts.outfit(fontWeight: FontWeight.w700)),
+                label: Text('New goal', style: AppFonts.text(fontWeight: FontWeight.w700)),
                 onPressed: () => _editGoal(context, vm),
               ),
       ),

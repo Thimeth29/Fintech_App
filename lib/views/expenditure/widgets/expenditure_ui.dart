@@ -1,16 +1,16 @@
 // Shared building blocks for the expenditure screens, so Plan, Budgets,
 // Recurring, Goals and Debts all look and behave the same way.
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/money.dart';
 import '../../../core/widgets/glass_card.dart';
 import '../../../models/expense_priority.dart';
+import '../../../core/theme/app_fonts.dart';
 
 TextStyle expText(double size,
         {FontWeight weight = FontWeight.w500, Color color = AppColors.onGlass, double? height}) =>
-    GoogleFonts.outfit(fontSize: size, fontWeight: weight, color: color, height: height);
+    AppFonts.text(fontSize: size, fontWeight: weight, color: color, height: height);
 
 IconData categoryIcon(String category) {
   switch (category) {
@@ -55,7 +55,7 @@ class SectionTitle extends StatelessWidget {
         children: [
           Expanded(
             child: Text(text,
-                style: GoogleFonts.outfit(
+                style: AppFonts.text(
                     fontSize: 17, fontWeight: FontWeight.w700, color: AppColors.onGlass, shadows: kTitleShadow)),
           ),
           if (trailing != null) trailing!,
@@ -263,7 +263,7 @@ void showExpSnack(BuildContext context, String message,
   final messenger = ScaffoldMessenger.of(context);
   messenger.hideCurrentSnackBar();
   messenger.showSnackBar(SnackBar(
-    content: Text(message, style: GoogleFonts.outfit(color: Colors.white)),
+    content: Text(message, style: AppFonts.text(color: Colors.white)),
     backgroundColor: isError ? AppColors.lossStrong : AppColors.deepNavy,
     action: action,
     duration: duration,

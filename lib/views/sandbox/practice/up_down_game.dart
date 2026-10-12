@@ -294,6 +294,7 @@ class UpDownStatsScreen extends StatelessWidget {
       maxContentWidth: 760,
       appBar: const TopNavBar(
           current: AppSection.sandbox, title: 'Your Up-or-Down stats', showBackButton: true, isSectionRoot: false),
+      bottomNavigationBar: const AppBottomNav(current: AppSection.sandbox, isSectionRoot: false),
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [

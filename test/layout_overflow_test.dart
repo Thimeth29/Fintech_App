@@ -5,10 +5,10 @@
 //
 // Widget tests normally draw text in the "FlutterTest" font, where every
 // glyph is a full 1em square — roughly twice the width of real text — and
-// Outfit can't be downloaded here. That makes text-heavy rows "overflow" in
-// tests when they fit fine on a device. So the SDK's bundled Roboto is
-// registered under GoogleFonts' per-weight family names ("Outfit_regular",
-// "Outfit_700", …) to get realistic metrics. If the SDK fonts can't be
+// Poppins / Inter can't be downloaded here. That makes text-heavy rows
+// "overflow" in tests when they fit fine on a device. So the SDK's bundled
+// Roboto is registered under GoogleFonts' per-weight family names
+// ("Inter_regular", "Poppins_700", …) to get realistic metrics. If the SDK fonts can't be
 // found, the test still runs, just with the pessimistic test font.
 
 import 'dart:io';
@@ -87,9 +87,11 @@ Future<void> _loadRealisticFont() async {
   for (final e in faces.entries) {
     final file = File('${fontsDir.path}${Platform.pathSeparator}roboto-${e.value}.ttf');
     if (!file.existsSync()) continue;
-    final loader = FontLoader('Outfit_${e.key}')
-      ..addFont(Future.value(ByteData.sublistView(file.readAsBytesSync())));
-    await loader.load();
+    for (final family in const ['Poppins', 'Inter']) {
+      final loader = FontLoader('${family}_${e.key}')
+        ..addFont(Future.value(ByteData.sublistView(file.readAsBytesSync())));
+      await loader.load();
+    }
   }
 }
 

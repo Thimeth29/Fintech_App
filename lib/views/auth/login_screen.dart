@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/theme/app_backgrounds.dart';
 import '../../core/theme/app_theme.dart';
@@ -10,6 +9,7 @@ import '../../services/auth_service.dart';
 import '../home/home_screen.dart';
 import 'forgot_password_screen.dart';
 import 'signup_screen.dart';
+import '../../core/theme/app_fonts.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -42,7 +42,7 @@ class _LoginScreenState extends State<LoginScreen> {
       SnackBar(
         content: Text(
           message,
-          style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.w500),
+          style: AppFonts.text(color: Colors.white, fontWeight: FontWeight.w500),
         ),
         backgroundColor: AppColors.lossStrong,
         behavior: SnackBarBehavior.floating,
@@ -81,7 +81,7 @@ class _LoginScreenState extends State<LoginScreen> {
             Expanded(
               child: Text(
                 'Account Not Found',
-                style: GoogleFonts.outfit(
+                style: AppFonts.text(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
                   color: AppColors.onGlass,
@@ -93,7 +93,7 @@ class _LoginScreenState extends State<LoginScreen> {
         content: Text(
           'No registered Supabase account was found for "$inputEmail".\n\n'
           'Would you like to log in with Demo Mode to test the app, or create a new account?',
-          style: GoogleFonts.outfit(
+          style: AppFonts.text(
             fontSize: 14,
             color: AppColors.onGlassMuted,
             height: 1.4,
@@ -110,7 +110,7 @@ class _LoginScreenState extends State<LoginScreen> {
             },
             child: Text(
               'Create Account',
-              style: GoogleFonts.outfit(
+              style: AppFonts.text(
                 color: AppColors.onGlassMuted,
                 fontWeight: FontWeight.w600,
               ),
@@ -130,7 +130,7 @@ class _LoginScreenState extends State<LoginScreen> {
             },
             child: Text(
               'Log in as Demo User',
-              style: GoogleFonts.outfit(
+              style: AppFonts.text(
                 color: AppColors.onLight,
                 fontWeight: FontWeight.w700,
               ),
@@ -261,7 +261,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         const SizedBox(height: 12),
                         Text(
                           'Welcome back',
-                          style: GoogleFonts.outfit(
+                          style: AppFonts.text(
                             fontSize: 28,
                             fontWeight: FontWeight.w800,
                             color: AppColors.onGlass,
@@ -271,7 +271,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         const SizedBox(height: 6),
                         Text(
                           "Log in to see your money, your sandbox and today's tips.",
-                          style: GoogleFonts.outfit(
+                          style: AppFonts.text(
                             fontSize: 14,
                             color: AppColors.onGlassMuted,
                             height: 1.4,
@@ -298,7 +298,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 Expanded(
                                   child: Text(
                                     _errorMessage!,
-                                    style: GoogleFonts.outfit(
+                                    style: AppFonts.text(
                                       fontSize: 13,
                                       fontWeight: FontWeight.w600,
                                       color: AppColors.loss,
@@ -389,7 +389,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 const SizedBox(width: 8),
                                 Text(
                                   'Keep me logged in',
-                                  style: GoogleFonts.outfit(
+                                  style: AppFonts.text(
                                       fontSize: 13,
                                       color: AppColors.onGlassMuted),
                                 ),
@@ -402,7 +402,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                               child: Text(
                                 'Forgot password?',
-                                style: GoogleFonts.outfit(
+                                style: AppFonts.text(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w700,
                                   color: AppColors.accentCyan,
@@ -439,7 +439,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   )
                                 : Text(
                                     'Log in',
-                                    style: GoogleFonts.outfit(
+                                    style: AppFonts.text(
                                       fontSize: 16,
                                       fontWeight: FontWeight.w700,
                                       color: AppColors.onLight,
@@ -458,7 +458,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 color: AppColors.accentCyan, size: 20),
                             label: Text(
                               'Explore with Demo Account',
-                              style: GoogleFonts.outfit(
+                              style: AppFonts.text(
                                 fontSize: 15,
                                 fontWeight: FontWeight.w700,
                                 color: AppColors.accentCyan,
@@ -484,7 +484,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 color: AppColors.accentCyan, size: 22),
                             label: Text(
                               'Use fingerprint',
-                              style: GoogleFonts.outfit(
+                              style: AppFonts.text(
                                 fontSize: 15,
                                 fontWeight: FontWeight.w700,
                                 color: AppColors.onGlass,
@@ -512,7 +512,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               padding: const EdgeInsets.symmetric(horizontal: 12),
                               child: Text(
                                 'or',
-                                style: GoogleFonts.outfit(
+                                style: AppFonts.text(
                                     fontSize: 13, color: AppColors.onGlassMuted),
                               ),
                             ),
@@ -537,7 +537,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             label: Text(
                               'Continue with Google',
-                              style: GoogleFonts.outfit(
+                              style: AppFonts.text(
                                 fontSize: 15,
                                 fontWeight: FontWeight.w700,
                                 color: AppColors.onGlass,
@@ -564,7 +564,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             },
                             child: Text(
                               'Log in with a one-time code instead',
-                              style: GoogleFonts.outfit(
+                              style: AppFonts.text(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w700,
                                 color: AppColors.accentCyan,
@@ -583,7 +583,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             children: [
                               Text(
                                 'New to Mobile SAP? ',
-                                style: GoogleFonts.outfit(
+                                style: AppFonts.text(
                                     fontSize: 14, color: AppColors.onGlassMuted),
                               ),
                               GestureDetector(
@@ -593,7 +593,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                                 child: Text(
                                   'Create an account',
-                                  style: GoogleFonts.outfit(
+                                  style: AppFonts.text(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w700,
                                     color: AppColors.accentCyan,
@@ -622,7 +622,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget _buildInputFieldLabel(String label) {
     return Text(
       label,
-      style: GoogleFonts.outfit(
+      style: AppFonts.text(
         fontSize: 14,
         fontWeight: FontWeight.w700,
         color: AppColors.onGlass,
@@ -644,7 +644,7 @@ class _LoginScreenState extends State<LoginScreen> {
       keyboardType: keyboardType,
       obscureText: obscureText,
       onChanged: onChanged,
-      style: GoogleFonts.outfit(fontSize: 15, color: AppColors.onGlass),
+      style: AppFonts.text(fontSize: 15, color: AppColors.onGlass),
       cursorColor: AppColors.accentCyan,
       decoration: InputDecoration(
         isDense: true,
@@ -652,7 +652,7 @@ class _LoginScreenState extends State<LoginScreen> {
         fillColor: AppColors.glassFillStrong,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         hintText: hintText,
-        hintStyle: GoogleFonts.outfit(fontSize: 14, color: AppColors.onGlassMuted),
+        hintStyle: AppFonts.text(fontSize: 14, color: AppColors.onGlassMuted),
         suffixIcon: suffixIcon,
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),

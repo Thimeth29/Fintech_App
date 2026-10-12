@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../core/widgets/gradient_scaffold.dart';
 import '../../core/widgets/top_nav_bar.dart';
@@ -10,6 +9,7 @@ import '../../services/auth_service.dart';
 import '../../core/config/gemini_config.dart';
 import '../../viewmodels/chat_viewmodel.dart';
 import '../../viewmodels/sandbox_viewmodel.dart';
+import '../../core/theme/app_fonts.dart';
 
 const List<String> _suggestedPrompts = [
   "🇱🇰 Current CSE Stock Trends",
@@ -101,6 +101,7 @@ class _ChatScreenState extends State<ChatScreen> {
     return GradientScaffold(
       maxContentWidth: 760,
       appBar: TopNavBar(current: AppSection.bot, title: widget.title, showBackButton: true),
+      bottomNavigationBar: const AppBottomNav(current: AppSection.bot),
       body: Column(
         children: [
           // AI Status Card Header
@@ -143,22 +144,21 @@ class _ChatScreenState extends State<ChatScreen> {
                       children: [
                         Text(
                           'FinBot AI • Sri Lanka Advisor',
-                          style: GoogleFonts.outfit(
+                          style: AppFonts.text(
                             fontSize: 15,
                             fontWeight: FontWeight.w700,
                             color: AppColors.onGlass,
                           ),
                         ),
-                        Text(
-                          isConfigured
-                              ? 'Online • Powered by Google Gemini AI'
-                              : 'Local Fallback • Connect GEMINI_API_KEY for live responses',
-                          style: GoogleFonts.outfit(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                            color: isConfigured ? AppColors.accentCyan : AppColors.warning,
+                        if (isConfigured)
+                          Text(
+                            'Online • Powered by Google Gemini AI',
+                            style: AppFonts.text(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.accentCyan,
+                            ),
                           ),
-                        ),
                       ],
                     ),
                   ),
@@ -199,7 +199,7 @@ class _ChatScreenState extends State<ChatScreen> {
                           borderRadius: 20,
                           child: Text(
                             prompt,
-                            style: GoogleFonts.outfit(
+                            style: AppFonts.text(
                               fontSize: 13,
                               color: AppColors.onGlass,
                               fontWeight: FontWeight.w600,
@@ -224,10 +224,10 @@ class _ChatScreenState extends State<ChatScreen> {
                     child: TextField(
                       controller: _controller,
                       enabled: !vm.isSending,
-                      style: GoogleFonts.outfit(color: AppColors.onGlass, fontSize: 14),
+                      style: AppFonts.text(color: AppColors.onGlass, fontSize: 14),
                       decoration: InputDecoration(
                         hintText: 'Ask FinBot about stocks, budget, or taxes...',
-                        hintStyle: GoogleFonts.outfit(color: AppColors.onGlassMuted, fontSize: 14),
+                        hintStyle: AppFonts.text(color: AppColors.onGlassMuted, fontSize: 14),
                         border: InputBorder.none,
                         enabledBorder: InputBorder.none,
                         focusedBorder: InputBorder.none,
@@ -330,7 +330,7 @@ class _Bubble extends StatelessWidget {
                 ),
                 child: SelectableText(
                   message.content,
-                  style: GoogleFonts.outfit(
+                  style: AppFonts.text(
                     fontSize: 14,
                     color: isUser ? Colors.white : AppColors.onGlass,
                     height: 1.4,
@@ -379,7 +379,7 @@ class _TypingBubble extends StatelessWidget {
             const SizedBox(width: 10),
             Text(
               'FinBot is generating AI response...',
-              style: GoogleFonts.outfit(
+              style: AppFonts.text(
                 fontSize: 13,
                 color: AppColors.onGlassMuted,
                 fontStyle: FontStyle.italic,

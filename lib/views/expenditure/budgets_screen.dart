@@ -87,6 +87,7 @@ class _BudgetsBody extends StatelessWidget {
       maxContentWidth: 860,
       appBar: const TopNavBar(
           current: AppSection.expenses, title: 'Budgets', showBackButton: true, isSectionRoot: false),
+      bottomNavigationBar: const AppBottomNav(current: AppSection.expenses, isSectionRoot: false),
       body: Consumer<ExpenseViewModel>(builder: (context, vm, _) {
         if (!vm.isLoggedIn) {
           return const Padding(

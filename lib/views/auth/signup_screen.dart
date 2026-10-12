@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/theme/app_backgrounds.dart';
 import '../../core/theme/app_theme.dart';
@@ -14,6 +13,7 @@ import '../../services/auth_service.dart';
 import '../../services/community_service.dart';
 import '../home/home_screen.dart';
 import 'login_screen.dart';
+import '../../core/theme/app_fonts.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -278,7 +278,7 @@ class _SignupScreenState extends State<SignupScreen> {
       SnackBar(
         content: Text(
           message,
-          style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.w500),
+          style: AppFonts.text(color: Colors.white, fontWeight: FontWeight.w500),
         ),
         backgroundColor: isError ? AppColors.lossStrong : AppColors.primary,
         behavior: SnackBarBehavior.floating,
@@ -526,7 +526,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       children: [
                         Text(
                           'Step $displayStep of 5',
-                          style: GoogleFonts.outfit(
+                          style: AppFonts.text(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
                             color: AppColors.onGlassMuted,
@@ -534,7 +534,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         ),
                         Text(
                           categoryText,
-                          style: GoogleFonts.outfit(
+                          style: AppFonts.text(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
                             color: AppColors.onGlassMuted,
@@ -593,7 +593,7 @@ class _SignupScreenState extends State<SignupScreen> {
         const SizedBox(height: 12),
         Text(
           'Create your account',
-          style: GoogleFonts.outfit(
+          style: AppFonts.text(
             fontSize: 26,
             fontWeight: FontWeight.w800,
             color: AppColors.onGlass,
@@ -603,7 +603,7 @@ class _SignupScreenState extends State<SignupScreen> {
         const SizedBox(height: 6),
         Text(
           'Practise investing safely and get money advice that explains itself.',
-          style: GoogleFonts.outfit(
+          style: AppFonts.text(
             fontSize: 14,
             color: AppColors.onGlassMuted,
             height: 1.4,
@@ -631,7 +631,7 @@ class _SignupScreenState extends State<SignupScreen> {
         const SizedBox(height: 4),
         Text(
           "We'll send a one-time code to verify it.",
-          style: GoogleFonts.outfit(fontSize: 12, color: AppColors.onGlassMuted),
+          style: AppFonts.text(fontSize: 12, color: AppColors.onGlassMuted),
         ),
         const SizedBox(height: 16),
 
@@ -646,7 +646,7 @@ class _SignupScreenState extends State<SignupScreen> {
         const SizedBox(height: 4),
         Text(
           'For contact purposes only — not used to sign in.',
-          style: GoogleFonts.outfit(fontSize: 12, color: AppColors.onGlassMuted),
+          style: AppFonts.text(fontSize: 12, color: AppColors.onGlassMuted),
         ),
         const SizedBox(height: 16),
 
@@ -667,7 +667,7 @@ class _SignupScreenState extends State<SignupScreen> {
         const SizedBox(height: 4),
         Text(
           'Under 18? A parent or guardian approves your account.',
-          style: GoogleFonts.outfit(fontSize: 12, color: AppColors.onGlassMuted),
+          style: AppFonts.text(fontSize: 12, color: AppColors.onGlassMuted),
         ),
         const SizedBox(height: 16),
 
@@ -693,7 +693,7 @@ class _SignupScreenState extends State<SignupScreen> {
         const SizedBox(height: 4),
         Text(
           'At least 8 characters, with letters and numbers.',
-          style: GoogleFonts.outfit(fontSize: 12, color: AppColors.onGlassMuted),
+          style: AppFonts.text(fontSize: 12, color: AppColors.onGlassMuted),
         ),
         const SizedBox(height: 20),
 
@@ -717,7 +717,7 @@ class _SignupScreenState extends State<SignupScreen> {
             Expanded(
               child: RichText(
                 text: TextSpan(
-                  style: GoogleFonts.outfit(
+                  style: AppFonts.text(
                       fontSize: 13, color: AppColors.onGlassMuted, height: 1.4),
                   children: const [
                     TextSpan(text: 'I agree to the '),
@@ -765,7 +765,7 @@ class _SignupScreenState extends State<SignupScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 12),
               child: Text(
                 'or',
-                style: GoogleFonts.outfit(
+                style: AppFonts.text(
                     fontSize: 13, color: AppColors.onGlassMuted),
               ),
             ),
@@ -787,7 +787,7 @@ class _SignupScreenState extends State<SignupScreen> {
             ),
             label: Text(
               'Continue with Google',
-              style: GoogleFonts.outfit(
+              style: AppFonts.text(
                 fontSize: 15,
                 fontWeight: FontWeight.w700,
                 color: AppColors.onGlass,
@@ -813,7 +813,7 @@ class _SignupScreenState extends State<SignupScreen> {
             children: [
               Text(
                 'Already have an account? ',
-                style: GoogleFonts.outfit(
+                style: AppFonts.text(
                     fontSize: 14, color: AppColors.onGlassMuted),
               ),
               GestureDetector(
@@ -822,7 +822,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
                 child: Text(
                   'Log in',
-                  style: GoogleFonts.outfit(
+                  style: AppFonts.text(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
                     color: AppColors.accentCyan,
@@ -866,7 +866,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
         Text(
           'Enter your code',
-          style: GoogleFonts.outfit(
+          style: AppFonts.text(
             fontSize: 26,
             fontWeight: FontWeight.w800,
             color: AppColors.onGlass,
@@ -878,12 +878,12 @@ class _SignupScreenState extends State<SignupScreen> {
           children: [
             Text(
               'We sent a 6-digit code to ',
-              style: GoogleFonts.outfit(
+              style: AppFonts.text(
                   fontSize: 14, color: AppColors.onGlassMuted),
             ),
             Text(
               contactText,
-              style: GoogleFonts.outfit(
+              style: AppFonts.text(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
                   color: AppColors.onGlass),
@@ -899,7 +899,7 @@ class _SignupScreenState extends State<SignupScreen> {
               },
               child: Text(
                 'Change',
-                style: GoogleFonts.outfit(
+                style: AppFonts.text(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
                   color: AppColors.accentCyan,
@@ -925,7 +925,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 textAlign: TextAlign.center,
                 keyboardType: TextInputType.number,
                 maxLength: 1,
-                style: GoogleFonts.outfit(
+                style: AppFonts.text(
                   fontSize: 22,
                   fontWeight: FontWeight.w700,
                   color: AppColors.onGlass,
@@ -971,7 +971,7 @@ class _SignupScreenState extends State<SignupScreen> {
               _resendSecondsLeft > 0
                   ? "Didn't get it? Resend in 0:${_resendSecondsLeft.toString().padLeft(2, '0')}"
                   : "Didn't get it?",
-              style: GoogleFonts.outfit(
+              style: AppFonts.text(
                   fontSize: 13, color: AppColors.onGlassMuted),
             ),
             if (_resendSecondsLeft == 0) ...[
@@ -980,7 +980,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 onTap: _isResending ? null : _handleResendOtp,
                 child: Text(
                   _isResending ? 'Sending…' : 'Resend code',
-                  style: GoogleFonts.outfit(
+                  style: AppFonts.text(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
                     color: AppColors.accentCyan,
@@ -1009,7 +1009,7 @@ class _SignupScreenState extends State<SignupScreen> {
               Expanded(
                 child: Text(
                   "If you're under 18, we'll ask a parent or guardian to approve your account next.",
-                  style: GoogleFonts.outfit(
+                  style: AppFonts.text(
                     fontSize: 13,
                     color: AppColors.onGlassMuted,
                     height: 1.4,
@@ -1042,7 +1042,7 @@ class _SignupScreenState extends State<SignupScreen> {
         const SizedBox(height: 12),
         Text(
           'Ask a parent or guardian',
-          style: GoogleFonts.outfit(
+          style: AppFonts.text(
             fontSize: 26,
             fontWeight: FontWeight.w800,
             color: AppColors.onGlass,
@@ -1052,7 +1052,7 @@ class _SignupScreenState extends State<SignupScreen> {
         const SizedBox(height: 6),
         Text(
           "Because you're under 18, a parent or guardian needs to approve your account.",
-          style: GoogleFonts.outfit(
+          style: AppFonts.text(
             fontSize: 14,
             color: AppColors.onGlassMuted,
             height: 1.4,
@@ -1089,7 +1089,7 @@ class _SignupScreenState extends State<SignupScreen> {
         const SizedBox(height: 4),
         Text(
           "We'll send them a link to approve. They can see your learning progress, never your password.",
-          style: GoogleFonts.outfit(fontSize: 12, color: AppColors.onGlassMuted),
+          style: AppFonts.text(fontSize: 12, color: AppColors.onGlassMuted),
         ),
         const SizedBox(height: 24),
 
@@ -1105,7 +1105,7 @@ class _SignupScreenState extends State<SignupScreen> {
             children: [
               Text(
                 'While you wait for approval',
-                style: GoogleFonts.outfit(
+                style: AppFonts.text(
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
                   color: AppColors.accentCyan,
@@ -1142,7 +1142,7 @@ class _SignupScreenState extends State<SignupScreen> {
         const SizedBox(height: 12),
         Text(
           'Tell us about you',
-          style: GoogleFonts.outfit(
+          style: AppFonts.text(
             fontSize: 26,
             fontWeight: FontWeight.w800,
             color: AppColors.onGlass,
@@ -1152,7 +1152,7 @@ class _SignupScreenState extends State<SignupScreen> {
         const SizedBox(height: 6),
         Text(
           'This shapes your dashboard, lessons and advice.',
-          style: GoogleFonts.outfit(
+          style: AppFonts.text(
             fontSize: 14,
             color: AppColors.onGlassMuted,
           ),
@@ -1256,7 +1256,7 @@ class _SignupScreenState extends State<SignupScreen> {
         const SizedBox(height: 12),
         Text(
           'Your money today',
-          style: GoogleFonts.outfit(
+          style: AppFonts.text(
             fontSize: 26,
             fontWeight: FontWeight.w800,
             color: AppColors.onGlass,
@@ -1266,7 +1266,7 @@ class _SignupScreenState extends State<SignupScreen> {
         const SizedBox(height: 6),
         Text(
           'Ranges are fine. You can change these any time.',
-          style: GoogleFonts.outfit(
+          style: AppFonts.text(
             fontSize: 14,
             color: AppColors.onGlassMuted,
           ),
@@ -1323,7 +1323,7 @@ class _SignupScreenState extends State<SignupScreen> {
             padding: const EdgeInsets.only(left: 14, right: 8, top: 14, bottom: 14),
             child: Text(
               'Rs',
-              style: GoogleFonts.outfit(
+              style: AppFonts.text(
                 fontSize: 15,
                 fontWeight: FontWeight.w700,
                 color: AppColors.onGlass,
@@ -1375,7 +1375,7 @@ class _SignupScreenState extends State<SignupScreen> {
             _buildInputFieldLabel('What do you already have? '),
             Text(
               'Pick all that apply',
-              style: GoogleFonts.outfit(fontSize: 13, color: AppColors.onGlassMuted),
+              style: AppFonts.text(fontSize: 13, color: AppColors.onGlassMuted),
             ),
           ],
         ),
@@ -1403,7 +1403,7 @@ class _SignupScreenState extends State<SignupScreen> {
           Text(
             'If yes, other members can find you by name and see your experience and district. '
             'Never your email, expenses or savings. You can change this any time in Community.',
-            style: GoogleFonts.outfit(fontSize: 12.5, color: AppColors.onGlassMuted, height: 1.4),
+            style: AppFonts.text(fontSize: 12.5, color: AppColors.onGlassMuted, height: 1.4),
           ),
           const SizedBox(height: 8),
           Wrap(
@@ -1428,7 +1428,7 @@ class _SignupScreenState extends State<SignupScreen> {
             Expanded(
               child: Text(
                 'Encrypted and only used to personalise your advice. We never ask for bank or card details.',
-                style: GoogleFonts.outfit(
+                style: AppFonts.text(
                   fontSize: 12,
                   color: AppColors.onGlassMuted,
                   height: 1.4,
@@ -1457,7 +1457,7 @@ class _SignupScreenState extends State<SignupScreen> {
   Widget _buildInputFieldLabel(String label) {
     return Text(
       label,
-      style: GoogleFonts.outfit(
+      style: AppFonts.text(
         fontSize: 14,
         fontWeight: FontWeight.w700,
         color: AppColors.onGlass,
@@ -1477,7 +1477,7 @@ class _SignupScreenState extends State<SignupScreen> {
       controller: controller,
       keyboardType: keyboardType,
       obscureText: obscureText,
-      style: GoogleFonts.outfit(fontSize: 15, color: AppColors.onGlass),
+      style: AppFonts.text(fontSize: 15, color: AppColors.onGlass),
       cursorColor: AppColors.accentCyan,
       decoration: InputDecoration(
         isDense: true,
@@ -1485,7 +1485,7 @@ class _SignupScreenState extends State<SignupScreen> {
         fillColor: AppColors.glassFillStrong,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         hintText: hintText,
-        hintStyle: GoogleFonts.outfit(fontSize: 14, color: AppColors.onGlassMuted),
+        hintStyle: AppFonts.text(fontSize: 14, color: AppColors.onGlassMuted),
         prefixIcon: prefixIcon,
         suffixIcon: suffixIcon,
         enabledBorder: OutlineInputBorder(
@@ -1521,11 +1521,11 @@ class _SignupScreenState extends State<SignupScreen> {
         child: DropdownButton<String>(
           value: items.contains(value) ? value : null,
           hint: Text(hintText ?? 'Select',
-              style: GoogleFonts.outfit(fontSize: 14, color: AppColors.onGlassMuted)),
+              style: AppFonts.text(fontSize: 14, color: AppColors.onGlassMuted)),
           isExpanded: true,
           icon: const Icon(Icons.keyboard_arrow_down_rounded,
               color: AppColors.onGlass),
-          style: GoogleFonts.outfit(fontSize: 15, color: AppColors.onGlass),
+          style: AppFonts.text(fontSize: 15, color: AppColors.onGlass),
           onChanged: onChanged,
           items: items.map((String item) {
             return DropdownMenuItem<String>(
@@ -1562,7 +1562,7 @@ class _SignupScreenState extends State<SignupScreen> {
               )
             : Text(
                 label,
-                style: GoogleFonts.outfit(
+                style: AppFonts.text(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                   color: AppColors.onLight,
@@ -1581,7 +1581,7 @@ class _SignupScreenState extends State<SignupScreen> {
         Expanded(
           child: Text(
             text,
-            style: GoogleFonts.outfit(
+            style: AppFonts.text(
               fontSize: 13,
               fontWeight: FontWeight.w500,
               color: AppColors.onGlass,
@@ -1622,7 +1622,7 @@ class _SignupScreenState extends State<SignupScreen> {
             const SizedBox(height: 8),
             Text(
               title,
-              style: GoogleFonts.outfit(
+              style: AppFonts.text(
                 fontSize: 15,
                 fontWeight: FontWeight.w700,
                 color: AppColors.onGlass,
@@ -1631,7 +1631,7 @@ class _SignupScreenState extends State<SignupScreen> {
             const SizedBox(height: 2),
             Text(
               subtitle,
-              style: GoogleFonts.outfit(
+              style: AppFonts.text(
                 fontSize: 12,
                 color: AppColors.onGlassMuted,
               ),
@@ -1663,7 +1663,7 @@ class _SignupScreenState extends State<SignupScreen> {
           child: Center(
             child: Text(
               lang,
-              style: GoogleFonts.outfit(
+              style: AppFonts.text(
                 fontSize: 14,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
                 color: AppColors.onGlass,
@@ -1693,7 +1693,7 @@ class _SignupScreenState extends State<SignupScreen> {
         ),
         child: Text(
           label,
-          style: GoogleFonts.outfit(
+          style: AppFonts.text(
             fontSize: 13,
             fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
             color: isSelected ? AppColors.accentCyan : AppColors.onGlass,
@@ -1734,7 +1734,7 @@ class _SignupScreenState extends State<SignupScreen> {
         ),
         child: Text(
           asset,
-          style: GoogleFonts.outfit(
+          style: AppFonts.text(
             fontSize: 13,
             fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
             color: isSelected ? AppColors.accentCyan : AppColors.onGlass,

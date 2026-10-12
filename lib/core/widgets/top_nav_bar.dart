@@ -1,6 +1,5 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../platform/app_platform.dart';
 import '../responsive.dart';
 import '../theme/app_theme.dart';
@@ -12,16 +11,55 @@ import '../../views/community/community_screen.dart';
 import '../../views/sandbox/sandbox_screen.dart';
 import '../../views/profile/profile_screen.dart';
 import 'glass_icon_button.dart';
+import '../theme/app_fonts.dart';
 
 enum AppSection { home, investments, expenses, sandbox, community, bot, profile }
 
+/// Opens [section] as the new root of the stack. Tapping the section you're
+/// already in does nothing on its root page, and returns to the root from
+/// a page inside it (e.g. FD rates under Investments).
+void _goToSection(BuildContext context, AppSection current, AppSection section,
+    {bool isSectionRoot = true}) {
+  if (section == current && isSectionRoot) return;
+  final Widget page = switch (section) {
+    AppSection.home => const HomeScreen(),
+    AppSection.investments => const InvestingOptionsScreen(),
+    AppSection.expenses => const ExpenditureScreen(),
+    AppSection.sandbox => const SandboxScreen(),
+    AppSection.community => const CommunityScreen(),
+    AppSection.bot => const ChatScreen(),
+    AppSection.profile => const ProfileScreen(),
+  };
+  Navigator.of(context).pushAndRemoveUntil(
+    PageRouteBuilder(
+      pageBuilder: (_, animation, secondaryAnimation) => page,
+      transitionsBuilder: (_, animation, secondaryAnimation, child) {
+        return FadeTransition(opacity: animation, child: child);
+      },
+      transitionDuration: const Duration(milliseconds: 200),
+    ),
+    (route) => false,
+  );
+}
+
+/// Whether the app window is desktop-width. For [PreferredSizeWidget]s,
+/// which have to report a height without a [BuildContext].
+bool get _windowIsDesktop {
+  final view = WidgetsBinding.instance.platformDispatcher.implicitView;
+  if (view == null) return false;
+  return view.physicalSize.width / view.devicePixelRatio >= Responsive.desktop;
+}
+
+/// Page header. On desktop it also carries the section navigation; on
+/// phones and tablets navigation lives in [AppBottomNav] and this is just
+/// the back button and title.
 class TopNavBar extends StatelessWidget implements PreferredSizeWidget {
   final AppSection current;
   final String title;
   final bool showBackButton;
 
   /// False on pages *inside* a section (e.g. FD rates under Investments):
-  /// tapping the highlighted pill then returns to that section's main page
+  /// tapping the highlighted tab then returns to that section's main page
   /// instead of doing nothing.
   final bool isSectionRoot;
 
@@ -38,45 +76,12 @@ class TopNavBar extends StatelessWidget implements PreferredSizeWidget {
   });
 
   @override
-  Size get preferredSize => Size.fromHeight(_hasTitleRow ? 110 : 66);
+  Size get preferredSize => _windowIsDesktop
+      ? Size.fromHeight(_hasTitleRow ? 110 : 66)
+      : Size.fromHeight(_hasTitleRow ? 56 : 0);
 
-  void _go(BuildContext context, AppSection section) {
-    if (section == current && isSectionRoot) return;
-    Widget page;
-    switch (section) {
-      case AppSection.home:
-        page = const HomeScreen();
-        break;
-      case AppSection.investments:
-        page = const InvestingOptionsScreen();
-        break;
-      case AppSection.expenses:
-        page = const ExpenditureScreen();
-        break;
-      case AppSection.sandbox:
-        page = const SandboxScreen();
-        break;
-      case AppSection.community:
-        page = const CommunityScreen();
-        break;
-      case AppSection.bot:
-        page = const ChatScreen();
-        break;
-      case AppSection.profile:
-        page = const ProfileScreen();
-        break;
-    }
-    Navigator.of(context).pushAndRemoveUntil(
-      PageRouteBuilder(
-        pageBuilder: (_, animation, secondaryAnimation) => page,
-        transitionsBuilder: (_, animation, secondaryAnimation, child) {
-          return FadeTransition(opacity: animation, child: child);
-        },
-        transitionDuration: const Duration(milliseconds: 200),
-      ),
-      (route) => false,
-    );
-  }
+  void _go(BuildContext context, AppSection section) =>
+      _goToSection(context, current, section, isSectionRoot: isSectionRoot);
 
   /// Tabs replace the whole stack, so a page opened from the nav bar has
   /// nothing to pop back to — fall back to Home instead of doing nothing.
@@ -89,34 +94,32 @@ class TopNavBar extends StatelessWidget implements PreferredSizeWidget {
     }
   }
 
-  /// Order shared by the phone row and the desktop bar.
   static const _mainTabs = [
-    ('Home', Icons.grid_view_rounded, AppSection.home),
+    ('Home', Icons.home_rounded, AppSection.home),
     ('Investments', Icons.trending_up_rounded, AppSection.investments),
     ('Expenses', Icons.account_balance_wallet_rounded, AppSection.expenses),
     ('Sand Box', Icons.science_rounded, AppSection.sandbox),
     ('Community', Icons.groups_rounded, AppSection.community),
   ];
   static const _sideTabs = [
-    ('Fin Bot', Icons.smart_toy_rounded, AppSection.bot),
+    ('FinBot', Icons.smart_toy_rounded, AppSection.bot),
     ('Profile', Icons.person_rounded, AppSection.profile),
   ];
 
-  List<Widget> _tabs(BuildContext context, List<(String, IconData, AppSection)> tabs, double gap) => [
+  List<Widget> _tabs(BuildContext context, List<(String, IconData, AppSection)> tabs, double gap,
+          {required bool inBar}) =>
+      [
         for (final (i, (label, icon, section)) in tabs.indexed) ...[
           if (i > 0) SizedBox(width: gap),
-          _tab(context, label, icon, section),
+          _NavPill(
+            label: label,
+            icon: icon,
+            active: section == current,
+            inBar: inBar,
+            onTap: () => _go(context, section),
+          ),
         ],
       ];
-
-  Widget _tab(BuildContext context, String label, IconData icon, AppSection section) {
-    return _NavPill(
-      label: label,
-      icon: icon,
-      active: section == current,
-      onTap: () => _go(context, section),
-    );
-  }
 
   Widget _title(BuildContext context) {
     return Row(
@@ -134,7 +137,7 @@ class TopNavBar extends StatelessWidget implements PreferredSizeWidget {
         Expanded(
           child: Text(
             title,
-            style: GoogleFonts.outfit(
+            style: AppFonts.text(
               fontSize: 20,
               fontWeight: FontWeight.w700,
               color: AppColors.onGlass,
@@ -149,52 +152,23 @@ class TopNavBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   Widget _mobile(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        if (_hasTitleRow)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 6),
-            child: _title(context),
-          )
-        else
-          const SizedBox(height: 8),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-          physics: const BouncingScrollPhysics(),
-          child: Row(
-            children: _tabs(context, [..._mainTabs, ..._sideTabs], 8),
-          ),
-        ),
-      ],
+    if (!_hasTitleRow) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 6),
+      child: _title(context),
     );
   }
 
-  /// Landing-page style: logo left, a centered glass pill holding the main
-  /// sections, Ask Bot / Profile on the right, page title underneath.
+  /// Landing-page style: logo left, a centered frosted pill holding the
+  /// main sections, FinBot / Profile on the right, page title underneath.
   Widget _desktop(BuildContext context) {
-    final useBlur = AppGlass.useBlur(context);
-    Widget pillBar = Container(
+    final pillBar = _FrostedBar(
+      radius: 30,
       padding: const EdgeInsets.all(5),
-      decoration: BoxDecoration(
-        color: useBlur ? AppColors.glassFill : AppColors.glassFillNoBlur,
-        borderRadius: BorderRadius.circular(30),
-        border: Border.all(color: AppColors.glassBorder),
-      ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
-        children: _tabs(context, _mainTabs, 4),
+        children: _tabs(context, _mainTabs, 4, inBar: true),
       ),
-    );
-    pillBar = ClipRRect(
-      borderRadius: BorderRadius.circular(30),
-      child: useBlur
-          ? BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: AppGlass.blurSigma, sigmaY: AppGlass.blurSigma),
-              child: pillBar,
-            )
-          : pillBar,
     );
 
     return Center(
@@ -219,7 +193,7 @@ class TopNavBar extends StatelessWidget implements PreferredSizeWidget {
                     Expanded(
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.end,
-                        children: _tabs(context, _sideTabs, 8),
+                        children: _tabs(context, _sideTabs, 8, inBar: false),
                       ),
                     ),
                   ],
@@ -239,6 +213,7 @@ class TopNavBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     final bar = SafeArea(
+      bottom: false,
       child: context.isDesktop ? _desktop(context) : _mobile(context),
     );
     // Android's system back on a tab page would otherwise close the app.
@@ -249,6 +224,213 @@ class TopNavBar extends StatelessWidget implements PreferredSizeWidget {
         if (!didPop) _go(context, AppSection.home);
       },
       child: bar,
+    );
+  }
+}
+
+/// Floating frosted-glass tab bar for phones and tablets. Put it in the
+/// page's `Scaffold.bottomNavigationBar`; it renders nothing on desktop,
+/// where [TopNavBar] carries the navigation instead.
+///
+/// Expenses, Sand Box and Profile are reached from Home's tiles and avatar.
+class AppBottomNav extends StatelessWidget {
+  final AppSection current;
+  final bool isSectionRoot;
+
+  const AppBottomNav({super.key, required this.current, this.isSectionRoot = true});
+
+  static const _tabs = [
+    ('Home', Icons.home_rounded, AppSection.home),
+    ('Community', Icons.groups_rounded, AppSection.community),
+    ('Investments', Icons.trending_up_rounded, AppSection.investments),
+    ('FinBot', Icons.smart_toy_rounded, AppSection.bot),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    if (context.isDesktop) return const SizedBox.shrink();
+    return SafeArea(
+      top: false,
+      minimum: const EdgeInsets.only(bottom: 10),
+      child: Center(
+        heightFactor: 1,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 520),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
+            child: _FrostedBar(
+              radius: 34,
+              glow: true,
+              padding: const EdgeInsets.all(6),
+              child: SizedBox(
+                height: 58,
+                child: Row(
+                  children: [
+                    for (final (label, icon, section) in _tabs)
+                      Expanded(
+                        child: _BottomNavItem(
+                          label: label,
+                          icon: icon,
+                          active: section == current,
+                          emphasised: section == AppSection.bot,
+                          onTap: () => _goToSection(context, current, section,
+                              isSectionRoot: isSectionRoot),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Blurred glass capsule shared by the bottom bar and the desktop pill.
+class _FrostedBar extends StatelessWidget {
+  final Widget child;
+  final double radius;
+  final EdgeInsetsGeometry padding;
+  final bool glow;
+
+  const _FrostedBar({
+    required this.child,
+    required this.radius,
+    required this.padding,
+    this.glow = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final useBlur = AppGlass.useBlur(context);
+    final shape = BorderRadius.circular(radius);
+    Widget bar = Container(
+      padding: padding,
+      decoration: BoxDecoration(
+        borderRadius: shape,
+        color: useBlur ? null : AppColors.glassFillNoBlur,
+        gradient: useBlur
+            ? const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color(0x66FFFFFF), Color(0x7A304168), Color(0x8C1E3A8A)],
+                stops: [0, 0.45, 1],
+              )
+            : null,
+        border: Border.all(color: Colors.white.withValues(alpha: 0.5), width: 1.2),
+      ),
+      child: child,
+    );
+    if (useBlur) {
+      bar = BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 22, sigmaY: 22),
+        child: bar,
+      );
+    }
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: shape,
+        boxShadow: [
+          const BoxShadow(color: AppColors.glassShadow, blurRadius: 24, offset: Offset(0, 8)),
+          if (glow)
+            BoxShadow(
+              color: AppColors.accentCyan.withValues(alpha: 0.28),
+              blurRadius: 22,
+              spreadRadius: -2,
+            ),
+        ],
+      ),
+      child: ClipRRect(borderRadius: shape, child: bar),
+    );
+  }
+}
+
+class _BottomNavItem extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final bool active;
+
+  /// FinBot gets a round dark badge, like a floating action.
+  final bool emphasised;
+  final VoidCallback onTap;
+
+  const _BottomNavItem({
+    required this.label,
+    required this.icon,
+    required this.active,
+    required this.emphasised,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final fg = active ? AppColors.onGlass : AppColors.onGlassMuted;
+    final iconWidget = emphasised
+        ? Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: AppColors.deepNavy,
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.white, width: 1.6),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.accentCyan.withValues(alpha: active ? 0.6 : 0.3),
+                  blurRadius: 10,
+                ),
+              ],
+            ),
+            child: Icon(icon, color: Colors.white, size: 18),
+          )
+        : Icon(icon, color: fg, size: 23);
+
+    return Semantics(
+      button: true,
+      selected: active,
+      label: label,
+      excludeSemantics: true,
+      child: Material(
+        type: MaterialType.transparency,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(26),
+          splashColor: Colors.white.withValues(alpha: 0.12),
+          highlightColor: Colors.white.withValues(alpha: 0.06),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeOutCubic,
+            margin: const EdgeInsets.symmetric(horizontal: 2),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(26),
+              color: active ? Colors.white.withValues(alpha: 0.2) : Colors.transparent,
+              border: Border.all(
+                color: active ? Colors.white.withValues(alpha: 0.45) : Colors.transparent,
+              ),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(height: 32, child: Center(child: iconWidget)),
+                const SizedBox(height: 2),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    style: AppFonts.text(
+                      fontSize: 11,
+                      fontWeight: active ? FontWeight.w700 : FontWeight.w500,
+                      color: fg,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -286,7 +468,7 @@ class _Brand extends StatelessWidget {
             const SizedBox(width: 10),
             Text(
               'Mobile SAP',
-              style: GoogleFonts.outfit(
+              style: AppFonts.text(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
                 color: AppColors.onGlass,
@@ -300,16 +482,20 @@ class _Brand extends StatelessWidget {
   }
 }
 
+/// Desktop tab. Inside the frosted bar ([inBar]) idle tabs are bare text so
+/// the bar reads as one surface; the active tab is a brighter glass chip.
 class _NavPill extends StatefulWidget {
   final String label;
   final IconData icon;
   final bool active;
+  final bool inBar;
   final VoidCallback onTap;
 
   const _NavPill({
     required this.label,
     required this.icon,
     required this.active,
+    required this.inBar,
     required this.onTap,
   });
 
@@ -324,7 +510,16 @@ class _NavPillState extends State<_NavPill> {
   Widget build(BuildContext context) {
     final active = widget.active;
     final hasHover = AppPlatform.hasHover(context);
-    final fg = active ? AppColors.onLight : AppColors.onGlass;
+    final fg = active ? AppColors.onGlass : AppColors.onGlassMuted;
+
+    final Color fill;
+    if (active) {
+      fill = Colors.white.withValues(alpha: 0.24);
+    } else if (_hover) {
+      fill = Colors.white.withValues(alpha: 0.12);
+    } else {
+      fill = widget.inBar ? Colors.transparent : AppColors.glassFill;
+    }
 
     return MouseRegion(
       cursor: hasHover ? SystemMouseCursors.click : MouseCursor.defer,
@@ -337,20 +532,19 @@ class _NavPillState extends State<_NavPill> {
           curve: Curves.easeOutCubic,
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           decoration: BoxDecoration(
-            color: active
-                ? Colors.white
-                : (_hover ? AppColors.glassFillStrong : AppColors.glassFill),
+            color: fill,
             borderRadius: BorderRadius.circular(22),
             border: Border.all(
-              color: active ? Colors.white : AppColors.glassBorder,
+              color: active
+                  ? Colors.white.withValues(alpha: 0.6)
+                  : (widget.inBar ? Colors.transparent : AppColors.glassBorder),
               width: 1.2,
             ),
             boxShadow: active
                 ? [
                     BoxShadow(
-                      color: Colors.white.withValues(alpha: 0.35),
+                      color: AppColors.accentCyan.withValues(alpha: 0.3),
                       blurRadius: 14,
-                      offset: const Offset(0, 2),
                     ),
                   ]
                 : const [],
@@ -358,11 +552,11 @@ class _NavPillState extends State<_NavPill> {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(widget.icon, size: 15, color: active ? fg : AppColors.onGlassMuted),
+              Icon(widget.icon, size: 16, color: fg),
               const SizedBox(width: 6),
               Text(
                 widget.label,
-                style: GoogleFonts.outfit(
+                style: AppFonts.text(
                   fontSize: 13,
                   fontWeight: active ? FontWeight.w700 : FontWeight.w500,
                   color: fg,

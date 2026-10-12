@@ -1,8 +1,8 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../platform/app_platform.dart';
 import '../theme/app_theme.dart';
+import '../theme/app_fonts.dart';
 
 /// Rounded glass action tile with press-scale feedback, an entrance
 /// animation and (on pointer devices) a hover lift.
@@ -107,7 +107,7 @@ class _BlockButtonState extends State<BlockButton> {
                   widget.label,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.outfit(
+                  style: AppFonts.text(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
                     color: effectiveText,
@@ -120,7 +120,7 @@ class _BlockButtonState extends State<BlockButton> {
                     widget.subtitle!,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.outfit(
+                    style: AppFonts.text(
                       fontSize: 11,
                       color: AppColors.onGlassMuted,
                       fontWeight: FontWeight.w500,

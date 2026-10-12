@@ -1,6 +1,5 @@
 // lib/views/auth/reset_password_screen.dart
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/widgets/gradient_scaffold.dart';
 import '../../core/widgets/glass_card.dart';
@@ -11,6 +10,7 @@ import 'login_screen.dart';
 import 'widgets/auth_back_button.dart';
 import 'widgets/labeled_text_field.dart';
 import 'widgets/primary_action_button.dart';
+import '../../core/theme/app_fonts.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
   const ResetPasswordScreen({super.key});
@@ -100,7 +100,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                     Text(
                       'Reset Password',
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.outfit(
+                      style: AppFonts.text(
                         fontSize: 28,
                         fontWeight: FontWeight.w800,
                         color: AppColors.onGlass,
@@ -110,7 +110,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                     Text(
                       'Choose a strong new password for your account.',
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.outfit(
+                      style: AppFonts.text(
                         fontSize: 13,
                         color: AppColors.onGlass,
                         shadows: kTitleShadow,
@@ -138,7 +138,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                             const SizedBox(height: 12),
                             Text(
                               _errorMessage!,
-                              style: GoogleFonts.outfit(
+                              style: AppFonts.text(
                                 color: AppColors.loss,
                                 fontSize: 13,
                                 fontWeight: FontWeight.w500,

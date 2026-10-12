@@ -27,7 +27,7 @@ void main() {
     await tester.pumpWidget(const MyApp());
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('Mobile SAP'), findsOneWidget);
+    expect(find.text('Welcome'), findsOneWidget);
     expect(find.widgetWithText(ElevatedButton, 'Get started'), findsOneWidget);
   });
 

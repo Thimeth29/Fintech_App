@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/money.dart';
@@ -17,6 +16,7 @@ import 'budgets_screen.dart';
 import 'recurring_expenses_screen.dart';
 import 'widgets/expenditure_ui.dart';
 import 'widgets/expense_form_dialog.dart';
+import '../../core/theme/app_fonts.dart';
 
 class PlanExpensesScreen extends StatelessWidget {
   /// Shared view model from the Expenditure hub; when null (e.g. opened
@@ -115,6 +115,7 @@ class _PlanBodyState extends State<_PlanBody> {
         showBackButton: true,
         isSectionRoot: false,
       ),
+      bottomNavigationBar: const AppBottomNav(current: AppSection.expenses, isSectionRoot: false),
       floatingActionButton: !loggedIn
           ? null
           : Consumer<ExpenseViewModel>(
@@ -124,7 +125,7 @@ class _PlanBodyState extends State<_PlanBody> {
                 shape: const StadiumBorder(),
                 icon: const Icon(Icons.add_rounded, color: AppColors.onLight),
                 label: Text('Add Expense',
-                    style: GoogleFonts.outfit(fontWeight: FontWeight.w700, color: AppColors.onLight)),
+                    style: AppFonts.text(fontWeight: FontWeight.w700, color: AppColors.onLight)),
                 onPressed: () => _add(vm),
               ),
             ),
@@ -542,7 +543,7 @@ class _CategoryPie extends StatelessWidget {
                     color: _colors[i % _colors.length],
                     title: '${((entries[i].value / total) * 100).round()}%',
                     radius: 56,
-                    titleStyle: GoogleFonts.outfit(
+                    titleStyle: AppFonts.text(
                         fontSize: 11,
                         color: AppColors.onFill(_colors[i % _colors.length]),
                         fontWeight: FontWeight.bold),
