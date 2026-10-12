@@ -1,0 +1,45 @@
+name: my_app
+description: A new Flutter project.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  supabase_flutter: ^2.5.0
+  provider: ^6.1.2
+  fl_chart: ^0.68.0
+  http: ^1.2.0
+  collection: ^1.18.0
+  google_fonts: ^6.2.1
+  flutter_svg: ^2.0.10+1
+  url_launcher: ^6.3.0
+  google_generative_ai: ^0.4.7
+  tflite_flutter: ^0.12.1
+  flutter_animate: ^4.5.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+  shared_preferences: ^2.3.2
+  flutter_launcher_icons: ^0.14.3
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/models/
+    - assets/icons/
+    - assets/branding/
+    - assets/sandbox/lessons/
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/branding/logo.png"
+  min_sdk_android: 21
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "assets/branding/logo.png"

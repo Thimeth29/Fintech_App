@@ -1,0 +1,85 @@
+{
+  "module": "trading",
+  "lessons": [
+    {
+      "id": "tr_candles",
+      "title": "Candlesticks and trends",
+      "summary": "Reading a price chart one candle at a time.",
+      "cards": [
+        { "title": "One candle", "body": "Each candle shows a time slot: where the price opened, its highest and lowest points, and where it closed. Green = closed higher than it opened; red = closed lower.", "visual": "candles" },
+        { "title": "Timeframes", "body": "A 1-minute chart shows tiny moves; a 15-minute chart shows the bigger picture. The same moment can look like a crash on one and a blip on another.", "visual": "clock" },
+        { "title": "Trends", "body": "Higher highs and higher lows = uptrend. Lower highs and lower lows = downtrend. Trends end without warning — a chart shows the past, not the future.", "visual": "line_up" }
+      ],
+      "quiz": [
+        { "question": "A green candle means…", "options": ["The price closed higher than it opened", "Buy now", "The market is closed", "Volume was high"], "answer": 0, "explanation": "Colour shows direction within that time slot." },
+        { "question": "The thin lines above and below a candle show…", "options": ["Fees", "The high and low of that period", "Next candle's price", "News"], "answer": 1, "explanation": "These 'wicks' mark the extremes." },
+        { "question": "Can a chart tell you what the price will do next?", "options": ["Yes, always", "No — it shows what already happened", "Only on weekends", "Only green charts"], "answer": 1, "explanation": "Patterns can fail at any time." }
+      ]
+    },
+    {
+      "id": "tr_levels",
+      "title": "Support, resistance, stop-loss",
+      "summary": "Planning your exit before you enter.",
+      "cards": [
+        { "title": "Support and resistance", "body": "Support is a price where buying has often stopped falls; resistance is where selling has often stopped rises. They're areas, not exact lines, and they break.", "visual": "target" },
+        { "title": "Stop-loss", "body": "A stop-loss sells automatically if the price falls to a level you choose. It caps how much one bad trade can cost.", "visual": "shield" },
+        { "title": "Take-profit", "body": "A take-profit sells automatically at a gain you choose, so you don't get greedy and watch a profit vanish.", "visual": "line_up" },
+        { "title": "Drag the lines", "body": "In the simulator you can drag the red stop-loss and green take-profit lines on the chart once you have a position.", "visual": "candles" }
+      ],
+      "quiz": [
+        { "question": "What does a stop-loss do?", "options": ["Guarantees profit", "Sells automatically if the price falls to your level", "Stops the market", "Removes fees"], "answer": 1, "explanation": "It limits the loss from one trade." },
+        { "question": "You buy at Rs 100 with a stop-loss at Rs 95. The price falls to Rs 94. What happens?", "options": ["Nothing", "Your position is sold around Rs 95 or just below", "You buy more", "The trade is cancelled with no loss"], "answer": 1, "explanation": "The stop triggers once the level is crossed." },
+        { "question": "Support levels are…", "options": ["Guaranteed floors", "Areas where falls have often paused before", "Set by regulators", "Always round numbers"], "answer": 1, "explanation": "They're past behaviour, not promises." }
+      ]
+    },
+    {
+      "id": "tr_risk",
+      "title": "Position size and risk/reward",
+      "summary": "How much to risk on one idea.",
+      "cards": [
+        { "title": "The 2% rule", "body": "Many professionals risk at most 1–2% of their account on one trade. With Rs 100,000, a stop-loss should cost no more than Rs 2,000 if hit.", "visual": "percent" },
+        { "title": "Sizing a position", "body": "Risk per unit = entry − stop-loss. Units = money you're willing to lose ÷ risk per unit. Rs 2,000 ÷ Rs 5 = 400 units.", "visual": "scale" },
+        { "title": "Risk/reward", "body": "If you risk Rs 5 to aim for Rs 10, that's 1:2. Good traders still lose often — they just make sure winners are bigger than losers.", "visual": "target" },
+        { "title": "Fees eat profits", "body": "Each trade here costs 0.2% (min Rs 25). Twenty small trades a day can cost more than they earn.", "visual": "receipt" }
+      ],
+      "quiz": [
+        { "question": "Account Rs 100,000, 2% rule. Max loss on one trade?", "options": ["Rs 200", "Rs 2,000", "Rs 20,000", "Rs 50,000"], "answer": 1, "explanation": "2% of 100,000 = Rs 2,000." },
+        { "question": "Entry Rs 50, stop Rs 48, willing to lose Rs 1,000. How many units?", "options": ["20", "500", "1,000", "2,000"], "answer": 1, "explanation": "1,000 ÷ (50 − 48) = 500 units." },
+        { "question": "Why do fees matter more in short-term trading?", "options": ["They don't", "You pay them on every trade, and trades are frequent", "They're higher on weekends", "They're refunded"], "answer": 1, "explanation": "Small fees × many trades = big cost." }
+      ]
+    },
+    {
+      "id": "tr_psychology",
+      "title": "Emotions and why most traders lose",
+      "summary": "The honest truth about short-term trading.",
+      "cards": [
+        { "title": "Most lose", "body": "Studies of retail day traders in several countries find that the large majority lose money over time, and only a tiny share earn more than a basic wage.", "visual": "line_down" },
+        { "title": "Revenge trading", "body": "After a loss, it's tempting to trade bigger to 'win it back'. This is how small losses become big ones. Walk away instead.", "visual": "warning" },
+        { "title": "Loss limits", "body": "Decide a daily loss limit before you start. In the trainer, trading pauses if you lose 20% of your wallet in a day.", "visual": "shield" },
+        { "title": "Take breaks", "body": "Hours of staring at ticks wears down judgement. The trainer nudges you to take a break after 30 minutes.", "visual": "clock" }
+      ],
+      "quiz": [
+        { "question": "What does research say about most retail day traders?", "options": ["Most get rich", "Most lose money over time", "Exactly half win", "They always beat the market"], "answer": 1, "explanation": "Fees, spreads and emotions work against them." },
+        { "question": "You just lost Rs 5,000. What's 'revenge trading'?", "options": ["Taking a break", "Making a bigger, rushed trade to win it back", "Reporting the broker", "Reading the news"], "answer": 1, "explanation": "It usually makes losses worse." },
+        { "question": "A good response to hitting your daily loss limit is…", "options": ["Double your next trade", "Stop for the day", "Borrow money", "Remove your stop-losses"], "answer": 1, "explanation": "Limits only work if you respect them." }
+      ]
+    },
+    {
+      "id": "tr_scams",
+      "title": "Spotting trading scams",
+      "summary": "Fixed returns, binary options and pressure tactics.",
+      "cards": [
+        { "title": "Guaranteed returns", "body": "Any platform promising fixed daily or monthly returns from trading is a red flag. Real trading can always lose money.", "visual": "warning" },
+        { "title": "Binary options", "body": "\"Will the price be up or down in 60 seconds?\" apps pay less than double your stake on a win, so even a 50/50 guess loses over time. Try the Up-or-Down game to see it.", "visual": "candles" },
+        { "title": "Check the licence", "body": "In Sri Lanka, the SEC licenses stockbrokers and the Central Bank regulates deposit-takers. Unregulated forex apps and recruit-a-friend schemes are not protected; pyramid schemes are illegal.", "visual": "shield" },
+        { "title": "Pressure tactics", "body": "\"Only today\", \"deposit more to unlock your profits\", or a stranger teaching you to trade on WhatsApp — walk away.", "visual": "idea" }
+      ],
+      "quiz": [
+        { "question": "An app promises a guaranteed 2% profit every day from forex trading. This is…", "options": ["A great opportunity", "A major red flag", "Normal for forex", "Government approved"], "answer": 1, "explanation": "No genuine trading can guarantee returns." },
+        { "question": "A 60-second up/down app pays 1.8× on a win. If you guess 50/50, over time you…", "options": ["Break even", "Win", "Lose about 10% of what you stake", "Double your money"], "answer": 2, "explanation": "0.5 × 1.8 = 0.9: you get back 90% of stakes on average." },
+        { "question": "Who licenses stockbrokers in Sri Lanka?", "options": ["Any bank", "The Securities and Exchange Commission (SEC)", "Social media platforms", "Nobody"], "answer": 1, "explanation": "Check the SEC's list before trusting a broker." },
+        { "question": "A stranger on WhatsApp offers to teach you trading and asks you to deposit on a new app. You should…", "options": ["Deposit a little to test", "Walk away and report it", "Recruit friends", "Share your OTP"], "answer": 1, "explanation": "This is a common scam pattern." }
+      ]
+    }
+  ]
+}

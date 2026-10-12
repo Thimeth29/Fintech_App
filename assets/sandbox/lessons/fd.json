@@ -1,0 +1,99 @@
+{
+  "module": "fd",
+  "lessons": [
+    {
+      "id": "fd_basics",
+      "title": "How a fixed deposit works",
+      "summary": "Lend money to a bank for a fixed time at a fixed rate.",
+      "cards": [
+        { "title": "Lock it, earn it", "body": "You deposit a sum for a set time (the tenure) — 1, 3, 6, 12 or 24 months — and the bank promises a fixed interest rate for the whole period.", "visual": "bank" },
+        { "title": "Tenure", "body": "Longer tenures usually pay higher rates, because the bank gets to use your money for longer. The trade-off: it's locked away.", "visual": "calendar" },
+        { "title": "Safety", "body": "Licensed banks and finance companies are regulated by the Central Bank. Deposits are also covered by the Sri Lanka Deposit Insurance Scheme up to a limit per depositor, per institution.", "visual": "shield" },
+        { "title": "Rates differ", "body": "Finance companies often pay more than big banks — partly to compensate for higher risk. A higher rate is never free.", "visual": "scale" }
+      ],
+      "quiz": [
+        { "question": "What does 'tenure' mean for an FD?", "options": ["The interest rate", "How long the money is locked in", "The bank's name", "The tax rate"], "answer": 1, "explanation": "Tenure is the fixed period, e.g. 12 months." },
+        { "question": "Why might a finance company pay more than a large bank?", "options": ["It's always safer", "To attract deposits and compensate for higher risk", "The government pays the difference", "No reason"], "answer": 1, "explanation": "Higher rates often come with higher risk." },
+        { "question": "If you open a 12-month FD at 10%, what happens if market rates drop next month?", "options": ["Your rate drops too", "You keep 10% until maturity", "The FD is cancelled", "You lose your principal"], "answer": 1, "explanation": "The rate is fixed for the tenure." }
+      ]
+    },
+    {
+      "id": "fd_interest",
+      "title": "Simple vs compound interest",
+      "summary": "Interest on your money, and interest on your interest.",
+      "cards": [
+        { "title": "Simple interest", "body": "Interest = principal × rate × time. Rs 100,000 at 10% for one year earns Rs 10,000. Sri Lankan FDs usually pay simple interest within a term.", "visual": "percent" },
+        { "title": "Compound interest", "body": "When interest is added to your principal, the next period earns interest on it too. Renewing an FD with the interest added is how you compound.", "visual": "coins" },
+        { "title": "The difference grows", "body": "Rs 100,000 at 10% for 10 years: simple gives Rs 200,000; compounded yearly gives about Rs 259,000. Time is the secret ingredient.", "visual": "line_up" }
+      ],
+      "quiz": [
+        { "question": "Rs 50,000 at 8% simple interest for one year earns…", "options": ["Rs 400", "Rs 4,000", "Rs 8,000", "Rs 40,000"], "answer": 1, "explanation": "50,000 × 0.08 = Rs 4,000." },
+        { "question": "Compounding means…", "options": ["Paying interest on a loan", "Earning interest on earlier interest", "A fee for early withdrawal", "A type of tax"], "answer": 1, "explanation": "Interest that's reinvested starts earning too." },
+        { "question": "In the trainer, how do you compound an FD?", "options": ["Turn on auto-renew so interest joins the principal", "Break it every month", "Open many tiny FDs", "You can't"], "answer": 0, "explanation": "Auto-renew rolls principal + interest into a new term." }
+      ]
+    },
+    {
+      "id": "fd_payout",
+      "title": "Payout options and early withdrawal",
+      "summary": "Monthly income or a lump sum — and what breaking early costs.",
+      "cards": [
+        { "title": "Interest at maturity", "body": "You get all the interest at the end, with your principal. This usually pays the highest rate.", "visual": "calendar" },
+        { "title": "Monthly interest", "body": "You get interest every month, which is useful for living costs. Banks typically pay a slightly lower rate for this option.", "visual": "coins" },
+        { "title": "Breaking early", "body": "Need the money before maturity? Real banks usually recalculate interest at a much lower rate and take back any extra interest already paid. In the trainer, you keep the interest earned so far but give up the rest of the return.", "visual": "warning" }
+      ],
+      "quiz": [
+        { "question": "Which payout usually has the highest rate?", "options": ["Monthly", "At maturity", "Both are always equal", "Weekly"], "answer": 1, "explanation": "The bank keeps the interest longer, so it can pay a bit more." },
+        { "question": "Why choose monthly interest?", "options": ["Regular income for expenses", "It's tax-free", "Higher rate", "No lock-in"], "answer": 0, "explanation": "It suits people living off their interest." },
+        { "question": "What usually happens if you break an FD early?", "options": ["You get a bonus", "Interest is recalculated at a lower rate", "You lose all your principal", "Nothing changes"], "answer": 1, "explanation": "You keep your principal but earn much less interest." }
+      ]
+    },
+    {
+      "id": "fd_tax_inflation",
+      "title": "Tax and inflation",
+      "summary": "What you really keep, and what it can really buy.",
+      "cards": [
+        { "title": "Withholding tax", "body": "Since April 2025, banks deduct 10% advance income tax from interest. Rs 10,000 of interest becomes Rs 9,000. People with low total income can file a self-declaration to avoid the deduction.", "visual": "receipt" },
+        { "title": "Inflation", "body": "Inflation is how fast prices rise. If prices rise 5% a year, Rs 100,000 next year buys what Rs 95,000 buys today.", "visual": "line_down" },
+        { "title": "Real return", "body": "Real return ≈ after-tax rate − inflation. A 9% FD after 10% tax pays 8.1%; with 5% inflation your real return is about 3%. If inflation is above your after-tax rate, you're losing purchasing power.", "visual": "scale" }
+      ],
+      "quiz": [
+        { "question": "Your FD pays Rs 20,000 interest. After 10% withholding tax you get…", "options": ["Rs 2,000", "Rs 18,000", "Rs 20,000", "Rs 22,000"], "answer": 1, "explanation": "20,000 − 10% = Rs 18,000." },
+        { "question": "Your after-tax rate is 6% and inflation is 8%. Your real return is roughly…", "options": ["+14%", "+2%", "−2%", "0%"], "answer": 2, "explanation": "6% − 8% ≈ −2%: your money buys less over time." },
+        { "question": "Inflation means…", "options": ["Prices rise over time", "Your bank pays more", "Taxes go down", "Shares always rise"], "answer": 0, "explanation": "Each rupee buys a little less each year." }
+      ]
+    },
+    {
+      "id": "fd_ladder",
+      "title": "FD laddering",
+      "summary": "Spread maturities so money keeps coming free.",
+      "cards": [
+        { "title": "The problem", "body": "Put everything in one 24-month FD and you get the best rate — but can't touch it for two years without a penalty.", "visual": "warning" },
+        { "title": "The ladder", "body": "Split it: e.g. one FD maturing in 3 months, one in 6 and one in 12. Something matures regularly, so you rarely need to break one early.", "visual": "ladder" },
+        { "title": "Rolling", "body": "When a rung matures, renew it at the longest tenure. Over time every rung earns long-term rates, but one still matures often.", "visual": "calendar" }
+      ],
+      "quiz": [
+        { "question": "What is an FD ladder?", "options": ["One very large FD", "Several FDs maturing at different times", "An FD with a ladder bonus", "A loan against an FD"], "answer": 1, "explanation": "Different maturity dates are the whole point." },
+        { "question": "The main benefit of laddering is…", "options": ["Guaranteed higher rates", "Regular access to cash without breaking FDs", "No tax", "No inflation"], "answer": 1, "explanation": "Money comes free regularly." },
+        { "question": "When a rung matures, a common strategy is to…", "options": ["Spend it all", "Renew it at the longest tenure", "Break the other rungs", "Move it to a savings account forever"], "answer": 1, "explanation": "This keeps the ladder going at better rates." }
+      ]
+    },
+    {
+      "id": "fd_group_seettu",
+      "title": "Investing as a group & Seettu",
+      "summary": "How rotating savings and group investing work, and how to spot a scam.",
+      "cards": [
+        { "title": "How a seettu works", "body": "Everyone pays the same amount each round, and one member takes the whole pot. With 10 members paying Rs 5,000, each pot is Rs 50,000 and the seettu runs 10 rounds until everyone has had a turn. Early receivers are effectively borrowing from the later ones.", "visual": "calendar" },
+        { "title": "Trust and record-keeping", "body": "A seettu or investment group only works if everyone keeps paying. Keep written records: who paid, when, and who confirmed it. In Mobile SAP the payer marks a payment as paid and someone else confirms it, and nobody can edit the activity log.", "visual": "receipt" },
+        { "title": "Sharing profits pro-rata", "body": "In an investment group, pro-rata means you get a share of profits equal to your share of the money. Put in Rs 60,000 of a Rs 80,000 pool (75%), and you get 75% of each distribution. An equal split ignores how much each person put in.", "visual": "percent" },
+        { "title": "Warning signs of a scam", "body": "Be careful of anyone who promises guaranteed or very high returns, pays you for bringing in new members (a pyramid scheme), pushes you to pay quickly, or won't show the group's records. A real investment can always lose money.", "visual": "warning" },
+        { "title": "Protect yourself", "body": "Start small, join people you can verify, read the group rules before joining, pay by traceable bank transfer, and never share card or account numbers in group chat. If something feels wrong, report it.", "visual": "shield" }
+      ],
+      "quiz": [
+        { "question": "In a 10-member seettu with Rs 5,000 per round, how big is each pot?", "options": ["Rs 5,000", "Rs 10,000", "Rs 50,000", "Rs 500,000"], "answer": 2, "explanation": "10 members × Rs 5,000 = Rs 50,000 per round." },
+        { "question": "You put Rs 20,000 into a Rs 80,000 group. With a pro-rata split, what share of a distribution is yours?", "options": ["10%", "25%", "50%", "It depends on the leader"], "answer": 1, "explanation": "20,000 ÷ 80,000 = 25%." },
+        { "question": "Which of these is a warning sign of a scam?", "options": ["A written set of group rules", "A bonus for every new member you recruit", "Payments confirmed by the treasurer", "A vote before each investment"], "answer": 1, "explanation": "Rewards for recruiting are a hallmark of pyramid schemes." },
+        { "question": "Why does a seettu need good records?", "options": ["Banks require it", "So everyone can see who has paid and who has received the pot", "To earn interest", "It doesn't"], "answer": 1, "explanation": "Clear records keep everyone honest and settle disputes." }
+      ]
+    }
+  ]
+}

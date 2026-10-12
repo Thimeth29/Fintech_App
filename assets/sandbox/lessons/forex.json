@@ -1,0 +1,186 @@
+{
+  "module": "forex",
+  "lessons": [
+    {
+      "id": "fx_basics",
+      "title": "Exchange rates and the rupee",
+      "summary": "What USD/LKR means and who publishes it.",
+      "cards": [
+        {
+          "title": "A price for money",
+          "body": "An exchange rate is the price of one currency in another. USD/LKR at 300 means one US dollar costs Rs 300.",
+          "visual": "coins"
+        },
+        {
+          "title": "CBSL's daily rates",
+          "body": "Every business day the Central Bank of Sri Lanka publishes indicative rates for about 55 currencies, worked out each morning from the USD/LKR market rate and world currency prices. The trainer's live prices use them.",
+          "visual": "bank"
+        },
+        {
+          "title": "Weaker or stronger",
+          "body": "If USD/LKR rises from 300 to 310, each dollar costs more rupees: the rupee has weakened. Imports like fuel and medicine get dearer, and anyone holding dollars has more rupees' worth.",
+          "visual": "line_up"
+        },
+        {
+          "title": "Not just dollars",
+          "body": "Rates move for every currency. Families receiving money from relatives in the Middle East, Europe or Australia feel these moves directly.",
+          "visual": "pie"
+        }
+      ],
+      "quiz": [
+        {
+          "question": "USD/LKR moves from 300 to 310. What happened to the rupee?",
+          "options": [
+            "It strengthened",
+            "It weakened",
+            "Nothing changed",
+            "It was devalued to zero"
+          ],
+          "answer": 1,
+          "explanation": "Each dollar now costs Rs 10 more, so the rupee buys less: it weakened."
+        },
+        {
+          "question": "Who publishes the daily indicative exchange rates in Sri Lanka?",
+          "options": [
+            "The Colombo Stock Exchange",
+            "The Central Bank of Sri Lanka",
+            "Each jeweller",
+            "The Inland Revenue Department"
+          ],
+          "answer": 1,
+          "explanation": "The Central Bank of Sri Lanka publishes them every business day."
+        },
+        {
+          "question": "You hold US$100 and the rupee weakens. In rupees, your dollars are worth…",
+          "options": [
+            "More",
+            "Less",
+            "The same",
+            "Nothing"
+          ],
+          "answer": 0,
+          "explanation": "Each dollar now converts into more rupees."
+        }
+      ]
+    },
+    {
+      "id": "fx_spread",
+      "title": "Buying and selling rates",
+      "summary": "Why you lose a little every time you swap.",
+      "cards": [
+        {
+          "title": "Two prices",
+          "body": "Banks sell you foreign currency at a higher selling rate and buy it back at a lower buying rate. The gap is the spread, and it's how they earn.",
+          "visual": "scale"
+        },
+        {
+          "title": "The trainer's spread",
+          "body": "In the trainer you buy at the CBSL rate plus 0.75% and sell at it minus 0.75%: a 1.5% round trip. Cash notes usually have wider spreads than bank transfers.",
+          "visual": "percent"
+        },
+        {
+          "title": "Start behind",
+          "body": "Buy and sell straight back and you lose the spread. The currency has to move in your favour by more than that before you make anything.",
+          "visual": "warning"
+        }
+      ],
+      "quiz": [
+        {
+          "question": "What is the spread?",
+          "options": [
+            "A tax on dollars",
+            "The gap between the bank's buying and selling rates",
+            "Interest on a foreign currency account",
+            "The CBSL's profit"
+          ],
+          "answer": 1,
+          "explanation": "Banks sell high and buy low; the difference is the spread."
+        },
+        {
+          "question": "With a 1.5% round-trip spread, roughly how much do you lose buying Rs 100,000 of dollars and selling them straight back?",
+          "options": [
+            "Nothing",
+            "About Rs 150",
+            "About Rs 1,500",
+            "About Rs 15,000"
+          ],
+          "answer": 2,
+          "explanation": "1.5% of Rs 100,000 is Rs 1,500."
+        },
+        {
+          "question": "Which usually has the wider spread?",
+          "options": [
+            "Cash notes",
+            "A bank transfer",
+            "They're always the same",
+            "Neither has a spread"
+          ],
+          "answer": 0,
+          "explanation": "Handling cash costs banks more, so cash rates are usually worse."
+        }
+      ]
+    },
+    {
+      "id": "fx_risk",
+      "title": "Currency risk",
+      "summary": "Rupees can fall fast — and recover.",
+      "cards": [
+        {
+          "title": "Big moves happen",
+          "body": "In 2022 the rupee lost over 40% of its value against the dollar in a few months. In 2023 it won back part of that. Currencies can move both ways.",
+          "visual": "candles"
+        },
+        {
+          "title": "No interest by itself",
+          "body": "Notes in a drawer earn nothing. A foreign currency deposit earns interest, usually less than rupee FDs. Your return depends mostly on the exchange rate.",
+          "visual": "receipt"
+        },
+        {
+          "title": "Rules apply",
+          "body": "Banks offer foreign currency accounts, but who can open them and how the money can be used is set under Sri Lanka's Foreign Exchange Act. Ask your bank before you buy.",
+          "visual": "shield"
+        },
+        {
+          "title": "A hedge, not a bet",
+          "body": "Holding some foreign currency can protect you if you'll need it later — for study, travel or imports. Buying it hoping for a quick profit is speculation.",
+          "visual": "idea"
+        }
+      ],
+      "quiz": [
+        {
+          "question": "Can the rupee strengthen after a big fall?",
+          "options": [
+            "No, never",
+            "Yes — it won back part of its fall in 2023",
+            "Only if the CSE rises",
+            "Only on weekends"
+          ],
+          "answer": 1,
+          "explanation": "Currencies move both ways; after falling sharply in 2022 the rupee recovered some ground in 2023."
+        },
+        {
+          "question": "Foreign currency notes kept at home earn…",
+          "options": [
+            "The CBSL policy rate",
+            "No interest",
+            "Dividends",
+            "The same as an FD"
+          ],
+          "answer": 1,
+          "explanation": "Cash earns nothing; only the exchange rate can change its rupee value."
+        },
+        {
+          "question": "When does holding foreign currency make the most sense?",
+          "options": [
+            "When you'll need that currency later",
+            "Whenever you want a quick profit",
+            "Only when the rupee is strong",
+            "Never"
+          ],
+          "answer": 0,
+          "explanation": "Matching currency to a future need (study, travel, imports) removes exchange-rate risk for that need."
+        }
+      ]
+    }
+  ]
+}

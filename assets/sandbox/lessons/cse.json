@@ -1,0 +1,86 @@
+{
+  "module": "cse",
+  "lessons": [
+    {
+      "id": "cse_shares",
+      "title": "What is a share?",
+      "summary": "Owning a slice of a company, and where those slices are bought and sold.",
+      "cards": [
+        { "title": "A slice of a company", "body": "A share is a tiny piece of ownership in a company. If a company has 1 million shares and you own 1,000, you own 0.1% of it — including 0.1% of its future profits.", "visual": "pie" },
+        { "title": "Why prices move", "body": "A share's price is what buyers and sellers agree on right now. Good news about future profits pulls the price up; bad news pushes it down. Nobody sets the price — the market does.", "visual": "line_up" },
+        { "title": "The Colombo Stock Exchange", "body": "The CSE is Sri Lanka's marketplace for shares. You can't trade there directly: you open a CDS (Central Depository Systems) account through an SEC-licensed stockbroker, who places your orders.", "visual": "bank" },
+        { "title": "Market hours", "body": "Regular trading runs 9:30 am – 2:30 pm, Monday to Friday, except market holidays. Orders placed outside those hours wait until the market opens.", "visual": "clock" }
+      ],
+      "quiz": [
+        { "question": "You own 500 of a company's 100,000 shares. What do you own?", "options": ["0.5% of the company", "5% of the company", "Rs 500 of its cash", "Nothing until it pays a dividend"], "answer": 0, "explanation": "500 ÷ 100,000 = 0.5%. A share is ownership, not a loan or a coupon." },
+        { "question": "What do you need to trade on the CSE?", "options": ["Just a bank account", "A CDS account opened through a licensed stockbroker", "A licence from the Central Bank", "A minimum of Rs 1 million"], "answer": 1, "explanation": "Shares are held electronically in your CDS account, opened through an SEC-licensed broker." },
+        { "question": "When does regular CSE trading happen?", "options": ["24 hours a day", "9:30 am – 2:30 pm on weekdays", "Weekends only", "Whenever your broker is online"], "answer": 1, "explanation": "Regular trading is 9:30 am – 2:30 pm, Monday to Friday." },
+        { "question": "Who decides a share's price?", "options": ["The company's CEO", "The stock exchange", "Buyers and sellers in the market", "The government"], "answer": 2, "explanation": "The price is simply the latest deal between a buyer and a seller." }
+      ]
+    },
+    {
+      "id": "cse_indices",
+      "title": "ASPI and S&P SL20",
+      "summary": "The two numbers that tell you how the whole market is doing.",
+      "cards": [
+        { "title": "What an index is", "body": "An index tracks the combined price of a group of shares. Instead of checking 280+ companies, you check one number to see whether the market went up or down.", "visual": "chart_index" },
+        { "title": "ASPI", "body": "The All Share Price Index includes every company listed on the CSE, weighted by size. Big companies move it more than small ones.", "visual": "pie" },
+        { "title": "S&P SL20", "body": "The S&P Sri Lanka 20 tracks 20 of the largest, most-traded companies. It shows how the market's leaders are doing.", "visual": "target" },
+        { "title": "Using an index", "body": "Compare your portfolio with the ASPI. If the market rose 10% and you made 4%, your picks lagged the market — even though you made money.", "visual": "scale" }
+      ],
+      "quiz": [
+        { "question": "Which index includes every company listed on the CSE?", "options": ["S&P SL20", "ASPI", "Both", "Neither"], "answer": 1, "explanation": "ASPI = All Share Price Index." },
+        { "question": "The S&P SL20 tracks…", "options": ["20 of the largest, most-traded companies", "The 20 cheapest shares", "20 government bonds", "The 20 newest listings"], "answer": 0, "explanation": "It focuses on large, liquid companies." },
+        { "question": "The ASPI rose 12% this year and your shares rose 5%. What's true?", "options": ["You beat the market", "You lost money", "You made money but trailed the market", "Indices don't apply to you"], "answer": 2, "explanation": "You gained 5%, but the market as a whole did better." }
+      ]
+    },
+    {
+      "id": "cse_dividends_pe",
+      "title": "Dividends and P/E",
+      "summary": "Getting paid for owning a share, and a quick way to judge if a price is high.",
+      "cards": [
+        { "title": "Dividends", "body": "Many companies share part of their profit with owners as a dividend, e.g. Rs 5 per share. Hold 200 shares and you receive Rs 1,000, minus 15% withholding tax.", "visual": "coins" },
+        { "title": "Dividend yield", "body": "Yield = yearly dividend ÷ share price. A Rs 100 share paying Rs 6 a year yields 6%. A very high yield can be a warning sign that the price has fallen for a reason.", "visual": "percent" },
+        { "title": "P/E ratio", "body": "Price ÷ earnings per share. A P/E of 10 means you pay Rs 10 for every Rs 1 of yearly profit. Lower can mean cheaper — or that investors expect profits to fall.", "visual": "scale" },
+        { "title": "Compare like with like", "body": "Banks, telecoms and manufacturers have different typical P/Es. Compare a company with others in its own sector, not with the whole market.", "visual": "idea" }
+      ],
+      "quiz": [
+        { "question": "A share costs Rs 200 and pays Rs 10 in dividends a year. What's the yield?", "options": ["2%", "5%", "10%", "20%"], "answer": 1, "explanation": "10 ÷ 200 = 5%." },
+        { "question": "A P/E of 8 means…", "options": ["The share costs Rs 8", "You pay Rs 8 for each Rs 1 of yearly earnings", "Earnings grew 8%", "The dividend is 8%"], "answer": 1, "explanation": "P/E = price ÷ earnings per share." },
+        { "question": "In the trainer, dividends are paid…", "options": ["Every day", "When you fast-forward through a payout month", "Only if you sell", "Never"], "answer": 1, "explanation": "Each company pays in certain months; fast-forward through them while holding to collect." },
+        { "question": "A share suddenly shows a 25% dividend yield. What should you think?", "options": ["Free money — buy it all", "The price may have crashed for a reason; investigate", "Yields are always that high", "It's guaranteed"], "answer": 1, "explanation": "Yield rises when the price falls. Ask why it fell." }
+      ]
+    },
+    {
+      "id": "cse_diversify",
+      "title": "Diversify and think long-term",
+      "summary": "Don't put all your eggs in one basket, and give investments time.",
+      "cards": [
+        { "title": "One basket", "body": "If all your money is in one company and it has a bad year, your whole portfolio has a bad year. Spreading across sectors means one problem doesn't sink everything.", "visual": "pie" },
+        { "title": "Different sectors", "body": "Banks, telecoms, consumer goods and construction react differently to news. A rate cut may help banks' borrowers but squeeze their margins — owning several sectors smooths the ride.", "visual": "shield" },
+        { "title": "Long-term vs short-term", "body": "Over days, prices jump around on news and emotion. Over years, prices tend to follow profits. Long-term investors ride out dips instead of selling at the bottom.", "visual": "line_up" },
+        { "title": "Dips happen", "body": "A 10% fall is normal for shares. Selling in panic locks in the loss. Ask: has the company changed, or just the mood?", "visual": "line_down" }
+      ],
+      "quiz": [
+        { "question": "Why own shares in several sectors?", "options": ["It guarantees profit", "One company's bad news hurts less", "It avoids fees", "The CSE requires it"], "answer": 1, "explanation": "Diversification limits damage; it doesn't guarantee profit." },
+        { "question": "Your share fell 10% this month, but the company is unchanged. A long-term investor would most likely…", "options": ["Sell immediately", "Hold, and review the company's fundamentals", "Borrow money to buy more", "Stop investing forever"], "answer": 1, "explanation": "Panic-selling locks in a temporary loss." },
+        { "question": "Over many years, share prices tend to follow…", "options": ["Daily headlines", "Company profits", "The weather", "Social media likes"], "answer": 1, "explanation": "Short-term noise fades; earnings matter in the long run." }
+      ]
+    },
+    {
+      "id": "cse_fees",
+      "title": "Brokerage fees",
+      "summary": "Every buy and every sell costs money. Frequent trading adds up.",
+      "cards": [
+        { "title": "1.12% per trade", "body": "For trades up to Rs 100 million, the CSE's total cost is 1.12% of the value: brokerage 0.64%, CSE 0.084%, CDS 0.024%, SEC cess 0.072% and share transaction levy 0.30%.", "visual": "receipt" },
+        { "title": "Buy and sell", "body": "You pay on the way in and on the way out. A round trip costs about 2.24%, so a share must rise more than 2.24% before you break even.", "visual": "percent" },
+        { "title": "Trading too often", "body": "Ten round trips a year cost over 22% of the money traded. That's why frequent trading usually beats only your broker, not the market.", "visual": "warning" }
+      ],
+      "quiz": [
+        { "question": "You buy Rs 50,000 of shares. Roughly what fee do you pay?", "options": ["Rs 56", "Rs 560", "Rs 5,600", "Nothing"], "answer": 1, "explanation": "1.12% × 50,000 = Rs 560." },
+        { "question": "How much must a share rise before a buy-then-sell breaks even?", "options": ["0%", "About 1.12%", "About 2.24%", "10%"], "answer": 2, "explanation": "You pay roughly 1.12% on each side." },
+        { "question": "What usually happens to people who trade very often?", "options": ["Fees eat into their returns", "They pay lower fees", "They always beat the market", "The CSE refunds fees"], "answer": 0, "explanation": "Costs compound with every trade." }
+      ]
+    }
+  ]
+}

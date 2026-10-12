@@ -1,0 +1,181 @@
+{
+  "module": "community_fund",
+  "lessons": [
+    {
+      "id": "cf_seettu",
+      "title": "How a seettu works",
+      "summary": "Save together and take turns with the pot.",
+      "cards": [
+        {
+          "title": "Everyone pays, one takes",
+          "body": "A seettu has a fixed group. Every round (usually monthly) each member pays the same amount and one member takes the whole pot.",
+          "visual": "coins"
+        },
+        {
+          "title": "An example",
+          "body": "10 members paying Rs 5,000 a month make a Rs 50,000 pot. The seettu lasts 10 months, and everyone gets the pot once.",
+          "visual": "calendar"
+        },
+        {
+          "title": "No interest",
+          "body": "If everyone pays, you get back exactly what you put in. A seettu doesn't grow your money; it changes when you have it.",
+          "visual": "scale"
+        }
+      ],
+      "quiz": [
+        {
+          "question": "8 members each pay Rs 2,500 a month. How big is each pot?",
+          "options": [
+            "Rs 2,500",
+            "Rs 10,000",
+            "Rs 20,000",
+            "Rs 25,000"
+          ],
+          "answer": 2,
+          "explanation": "8 × Rs 2,500 = Rs 20,000."
+        },
+        {
+          "question": "If everyone pays every round, how much do you get back in total?",
+          "options": [
+            "More than you paid, with interest",
+            "Exactly what you paid",
+            "Less than you paid",
+            "It depends on the CSE"
+          ],
+          "answer": 1,
+          "explanation": "A seettu pays no interest: total in equals total out."
+        },
+        {
+          "question": "How long does a 12-member monthly seettu run?",
+          "options": [
+            "1 month",
+            "6 months",
+            "12 months",
+            "24 months"
+          ],
+          "answer": 2,
+          "explanation": "One round per member, so 12 rounds."
+        }
+      ]
+    },
+    {
+      "id": "cf_turns",
+      "title": "Early turn or late turn?",
+      "summary": "A loan, or savings without interest.",
+      "cards": [
+        {
+          "title": "Early turn = a loan",
+          "body": "Take the pot first and you get a lump sum now, then repay it over the following rounds. It's like an interest-free loan from the group.",
+          "visual": "line_up"
+        },
+        {
+          "title": "Late turn = savings",
+          "body": "Take the pot last and you've lent to everyone else. You save in a disciplined way, but earn no interest while inflation eats into the pot's value.",
+          "visual": "line_down"
+        },
+        {
+          "title": "Bidding for turns",
+          "body": "Some seettus let members bid: whoever gives up the most of the pot goes first, and the rest share that discount. That discount is really interest.",
+          "visual": "target"
+        }
+      ],
+      "quiz": [
+        {
+          "question": "Taking the first pot is most like…",
+          "options": [
+            "A fixed deposit",
+            "An interest-free loan",
+            "Buying shares",
+            "A government bond"
+          ],
+          "answer": 1,
+          "explanation": "You get the money first and repay it over the remaining rounds."
+        },
+        {
+          "question": "What does a late turn cost you, even if everyone pays?",
+          "options": [
+            "Nothing at all",
+            "Interest you could have earned elsewhere, and inflation",
+            "A penalty from the bank",
+            "Withholding tax"
+          ],
+          "answer": 1,
+          "explanation": "Your money waits without interest while prices rise."
+        },
+        {
+          "question": "In a bidding seettu, what is the discount someone gives up to go first?",
+          "options": [
+            "A fee to the government",
+            "Effectively interest paid to the others",
+            "A tax",
+            "A mistake"
+          ],
+          "answer": 1,
+          "explanation": "Paying to get money earlier is what interest is."
+        }
+      ]
+    },
+    {
+      "id": "cf_risk",
+      "title": "When someone stops paying",
+      "summary": "Trust is the whole system.",
+      "cards": [
+        {
+          "title": "The classic risk",
+          "body": "A member takes their pot early and then stops paying. Every later pot shrinks, and nothing is insured.",
+          "visual": "warning"
+        },
+        {
+          "title": "Who you join matters",
+          "body": "Seettus with people you know and can find are much safer than groups of strangers. In the trainer, a circle of strangers is far more likely to have a member stop paying.",
+          "visual": "shield"
+        },
+        {
+          "title": "Keep records",
+          "body": "Agree the rules in writing: amounts, dates, the order of turns and what happens if someone misses a payment. Pay by traceable transfer and note who confirmed it.",
+          "visual": "receipt"
+        },
+        {
+          "title": "Keep your promise",
+          "body": "You must keep paying after your pot too. The trainer only lets you join if your wallet could cover every round you owe, even if your pot comes late.",
+          "visual": "calendar"
+        }
+      ],
+      "quiz": [
+        {
+          "question": "What is the main risk in a seettu?",
+          "options": [
+            "Share prices falling",
+            "A member who has taken their pot stops paying",
+            "The CBSL changing rates",
+            "Exchange rates moving"
+          ],
+          "answer": 1,
+          "explanation": "Seettus run on trust; a member who stops paying shrinks later pots."
+        },
+        {
+          "question": "Which group is usually safer?",
+          "options": [
+            "Strangers online promising high returns",
+            "People you know and can verify",
+            "Anyone who pays first",
+            "It makes no difference"
+          ],
+          "answer": 1,
+          "explanation": "Knowing and being able to find members makes defaults less likely and easier to resolve."
+        },
+        {
+          "question": "After you've received your pot, should you keep paying?",
+          "options": [
+            "No, you're done",
+            "Yes — every member pays every round",
+            "Only if you feel like it",
+            "Only half"
+          ],
+          "answer": 1,
+          "explanation": "The others are counting on your payments for their pots."
+        }
+      ]
+    }
+  ]
+}

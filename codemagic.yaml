@@ -1,0 +1,42 @@
+workflows:
+  android-firebase-distribution:
+    name: Android - Firebase App Distribution
+    max_build_duration: 30
+    instance_type: linux_x2
+    environment:
+      flutter: stable
+      groups:
+        # Create this group in Codemagic (Teams > your team > Environment
+        # variables), containing:
+        #   GCLOUD_SERVICE_ACCOUNT_CREDENTIALS  (secure) - the full JSON
+        #     key of a Firebase service account with App Distribution
+        #     access, pasted as-is
+        #   FIREBASE_APP_ID                     - from Firebase project
+        #     settings > General > Your apps (format: 1:XXXXXXXXXX:android:xxxxxxxx)
+        #   GEMINI_API_KEY                      (secure, optional) - only
+        #     needed if you want FinBot/AI Coach features working in the
+        #     distributed build; omit to ship without them
+        - firebase_credentials
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: front-end
+          include: true
+      cancel_previous_builds: true
+    scripts:
+      - name: Get Flutter packages
+        script: flutter pub get
+      - name: Build release APK
+        script: |
+          flutter build apk --release \
+            --dart-define=GEMINI_API_KEY=${GEMINI_API_KEY:-}
+    artifacts:
+      - build/app/outputs/flutter-apk/*.apk
+    publishing:
+      firebase:
+        firebase_service_account: $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
+        android:
+          app_id: $FIREBASE_APP_ID
+          groups:
+            - testers

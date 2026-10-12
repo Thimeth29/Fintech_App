@@ -1,0 +1,12 @@
+project_id = "uttemjtuxeasyccxhhlz"
+
+# Public market data: callable with the app's publishable key.
+[functions.cse-market]
+verify_jwt = false
+
+[functions.financial-news]
+verify_jwt = false
+
+# Checks its own CRON_SECRET header instead of a JWT, so pg_cron can call it.
+[functions.collect-rates]
+verify_jwt = false

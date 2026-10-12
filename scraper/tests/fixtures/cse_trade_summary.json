@@ -1,0 +1,7 @@
+{"reqTradeSummery": [
+  {"id": 1, "name": "JOHN KEELLS HOLDINGS PLC", "symbol": "JKH.N0000", "price": 21.4, "change": 0.3, "percentageChange": 1.42, "turnover": 152000000, "lastTradedTime": 1791791400000},
+  {"id": 2, "name": "COMMERCIAL BANK OF CEYLON PLC", "symbol": "COMB.N0000", "price": 141.25, "change": -1.0, "percentageChange": -0.7, "turnover": 90000000},
+  {"id": 3, "name": "COMMERCIAL BANK OF CEYLON PLC", "symbol": "COMB.X0000", "price": 120.0, "percentageChange": 0},
+  {"id": 4, "name": "SOME OTHER PLC", "symbol": "ABC.N0000", "price": 10.0},
+  {"id": 5, "name": "DIALOG AXIATA PLC", "symbol": "DIAL.N0000", "price": 0}
+]}

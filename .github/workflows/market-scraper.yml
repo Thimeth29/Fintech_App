@@ -1,0 +1,55 @@
+# Fills Supabase market_prices for the Investment Trainer's live prices.
+# The app never scrapes: it only reads the table (with Realtime).
+#
+# Repository secrets needed: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY.
+# GitHub only runs schedules from the default branch.
+name: Market data scraper
+
+on:
+  schedule:
+    # Every 30 min while the CSE trades (09:30-14:30 Colombo = 04:00-09:00 UTC), Mon-Fri.
+    - cron: '0,30 4-8 * * 1-5'
+    # Once a day at 10:15 Colombo (after CBSL's 09:30 rates): everything.
+    - cron: '45 4 * * *'
+  workflow_dispatch:
+    inputs:
+      sources:
+        description: 'Comma-separated: cbsl,cse,banks,tbills'
+        default: 'cbsl,cse,banks,tbills'
+      backfill_days:
+        description: 'Days of CBSL history to write (e.g. 180 on first run)'
+        default: '7'
+
+concurrency:
+  group: market-scraper
+  cancel-in-progress: false
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: scraper
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: scraper/requirements*.txt
+      - run: pip install -r requirements-dev.txt
+      - run: python -m pytest -q
+      - name: Scrape and write
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            SOURCES="${{ github.event.inputs.sources }}"; DAYS="${{ github.event.inputs.backfill_days }}"
+          elif [ "${{ github.event.schedule }}" = "0,30 4-8 * * 1-5" ]; then
+            SOURCES="cse"; DAYS=7
+          else
+            SOURCES="cbsl,cse,banks,tbills"; DAYS=7
+          fi
+          python -m market_scraper.run --sources "$SOURCES" --backfill-days "$DAYS"
