@@ -62,10 +62,11 @@ class TopNavBar extends StatelessWidget implements PreferredSizeWidget {
   /// tapping the highlighted tab then returns to that section's main page
   /// instead of doing nothing.
   final bool isSectionRoot;
+  final List<Widget>? actions;
 
   /// An empty [title] with no back button hides the title row, leaving just
   /// the navigation (used by Home, which has its own greeting header).
-  bool get _hasTitleRow => title.isNotEmpty || showBackButton;
+  bool get _hasTitleRow => title.isNotEmpty || showBackButton || (actions != null && actions!.isNotEmpty);
 
   const TopNavBar({
     super.key,
@@ -73,6 +74,7 @@ class TopNavBar extends StatelessWidget implements PreferredSizeWidget {
     required this.title,
     this.showBackButton = false,
     this.isSectionRoot = true,
+    this.actions,
   });
 
   @override
@@ -147,6 +149,7 @@ class TopNavBar extends StatelessWidget implements PreferredSizeWidget {
             overflow: TextOverflow.ellipsis,
           ),
         ),
+        if (actions != null) ...actions!,
       ],
     );
   }

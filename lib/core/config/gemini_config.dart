@@ -1,14 +1,19 @@
 // lib/core/config/gemini_config.dart
+//
+// HOW TO SUPPLY YOUR KEY (never commit a real key here):
+//   1. Copy dart_defines.env.example → dart_defines.env  (gitignored)
+//   2. Set GEMINI_API_KEY=your_real_key inside dart_defines.env
+//   3. Run:  flutter run --dart-define-from-file=dart_defines.env
+//      Or:   flutter run --dart-define=GEMINI_API_KEY=YOUR_KEY_HERE
 
 class GeminiConfig {
-  /// Never hardcode a real key here — this file ships inside the compiled
-  /// app (APK/web bundle), so anything in source is extractable by anyone
-  /// and would run up usage on your Google account. Pass it at build/run
-  /// time instead, where it stays out of source control and the binary's
-  /// embedded strings:
-  ///   flutter run --dart-define=GEMINI_API_KEY=YOUR_GEMINI_API_KEY
+  /// Read the key from --dart-define (injected at build/run time).
+  /// No default value — an empty string means "not configured".
   static String get apiKey =>
-      const String.fromEnvironment('GEMINI_API_KEY', defaultValue: '');
+      const String.fromEnvironment(
+        'GEMINI_API_KEY',
+        defaultValue: '',
+      );
 
   /// gemini-1.5-flash/-pro, gemini-pro and gemini-2.0-flash are all retired
   /// (confirmed 404 from the API) — gemini-flash-lite-latest is the model

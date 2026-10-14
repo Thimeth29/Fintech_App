@@ -83,15 +83,20 @@ class AiService {
       return "FinBot isn't connected yet — please provide a valid Gemini API key.";
     }
 
-    // 1. Try direct REST HTTP request with Bearer authorization (supports OAuth/service tokens)
-    final restReply = await _askViaRestHttp(prompt, history);
+    // Deduplicate: if caller already added prompt to history, only keep previous messages
+    final pastHistory = history.isNotEmpty && history.last.content == prompt
+        ? history.sublist(0, history.length - 1)
+        : history;
+
+    // 1. Try direct REST HTTP request
+    final restReply = await _askViaRestHttp(prompt, pastHistory);
     if (restReply != null && restReply.isNotEmpty) {
       return restReply;
     }
 
     // 2. Try SDK with candidate models
     final List<Content> geminiHistory = [];
-    for (final m in history) {
+    for (final m in pastHistory) {
       if (m.role == ChatRole.user) {
         geminiHistory.add(Content.text(m.content));
       } else {
@@ -123,28 +128,31 @@ class AiService {
     }
 
     final errStr = lastError.toString();
-    if (errStr.contains('v1beta') || errStr.contains('not found') || errStr.contains('API_KEY') || errStr.contains('invalid')) {
-      return "⚠️ **Gemini API Key Notice**:\n"
-          "The API key provided is not a valid Google AI Studio API key.\n\n"
-          "💡 **How to get your free API key**:\n"
-          "1. Go to [Google AI Studio](https://aistudio.google.com/app/apikey).\n"
-          "2. Click **Create API Key**.\n"
-          "3. Copy the key (it starts with `AIzaSy...`).\n"
-          "4. Run the app with `--dart-define=GEMINI_API_KEY=your_key_here`.\n\n"
+    if (errStr.contains('API_KEY') ||
+        errStr.contains('401') ||
+        errStr.contains('403') ||
+        errStr.contains('UNAUTHENTICATED') ||
+        errStr.contains('invalid')) {
+      return "⚠️ **Gemini API Notice**:\n"
+          "Unable to authenticate with Google Gemini API.\n\n"
+          "💡 **Configuration Check**:\n"
+          "1. Verify that your Gemini API key is active in Google AI Studio / Google Cloud Console.\n"
+          "2. Ensure the key is supplied via `--dart-define=GEMINI_API_KEY=your_key` or in `backend/.env`.\n\n"
           "---\n"
           "🇱🇰 **FinBot Sri Lanka Financial Literacy Insight**:\n"
           "${_generateFallbackResponse(prompt)}";
     }
 
-    return 'FinBot ran into a connection error: $lastError';
+    return 'FinBot ran into a connection error: $lastError\n\n'
+        '---\n🇱🇰 **FinBot Insight**:\n${_generateFallbackResponse(prompt)}';
   }
 
-  Future<String?> _askViaRestHttp(String prompt, List<ChatMessageModel> history) async {
+  Future<String?> _askViaRestHttp(String prompt, List<ChatMessageModel> pastHistory) async {
     final apiKey = GeminiConfig.apiKey;
     const models = _candidateModels;
 
     final contentsList = <Map<String, dynamic>>[];
-    for (final m in history) {
+    for (final m in pastHistory) {
       contentsList.add({
         'role': m.role == ChatRole.user ? 'user' : 'model',
         'parts': [
@@ -169,7 +177,6 @@ class AiService {
           headers: {
             'Content-Type': 'application/json',
             'x-goog-api-key': apiKey,
-            'Authorization': 'Bearer $apiKey',
           },
           body: jsonEncode({
             'systemInstruction': {
@@ -185,6 +192,7 @@ class AiService {
           final body = jsonDecode(response.body);
           final text = body['candidates']?[0]?['content']?['parts']?[0]?['text'];
           if (text != null && text.toString().isNotEmpty) {
+            _workingModel = mName;
             return text.toString();
           }
         }

@@ -69,3 +69,6 @@ venv/
 *.tflite
 *.keras
 *.pkl
+
+# Flutter dart-define secrets — never commit real keys
+dart_defines.env
