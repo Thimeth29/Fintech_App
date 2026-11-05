@@ -2,7 +2,8 @@ name: Update market prices
 
 on:
   schedule:
-    - cron: "30 10 * * *"   # 10:30 UTC = 4:00 PM Sri Lanka time, after the CSE closes
+    - cron: "30 4 * * *"    # 04:30 UTC = 10:00 AM Sri Lanka time
+    - cron: "30 10 * * *"   # 10:30 UTC = 04:00 PM Sri Lanka time
   workflow_dispatch:         # lets you run it manually from the Actions tab
 
 jobs:
